@@ -1,11 +1,9 @@
 import 'package:auction/screens/main_screen.dart';
-import 'package:auction/screens/post/post_detail_screen.dart';
 import 'package:flutter/material.dart';
 
-import 'config/theme.dart';
-
-
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();  // Firebase 초기화
   runApp(MyApp());
 }
 
