@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:auction/screens/auth/login_screen.dart';
+import 'package:auction/screens/like/my_likes.dart';
 import 'package:auction/screens/auth/settings_screen.dart';
 import 'package:auction/screens/auth/my_screen.dart';
 import 'package:auction/screens/chat/chat_list_screen.dart';
@@ -32,6 +33,7 @@ class _MainPageState extends State<MainPage> {
     HomePage(),
     SelllistPage(),
     ChatlistPage(),
+    likePage(),
     settingsPage(),
   ];
 
@@ -82,6 +84,7 @@ class _MainPageState extends State<MainPage> {
               icon: Icon(Icons.menu_book_sharp), label: 'Selllist'),
           BottomNavigationBarItem(
               icon: Icon(Icons.people_rounded), label: 'Chatlist'),
+          BottomNavigationBarItem(icon: Icon(Icons.star), label: 'likelist'),
           BottomNavigationBarItem(
               icon: Icon(Icons.settings), label: 'Settings'),
         ],
