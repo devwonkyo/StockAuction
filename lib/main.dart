@@ -79,9 +79,9 @@ class _MainPageState extends State<MainPage> {
         items: [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(
-              icon: Icon(Icons.menu_book_sharp), label: 'Sellbook'),
+              icon: Icon(Icons.menu_book_sharp), label: 'Selllist'),
           BottomNavigationBarItem(
-              icon: Icon(Icons.people_rounded), label: 'Community'),
+              icon: Icon(Icons.people_rounded), label: 'Chatlist'),
           BottomNavigationBarItem(
               icon: Icon(Icons.settings), label: 'Settings'),
         ],
@@ -162,10 +162,10 @@ class _HomePageState extends State<HomePage> {
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
-                    auctionBookItem(),
-                    auctionBookItem(),
-                    auctionBookItem(),
-                    auctionBookItem(),
+                    auctionItem(),
+                    auctionItem(),
+                    auctionItem(),
+                    auctionItem(),
                   ],
                 ),
               ),
@@ -176,7 +176,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget auctionBookItem() {
+  Widget auctionItem() {
     return Container(
       margin: EdgeInsets.only(right: 10), // 항목 사이 간격
       color: Colors.white70,
