@@ -32,86 +32,106 @@ class _PostDetailPageState extends State<PostDetailPage> {
           },
         ),
       ),
-      body: Expanded(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              // 이미지 스와이프 구현 부분
-              SizedBox(
-                height: 300,
-                child: Swiper(
-                  itemBuilder: (BuildContext context, int index) {
-                    return Image.asset(
-                      _images[index],
-                      fit: BoxFit.cover,
-                    );
-                  },
-                  itemCount: _images.length, // 이미지 개수
-                  pagination: const SwiperPagination(),
-                ),
-              ),
-              // 제품 정보 부분
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Nike x Sacai VaporWaffle Dark Iris',
-                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 이미지 스와이프 구현 부분
+                  SizedBox(
+                    height: 300,
+                    child: Swiper(
+                      itemBuilder: (BuildContext context, int index) {
+                        return Image.asset(
+                          _images[index],
+                          fit: BoxFit.cover,
+                        );
+                      },
+                      itemCount: _images.length, // 이미지 개수
+                      pagination: const SwiperPagination(),
                     ),
-                    SizedBox(height: 8),
-                    Text('최근 거래가', style: TextStyle(fontSize: 16)),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  ),
+                  // 제품 정보 부분
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('750,000원',
-                            style: TextStyle(
-                                fontSize: 24, fontWeight: FontWeight.bold)),
-                        Text('+90,000원 (+13.6%)',
-                            style: TextStyle(fontSize: 18, color: Colors.red)),
-                      ],
-                    ),
-                    SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red,
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 32, vertical: 12),
-                          ),
-                          child: Column(
-                            children: [
-                              Text('구매',style: TextStyle(color: Colors.white),),
-                              Text('700,000원 즉시 구매가'),
-                            ],
-                          ),
+                        Text(
+                          'Nike x Sacai VaporWaffle Dark Iris',
+                          style: TextStyle(
+                              fontSize: 22, fontWeight: FontWeight.bold),
                         ),
-                        ElevatedButton(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 32, vertical: 12),
-                          ),
-                          child: Column(
-                            children: [
-                              Text('판매'),
-                              Text('680,000원 즉시 판매가'),
-                            ],
-                          ),
+                        SizedBox(height: 8),
+                        Text(
+                          '조금은 긴 글내용/Users/wonkyo/Documents/elice/Auction/aution/lib/screens/post/post_detail_screen.dart조금은 긴 글내용/Users/wonkyo/Documents/elice/Auction/aution/lib/screens/post/post_detail_screen.dart'
+                          '조금은 긴 글내용/Users/wonkyo/Documents/elice/Auction/aution/lib/screens/post/post_detail_screen.dart'
+                          '조금은 긴 글내용/Users/wonkyo/Documents/elice/Auction/aution/lib/screens/post/post_detail_screen.dart조금은 긴 글내용/Users/wonkyo/Documents/elice/Auction/aution/lib/screens/post/post_detail_screen.dart'
+                          '조금은 긴 글내용/Users/wonkyo/Documents/elice/Auction/aution/lib/screens/post/post_detail_screen.dart'
+                          '조금은 긴 글내용/Users/wonkyo/Documents/elice/Auction/aution/lib/screens/post/post_detail_screen.dart'
+                          'ㅍ'
+                          '조금은 긴 글내용/Users/wonkyo/Documents/elice/Auction/aution/lib/screens/post/post_detail_screen.dart',
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('최근 거래가', style: TextStyle(fontSize: 16)),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('750,000원',
+                          style: TextStyle(
+                              fontSize: 24, fontWeight: FontWeight.bold)),
+                      Text('+90,000원 (+13.6%)',
+                          style: TextStyle(fontSize: 18, color: Colors.red)),
+                    ],
+                  ),
+                  SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Expanded(
+                        child: TextField(
+                            decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: '가격을 입력해주세요',
+                        )),
+                      ),
+                      const SizedBox(width: 10,),
+                      ElevatedButton(
+                        onPressed: () {},
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFF65AE7E),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 32, vertical: 12),
+                        ),
+                        child: Text(
+                          '입찰',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          )
+        ],
       ),
     );
   }

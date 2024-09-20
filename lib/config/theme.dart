@@ -11,8 +11,11 @@ ThemeData darkThemeData() {
       displayLarge: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
     ),
     buttonTheme: ButtonThemeData(
-      buttonColor: Colors.white,
+      buttonColor: Colors.grey[800],
       textTheme: ButtonTextTheme.normal,
+    ),
+    colorScheme: const ColorScheme.dark( // 다크 모드 색상 설정
+      primary: Colors.white
     ),
     brightness: Brightness.dark,  // 다크 모드 명시
   );
@@ -33,6 +36,9 @@ ThemeData lightThemeData() {
     buttonTheme: ButtonThemeData(
       buttonColor: Colors.red,
       textTheme: ButtonTextTheme.primary,
+    ),
+    colorScheme: const ColorScheme.light( // 다크 모드 색상 설정
+        primary: Colors.black
     ),
     brightness: Brightness.light,  // 라이트 모드 명시
   );
