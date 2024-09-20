@@ -1,3 +1,4 @@
+import 'package:auction/screens/auth/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -80,17 +81,31 @@ class _SignupScreenState extends State<SignupScreen> {
                 onSaved: (value) => _email = value!,
               ),
               SizedBox(height: 20),
-              Column(
+              Row(
                 children: [
-                  TextFormField(
-                    decoration: InputDecoration(
-                      labelText: '닉네임',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15.0),
+                  Expanded(
+                    child: TextFormField(
+                      decoration: InputDecoration(
+                        labelText: '닉네임',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15.0),
+                        ),
                       ),
                     ),
-                    validator: (value) => value!.isEmpty ? '닉네임을 입력해주세요' : null,
-                    onSaved: (value) => _nickname = value!,
+                  ),
+                  SizedBox(width: 10), // 텍스트 필드와 버튼 사이에 간격 추가
+                  ElevatedButton(
+                    onPressed: () {
+                      // 기능 없음
+                    },
+                    child: Text('중복확인'),
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(horizontal: 0, vertical: 15), // 버튼 크기 조정
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15.0),
+                      ),
+                      backgroundColor: Color(0XFFEBCDFC),
+                    ),
                   ),
                 ],
               ),
@@ -131,8 +146,23 @@ class _SignupScreenState extends State<SignupScreen> {
               ),
               SizedBox(height: 20),
               ElevatedButton(
-                child: Text('회원가입 하기'),
-                onPressed: (){},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => LoginScreen()),
+                  );
+                },
+                child: Text('회원가입'),
+                style: ElevatedButton.styleFrom(
+                  textStyle: TextStyle(
+                    fontSize: 20.0,
+                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 150, vertical: 15), // 버튼 크기 조정
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15.0),
+                  ),
+                  backgroundColor: Color(0XFFEBCDFC),
+                ),
               ),
             ],
           ),
