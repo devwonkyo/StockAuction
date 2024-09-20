@@ -1,3 +1,4 @@
+import 'package:auction/main.dart';
 import 'package:auction/screens/auth/password_reser_screen.dart';
 import 'package:auction/screens/auth/signup_screen.dart';
 import 'package:flutter/material.dart';
@@ -22,9 +23,12 @@ class _LoginScreenState extends State<LoginScreen> {
           email: _email,
           password: _password,
         );
-        // Navigate to home screen or show success message
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => MainPage()),
+        );
       } catch (e) {
-        // Show error message
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('로그인 실패: $e')));
       }
     }
   }
@@ -117,16 +121,16 @@ class _LoginScreenState extends State<LoginScreen> {
                   GestureDetector(
                     onTap: () {
                       setState(() {
-                        _stayLoggedIn = !_stayLoggedIn; // 스위치 상태 변경
+                        _stayLoggedIn = !_stayLoggedIn; // 체크박스 상태 변경
                       });
                     },
-                    child: Text('로그인 상태 유지'),
+                    child: Text('자동 로그인'),
                   ),
-                  Switch(
+                  Checkbox(
                     value: _stayLoggedIn,
-                    onChanged: (bool value) {
+                    onChanged: (bool? value) {
                       setState(() {
-                        _stayLoggedIn = value;
+                        _stayLoggedIn = value ?? false; // 체크박스 상태 업데이트
                       });
                     },
                   ),
