@@ -186,7 +186,7 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
                     context,
                     MaterialPageRoute(builder: (context) => LoginScreen()),
                   );
-                },
+                },햣
                 child: Text('비밀번호 변경하기', style: TextStyle(fontWeight: FontWeight.w600),),
                 style: ElevatedButton.styleFrom(
                   textStyle: TextStyle(
