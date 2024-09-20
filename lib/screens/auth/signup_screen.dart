@@ -10,7 +10,7 @@ class SignupScreen extends StatefulWidget {
 
 class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
-  String _email = '';
+  String _id = '';
   String _password = '';
   String _nickname = '';
   String _phoneNumber = '';
@@ -47,7 +47,7 @@ class _SignupScreenState extends State<SignupScreen> {
   //       await FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid).set({
   //         'nickname': _nickname,
   //         'phoneNumber': _phoneNumber,
-  //         // 필요시 다른 정보 추가
+  //         // 필요시 다른 정보 추
   //       });
   //
   //       // 가입 성공 후 화면 전환 또는 메시지 표시
@@ -78,7 +78,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ),
                 validator: (value) => value!.isEmpty ? '이메일을 입력해주세요' : null,
-                onSaved: (value) => _email = value!,
+                onSaved: (value) => _id = value!,
               ),
               SizedBox(height: 20),
               Row(

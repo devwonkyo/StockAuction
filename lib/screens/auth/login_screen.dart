@@ -11,7 +11,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  String _email = '';
+  String _id = '';
   String _password = '';
   bool _stayLoggedIn = false;
 
@@ -20,7 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
       _formKey.currentState!.save();
       try {
         await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: _email,
+          email: _id,
           password: _password,
         );
         Navigator.pushReplacement(
@@ -62,7 +62,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 validator: (value) => value!.isEmpty ? '아이디를 입력해주세요.' : null,
-                onSaved: (value) => _email = value!,
+                onSaved: (value) => _id = value!,
               ),
               SizedBox(
                 height: 30,
