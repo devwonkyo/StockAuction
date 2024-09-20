@@ -60,7 +60,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 validator: (value) => value!.isEmpty ? '아이디를 입력해주세요.' : null,
                 onSaved: (value) => _email = value!,
               ),
-              SizedBox(height: 30,),
+              SizedBox(
+                height: 30,
+              ),
               TextFormField(
                 decoration: InputDecoration(
                   labelText: '비밀번호를 입력해 주세요.',
@@ -79,7 +81,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => PasswordResetScreen()),
+                        MaterialPageRoute(
+                            builder: (context) => PasswordResetScreen()),
                       );
                     },
                     child: Text(
@@ -91,9 +94,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ],
               ),
-              SizedBox(height: 30,),
+              SizedBox(
+                height: 30,
+              ),
               ElevatedButton(
-                child: Text('로그인'),
+                child: Text(
+                  '로그인',
+                  style: TextStyle(fontSize: 20,fontWeight: FontWeight.w600),
+                ),
                 onPressed: _login,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0XFFEBCDFC),

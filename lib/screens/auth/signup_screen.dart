@@ -98,7 +98,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     onPressed: () {
                       // 기능 없음
                     },
-                    child: Text('중복확인'),
+                    child: Text('중복확인',style: TextStyle(fontWeight: FontWeight.w600),),
                     style: ElevatedButton.styleFrom(
                       padding: EdgeInsets.symmetric(horizontal: 0, vertical: 15), // 버튼 크기 조정
                       shape: RoundedRectangleBorder(
@@ -156,6 +156,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 style: ElevatedButton.styleFrom(
                   textStyle: TextStyle(
                     fontSize: 20.0,
+                    fontWeight: FontWeight.w600
                   ),
                   padding: EdgeInsets.symmetric(horizontal: 150, vertical: 15), // 버튼 크기 조정
                   shape: RoundedRectangleBorder(
