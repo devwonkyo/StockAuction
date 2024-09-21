@@ -1,55 +1,44 @@
 import 'dart:async';
 
+import 'package:auction/providers/auction_timer_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-class TimerTextWidget extends StatefulWidget {
+class TimerTextWidget extends StatelessWidget {
   final int time;
 
   const TimerTextWidget({super.key, required this.time});
 
   @override
-  State<TimerTextWidget> createState() => _TimerTextWidgetState();
-}
-
-class _TimerTextWidgetState extends State<TimerTextWidget> {
-  late Timer _timer;
-  late int _remainingTime;
-  @override
-  void initState() {
-    super.initState();
-    //todo time받아서 남은시간으로 계산
-    _remainingTime = widget.time;
-    _startTimer();
-  }
-  @override
   Widget build(BuildContext context) {
-    return Text(
-      "남은 시간 : $formattedTime",
-      style: TextStyle(fontSize: 16),
+    return Consumer<AuctionTimerProvider>(
+        builder: (context, auctionTimerProvider, child) {
+          if (auctionTimerProvider.remainingTime > 10) {
+            return Text(
+              "남은 시간 : ${auctionTimerProvider.formattedTime}",
+              style: const TextStyle(fontSize: 16),);
+          } else if (auctionTimerProvider.remainingTime <= 10 &&
+              auctionTimerProvider.remainingTime > 0) {
+            return Text.rich(
+              TextSpan(
+                children: [
+                  const TextSpan(
+                    text: "남은 시간 : ",
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  TextSpan(
+                    text: auctionTimerProvider.formattedTime,
+                    style: const TextStyle(
+                        fontSize: 16, color: Colors.red), // 빨간색
+                  ),
+                ],
+              ),
+            );
+          } else {
+            return const Text("경매 종료", style: TextStyle(fontSize: 16),);
+          }
+        }
     );
   }
-
-  void _startTimer() {
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-      if (_remainingTime > 0) {
-        setState(() {
-          _remainingTime--; // 남은 시간 감소
-        });
-      } else {
-        _timer.cancel(); // 시간이 다 되면 타이머 종료
-      }
-    });
-  }
-  String get formattedTime {
-    final minutes = (_remainingTime ~/ 60).toString().padLeft(2, '0');
-    final seconds = (_remainingTime % 60).toString().padLeft(2, '0');
-    return "$minutes:$seconds"; // 포맷팅된 시간 반환
-  }
-
-  @override
-  void dispose() {
-    _timer.cancel(); // 위젯이 사라질 때 타이머 정리
-    super.dispose();
-  }
-
 }
+

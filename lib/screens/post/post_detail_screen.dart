@@ -1,9 +1,12 @@
+import 'package:auction/models/comment_model.dart';
+import 'package:auction/providers/auction_timer_provider.dart';
+import 'package:auction/screens/post/comment_detail_screen.dart';
+import 'package:auction/screens/post/widgets/comment_widget.dart';
 import 'package:auction/screens/post/widgets/favorite_button_widget.dart';
 import 'package:auction/screens/post/widgets/timer_text_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_swiper_null_safety/flutter_swiper_null_safety.dart';
 import 'package:provider/provider.dart';
-
 
 class PostDetailScreen extends StatefulWidget {
   @override
@@ -36,12 +39,14 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
           },
         ),
         actions: [
+          "userId" == "userId" ? //todo postUserId와 같을때
           IconButton(
             icon: const Icon(Icons.more_vert_outlined),
             onPressed: () {
               _showOptionsBottomSheet(context);
             },
-          ),
+          )
+              : const SizedBox.shrink(),
         ],
       ),
       body: Column(
@@ -75,43 +80,61 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                           children: [
                             Expanded(
                               child: Text(
-                                'Nike x Sacai VaporWaffle Dark Iris',
-                                style: TextStyle(
-                                    fontSize: 24),
+                                'Nike x Sacai VaporWaffle Dark',
+                                style: TextStyle(fontSize: 24),
                               ),
                             ),
-                            FavoriteButtonWidget(isFavorited: false,)
+                            FavoriteButtonWidget(
+                              isFavorited: false,
+                            )
                           ],
                         ),
                         SizedBox(height: 15),
                         Text(
                           '조금은 긴 글내용/Users/wonkyo/Documents/elice/Auction/aution/lib/screens/post/post_detail_screen.dart조금은 긴 글내용/Users/wonkyo/Documents/elice/Auction/aution/lib/screens/post/post_detail_screen.dart'
-                          '조금은 긴 글내용/Users/wonkyo/Documents/elice/Auction/aution/lib/screens/post/post_detail_screen.dart'
-                          '조금은 긴 글내용/Users/wonkyo/Documents/elice/Auction/aution/lib/screens/post/post_detail_screen.dart조금은 긴 글내용/Users/wonkyo/Documents/elice/Auction/aution/lib/screens/post/post_detail_screen.dart'
-                          '조금은 긴 글내용/Users/wonkyo/Documents/elice/Auction/aution/lib/screens/post/post_detail_screen.dart'
-                          '조금은 긴 글내용/Users/wonkyo/Documents/elice/Auction/aution/lib/screens/post/post_detail_screen.dart'
-                          'ㅍ'
-                          '조금은 긴 글내용/Users/wonkyo/Documents/elice/Auction/aution/lib/screens/post/post_detail_screen.dart',
-                          style: TextStyle(
-                              fontSize: 15),
+                              '조금은 긴 글내용/Users/wonkyo/Documents/elice/Auction/aution/lib/screens/post/post_detail_screen.dart'
+                              '조금은 긴 글내용/Users/wonkyo/Documents/elice/Auction/aution/lib/screens/post/post_detail_screen.dart조금은 긴 글내용/Users/wonkyo/Documents/elice/Auction/aution/lib/screens/post/post_detail_screen.dart'
+                              '조금은 긴 글내용/Users/wonkyo/Documents/elice/Auction/aution/lib/screens/post/post_detail_screen.dart'
+                              '조금은 긴 글내용/Users/wonkyo/Documents/elice/Auction/aution/lib/screens/post/post_detail_screen.dart'
+                              'ㅍ'
+                              '조금은 긴 글내용/Users/wonkyo/Documents/elice/Auction/aution/lib/screens/post/post_detail_screen.dart',
+                          style: TextStyle(fontSize: 15),
                         ),
-                        SizedBox(height: 30.0,),
-                        Divider(height: 1, color: Colors.grey,),
-                        SizedBox(height: 30.0,),
-                        Text(
-                          '댓글 3',
-                          style: TextStyle(
-                              fontSize: 14),
+                        SizedBox(
+                          height: 30.0,
                         ),
+                        Divider(
+                          height: 1,
+                          color: Colors.grey,
+                        ),
+                        SizedBox(
+                          height: 30.0,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              '댓글 3', //Todo 댓글 수 추가
+                              style: TextStyle(fontSize: 14),
+                            ),
+                            GestureDetector(
+                              onTap: (){
+                                Navigator.push(context, MaterialPageRoute(builder: (context) => CommentDetailScreen()));
+                              },
+                              child: Text(
+                                '댓글 쓰기',
+                                style: TextStyle(fontSize: 14),
+                              ),
+                            )
+                          ],
+                        ),
+                        SizedBox(height: 20,),
                         ListView.builder(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
                           itemCount: 3,
-                          itemBuilder:(context, index){
-                            return Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-
-                              ],
-                            );
+                          itemBuilder: (context, index) {
+                            return CommentWidget(commentModel: CommentModel(userId: "userId", comment: "comment", time: "time"));
                           },
                         )
                       ],
@@ -121,60 +144,69 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
               ),
             ),
           ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Padding(
-              padding: const EdgeInsets.all(15.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('현재 입찰가', style: TextStyle(fontSize: 16)),
-                      TimerTextWidget(time: 530,),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('750,000원',
-                          style: TextStyle(
-                              fontSize: 24, fontWeight: FontWeight.bold)),
-                      Text('+90,000원 (+13.6%)',
-                          style: TextStyle(fontSize: 18, color: Colors.red)),
-                    ],
-                  ),
-                  SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Expanded(
-                        child: TextField(
-                            keyboardType: TextInputType.number,
-                            decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          labelText: '가격을 입력해주세요',
-                        )),
-                      ),
-                      const SizedBox(width: 20,),
-                      ElevatedButton(
-                        onPressed: () {
-
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xFF65AE7E),
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 12),
+          ChangeNotifierProvider(
+            create: (context) => AuctionTimerProvider(20), //todo 시간 계산해서 넣어주기
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: Padding(
+                padding: const EdgeInsets.all(15.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('현재 입찰가', style: TextStyle(fontSize: 16)),
+                        const TimerTextWidget(time: 30,),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('750,000원',
+                            style: TextStyle(
+                                fontSize: 24, fontWeight: FontWeight.bold)),
+                        Text('+90,000원 (+13.6%)',   //todo provider에서 계산 결과 string으로 변환 후 넣기
+                            style: TextStyle(fontSize: 18, color: Colors.red)),
+                      ],
+                    ),
+                    SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Expanded(
+                          child: TextField(
+                              keyboardType: TextInputType.number,
+                              decoration: InputDecoration(
+                                border: OutlineInputBorder(),
+                                labelText: '가격을 입력해주세요',
+                              )),
                         ),
-                        child: Text(
-                          '입찰하기',
-                          style: TextStyle(color: Colors.white),
+                        const SizedBox(
+                          width: 20,
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                        Consumer<AuctionTimerProvider>(
+                          builder: (context, auctionTimerProvider, child){
+                            return ElevatedButton(
+                              onPressed: auctionTimerProvider.remainingTime != 0 ? () {
+                                //pressed
+                              } : null,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: auctionTimerProvider.remainingTime != 0 ? Color(0xFF65AE7E) : Colors.grey,
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 20, vertical: 12),
+                              ),
+                              child: Text(
+                                '입찰하기',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           )
@@ -236,5 +268,3 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     );
   }
 }
-
-
