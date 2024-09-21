@@ -2,6 +2,7 @@ import 'package:auction/screens/auth/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:auction/models/user_model.dart'; // UserModel import 추가
 
 class SignupScreen extends StatefulWidget {
   @override
@@ -52,12 +53,18 @@ class _SignupScreenState extends State<SignupScreen> {
           password: _password,
         );
 
+        // UserModel 인스턴스 생성
+        UserModel newUser = UserModel(
+          uid: userCredential.user!.uid,
+          email: _email,
+          nickname: _nickname,
+          phoneNumber: _phoneNumber,
+          pushToken: null,
+          userProfileImage: null,
+        );
+
         // Firestore에 사용자 정보 저장
-        await FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid).set({
-          'nickname': _nickname,
-          'phoneNumber': _phoneNumber,
-          'email': _email,
-        });
+        await FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid).set(newUser.toMap());
 
         print('User created successfully: ${userCredential.user!.uid}');
         print('User data saved to Firestore');
