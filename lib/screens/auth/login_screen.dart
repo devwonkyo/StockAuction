@@ -1,6 +1,7 @@
 import 'package:auction/main.dart';
 import 'package:auction/screens/auth/password_reser_screen.dart';
 import 'package:auction/screens/auth/signup_screen.dart';
+import 'package:auction/screens/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -25,7 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
         );
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => MainPage()),
+          MaterialPageRoute(builder: (context) => MainScreen()),
         );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('로그인 실패: $e')));
