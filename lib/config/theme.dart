@@ -6,6 +6,7 @@ ThemeData darkThemeData() {
     primarySwatch: Colors.grey,
     hintColor: Colors.tealAccent,
     fontFamily: 'Roboto',
+    scaffoldBackgroundColor: const Color(0xFF1E1E1F), // 배경색 설정
     textTheme: const TextTheme(
       bodyLarge: TextStyle(color: Colors.white, fontSize: 16),
       displayLarge: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
@@ -15,7 +16,8 @@ ThemeData darkThemeData() {
       textTheme: ButtonTextTheme.normal,
     ),
     colorScheme: const ColorScheme.dark( // 다크 모드 색상 설정
-      primary: Colors.white
+      primary: Colors.white,
+      surface: const Color(0xFF1E1E1F), // 배경색 (scaffoldBackgroundColor와 일치)
     ),
     brightness: Brightness.dark,  // 다크 모드 명시
   );
