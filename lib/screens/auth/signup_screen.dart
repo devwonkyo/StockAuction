@@ -10,61 +10,79 @@ class SignupScreen extends StatefulWidget {
 
 class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
-  String _id = '';
+  String _email = '';
   String _password = '';
+  String _confirmPassword = '';
   String _nickname = '';
   String _phoneNumber = '';
 
-  // Future<void> _checkNickname() async {
-  //   var snapshot = await FirebaseFirestore.instance
-  //       .collection('users') // 사용자 정보를 저장하는 컬렉션 이름
-  //       .where('nickname', isEqualTo: _nickname)
-  //       .get();
-  //
-  //   return snapshot.docs.isEmpty; // 중복되지 않으면 true 반환
-  // }
+  Future<bool> _checkNickname() async {
+    var snapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .where('nickname', isEqualTo: _nickname)
+        .get();
 
-  // void _signup() async {
-  //   if (_formKey.currentState!.validate()) {
-  //     _formKey.currentState!.save();
-  //
-  //     // 닉네임 중복 확인
-  //     bool isNicknameAvailable = await _checkNickname();
-  //     if (!isNicknameAvailable) {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(content: Text('이미 사용 중인 닉네임입니다.')),
-  //       );
-  //       return; // 닉네임이 중복되면 가입 진행 중단
-  //     }
-  //
-  //     try {
-  //       UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-  //         email: _email,
-  //         password: _password,
-  //       );
-  //
-  //       // Firestore에 사용자 정보 저장
-  //       await FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid).set({
-  //         'nickname': _nickname,
-  //         'phoneNumber': _phoneNumber,
-  //         // 필요시 다른 정보 추
-  //       });
-  //
-  //       // 가입 성공 후 화면 전환 또는 메시지 표시
-  //       Navigator.pop(context); // 예: 이전 화면으로 돌아가기
-  //     } catch (e) {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(content: Text('회원가입에 실패했습니다: $e')),
-  //       );
-  //     }
-  //   }
-  // }
+    return snapshot.docs.isEmpty;
+  }
+
+  void _signup() async {
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+
+      if (_password != _confirmPassword) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('비밀번호가 일치하지 않습니다.')),
+        );
+        return;
+      }
+
+      try {
+        // 닉네임 중복 체크
+        bool isNicknameAvailable = await _checkNickname();
+        if (!isNicknameAvailable) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('이미 사용 중인 닉네임입니다.')),
+          );
+          return;
+        }
+
+        // 사용자 생성
+        UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: _email,
+          password: _password,
+        );
+
+        // Firestore에 사용자 정보 저장
+        await FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid).set({
+          'nickname': _nickname,
+          'phoneNumber': _phoneNumber,
+          'email': _email,
+        });
+
+        print('User created successfully: ${userCredential.user!.uid}');
+        print('User data saved to Firestore');
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('회원가입이 완료되었습니다.')),
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => LoginScreen()),
+        );
+      } catch (e) {
+        print('Signup Error: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('회원가입에 실패했습니다: $e')),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('회원가입')),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
@@ -78,36 +96,18 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ),
                 validator: (value) => value!.isEmpty ? '이메일을 입력해주세요' : null,
-                onSaved: (value) => _id = value!,
+                onSaved: (value) => _email = value!,
               ),
               SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      decoration: InputDecoration(
-                        labelText: '닉네임',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15.0),
-                        ),
-                      ),
-                    ),
+              TextFormField(
+                decoration: InputDecoration(
+                  labelText: '닉네임',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15.0),
                   ),
-                  SizedBox(width: 10), // 텍스트 필드와 버튼 사이에 간격 추가
-                  ElevatedButton(
-                    onPressed: () {
-                      // 기능 없음
-                    },
-                    child: Text('중복확인',style: TextStyle(fontWeight: FontWeight.w600),),
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(horizontal: 0, vertical: 15), // 버튼 크기 조정
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15.0),
-                      ),
-                      backgroundColor: Color(0XFFEBCDFC),
-                    ),
-                  ),
-                ],
+                ),
+                validator: (value) => value!.isEmpty ? '닉네임을 입력해주세요' : null,
+                onSaved: (value) => _nickname = value!,
               ),
               SizedBox(height: 20),
               TextFormField(
@@ -130,8 +130,8 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ),
                 obscureText: true,
-                validator: (value) =>
-                value != _password ? '비밀번호가 일치하지 않습니다' : null,
+                validator: (value) => value!.isEmpty ? '비밀번호를 다시 입력해주세요' : null,
+                onSaved: (value) => _confirmPassword = value!,
               ),
               SizedBox(height: 20),
               TextFormField(
@@ -146,19 +146,14 @@ class _SignupScreenState extends State<SignupScreen> {
               ),
               SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => LoginScreen()),
-                  );
-                },
+                onPressed: _signup,
                 child: Text('회원가입'),
                 style: ElevatedButton.styleFrom(
                   textStyle: TextStyle(
-                    fontSize: 20.0,
-                    fontWeight: FontWeight.w600
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.w600
                   ),
-                  padding: EdgeInsets.symmetric(horizontal: 150, vertical: 15), // 버튼 크기 조정
+                  padding: EdgeInsets.symmetric(horizontal: 150, vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15.0),
                   ),
