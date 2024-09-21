@@ -28,7 +28,7 @@ class _LoginScreenState extends State<LoginScreen> {
           MaterialPageRoute(builder: (context) => MainScreen()),
         );
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('로그인 실패: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('아이디 또는 비밀번호를 확인해주세요')));
       }
     }
   }
