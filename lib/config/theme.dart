@@ -1,3 +1,4 @@
+import 'package:auction/config/color.dart';
 import 'package:flutter/material.dart';
 
 ThemeData darkThemeData() {
@@ -6,7 +7,7 @@ ThemeData darkThemeData() {
     primarySwatch: Colors.grey,
     hintColor: Colors.tealAccent,
     fontFamily: 'Roboto',
-    scaffoldBackgroundColor: const Color(0xFF1E1E1F), // 배경색 설정
+    scaffoldBackgroundColor: AppsColor.darkGray, // 배경색 설정
     textTheme: const TextTheme(
       bodyLarge: TextStyle(color: Colors.white, fontSize: 16),
       displayLarge: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
@@ -17,7 +18,7 @@ ThemeData darkThemeData() {
     ),
     colorScheme: const ColorScheme.dark( // 다크 모드 색상 설정
       primary: Colors.white,
-      surface: const Color(0xFF1E1E1F), // 배경색 (scaffoldBackgroundColor와 일치)
+      surface: AppsColor.darkGray, // 배경색 (scaffoldBackgroundColor와 일치)
     ),
     brightness: Brightness.dark,  // 다크 모드 명시
   );
@@ -27,7 +28,7 @@ ThemeData darkThemeData() {
 
 ThemeData lightThemeData() {
   return ThemeData(
-    primaryColor: Color(0xFF1E1E1F),
+    primaryColor: AppsColor.darkGray,
     primarySwatch: Colors.blue,
     hintColor: Colors.orange,
     fontFamily: 'Roboto',
@@ -35,7 +36,7 @@ ThemeData lightThemeData() {
       bodyLarge: TextStyle(color: Colors.black, fontSize: 16),
       displayLarge: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
     ),
-    buttonTheme: ButtonThemeData(
+    buttonTheme: const ButtonThemeData(
       buttonColor: Colors.red,
       textTheme: ButtonTextTheme.primary,
     ),

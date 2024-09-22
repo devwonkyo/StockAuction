@@ -1,12 +1,14 @@
+import 'package:auction/config/color.dart';
 import 'package:auction/models/comment_model.dart';
 import 'package:auction/providers/auction_timer_provider.dart';
-import 'package:auction/screens/post/comment_detail_screen.dart';
+import 'package:auction/screens/post/bid_list_screen.dart';
 import 'package:auction/screens/post/widgets/comment_widget.dart';
 import 'package:auction/screens/post/widgets/favorite_button_widget.dart';
 import 'package:auction/screens/post/widgets/timer_text_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_swiper_null_safety/flutter_swiper_null_safety.dart';
 import 'package:provider/provider.dart';
+import '../../providers/text_provider.dart';
 
 class PostDetailScreen extends StatefulWidget {
   @override
@@ -32,20 +34,22 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     ];
     return Scaffold(
       appBar: AppBar(
+        title: Text("게시물",style: TextStyle(fontSize: 20.0),),
         leading: IconButton(
-          icon: const Icon(Icons.keyboard_arrow_left_sharp),
+          icon: Icon(Icons.arrow_back), // 뒤로가기 아이콘
           onPressed: () {
-            Navigator.of(context).pop();
+            Navigator.pop(context); // 이전 페이지로 이동
           },
         ),
         actions: [
-          "userId" == "userId" ? //todo postUserId와 같을때
-          IconButton(
-            icon: const Icon(Icons.more_vert_outlined),
-            onPressed: () {
-              _showOptionsBottomSheet(context);
-            },
-          )
+          "userId" == "userId"
+              ? //todo postUserId와 같을때
+              IconButton(
+                  icon: const Icon(Icons.more_vert_outlined),
+                  onPressed: () {
+                    _showOptionsBottomSheet(context);
+                  },
+                )
               : const SizedBox.shrink(),
         ],
       ),
@@ -92,12 +96,12 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                         SizedBox(height: 15),
                         Text(
                           '조금은 긴 글내용/Users/wonkyo/Documents/elice/Auction/aution/lib/screens/post/post_detail_screen.dart조금은 긴 글내용/Users/wonkyo/Documents/elice/Auction/aution/lib/screens/post/post_detail_screen.dart'
-                              '조금은 긴 글내용/Users/wonkyo/Documents/elice/Auction/aution/lib/screens/post/post_detail_screen.dart'
-                              '조금은 긴 글내용/Users/wonkyo/Documents/elice/Auction/aution/lib/screens/post/post_detail_screen.dart조금은 긴 글내용/Users/wonkyo/Documents/elice/Auction/aution/lib/screens/post/post_detail_screen.dart'
-                              '조금은 긴 글내용/Users/wonkyo/Documents/elice/Auction/aution/lib/screens/post/post_detail_screen.dart'
-                              '조금은 긴 글내용/Users/wonkyo/Documents/elice/Auction/aution/lib/screens/post/post_detail_screen.dart'
-                              'ㅍ'
-                              '조금은 긴 글내용/Users/wonkyo/Documents/elice/Auction/aution/lib/screens/post/post_detail_screen.dart',
+                          '조금은 긴 글내용/Users/wonkyo/Documents/elice/Auction/aution/lib/screens/post/post_detail_screen.dart'
+                          '조금은 긴 글내용/Users/wonkyo/Documents/elice/Auction/aution/lib/screens/post/post_detail_screen.dart조금은 긴 글내용/Users/wonkyo/Documents/elice/Auction/aution/lib/screens/post/post_detail_screen.dart'
+                          '조금은 긴 글내용/Users/wonkyo/Documents/elice/Auction/aution/lib/screens/post/post_detail_screen.dart'
+                          '조금은 긴 글내용/Users/wonkyo/Documents/elice/Auction/aution/lib/screens/post/post_detail_screen.dart'
+                          'ㅍ'
+                          '조금은 긴 글내용/Users/wonkyo/Documents/elice/Auction/aution/lib/screens/post/post_detail_screen.dart',
                           style: TextStyle(fontSize: 15),
                         ),
                         SizedBox(
@@ -118,8 +122,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                               style: TextStyle(fontSize: 14),
                             ),
                             GestureDetector(
-                              onTap: (){
-                                Navigator.push(context, MaterialPageRoute(builder: (context) => CommentDetailScreen()));
+                              onTap: () {
+                                _showCommentBottomSheet(context);
                               },
                               child: Text(
                                 '댓글 쓰기',
@@ -128,13 +132,19 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                             )
                           ],
                         ),
-                        SizedBox(height: 20,),
+                        SizedBox(
+                          height: 20,
+                        ),
                         ListView.builder(
                           shrinkWrap: true,
                           physics: NeverScrollableScrollPhysics(),
                           itemCount: 3,
                           itemBuilder: (context, index) {
-                            return CommentWidget(commentModel: CommentModel(userId: "userId", comment: "comment", time: "time"));
+                            return CommentWidget(
+                                commentModel: CommentModel(
+                                    userId: "userId",
+                                    comment: "comment",
+                                    time: "time"));
                           },
                         )
                       ],
@@ -157,7 +167,9 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text('현재 입찰가', style: TextStyle(fontSize: 16)),
-                        const TimerTextWidget(time: 30,),
+                        const TimerTextWidget(
+                          time: 30,
+                        ),
                       ],
                     ),
                     Row(
@@ -166,8 +178,17 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                         Text('750,000원',
                             style: TextStyle(
                                 fontSize: 24, fontWeight: FontWeight.bold)),
-                        Text('+90,000원 (+13.6%)',   //todo provider에서 계산 결과 string으로 변환 후 넣기
-                            style: TextStyle(fontSize: 18, color: Colors.red)),
+                        GestureDetector(
+                          onTap: () => Navigator.push(context,MaterialPageRoute(builder: (context) => BidListScreen())),
+                          child: Row(
+                            children: [
+                              Icon(Icons.arrow_drop_up,color: Colors.redAccent,),
+                              Text('90,000원 (+13.6%)',
+                                  //todo provider에서 계산 결과 string으로 변환 후 넣기
+                                  style: TextStyle(fontSize: 18, color: Colors.redAccent)),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                     SizedBox(height: 16),
@@ -186,13 +207,18 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                           width: 20,
                         ),
                         Consumer<AuctionTimerProvider>(
-                          builder: (context, auctionTimerProvider, child){
+                          builder: (context, auctionTimerProvider, child) {
                             return ElevatedButton(
-                              onPressed: auctionTimerProvider.remainingTime != 0 ? () {
-                                //pressed
-                              } : null,
+                              onPressed: auctionTimerProvider.remainingTime != 0
+                                  ? () {
+                                      //pressed
+                                    }
+                                  : null,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: auctionTimerProvider.remainingTime != 0 ? Color(0xFF65AE7E) : Colors.grey,
+                                backgroundColor:
+                                    auctionTimerProvider.remainingTime != 0
+                                        ? Color(0xFF65AE7E)
+                                        : Colors.grey,
                                 padding: EdgeInsets.symmetric(
                                     horizontal: 20, vertical: 12),
                               ),
@@ -215,6 +241,116 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     );
   }
 
+  //Comment Bottom Sheet
+  void _showCommentBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return ChangeNotifierProvider(   //provier 주입
+          create: (context) => TextProvider(),
+          child: DraggableScrollableSheet(
+            expand: true,
+            snapAnimationDuration: const Duration(milliseconds: 400),
+            initialChildSize: 0.95,
+            minChildSize: 0.95,
+            maxChildSize: 0.95,
+            builder: (context, scrollController) {
+              final textColorProvider = Provider.of<TextProvider>(context);
+              return Container(
+                decoration: const BoxDecoration(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Column(
+                  children: [
+                    // Drag handle
+                    Container(
+                      width: 40,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white
+                            : Colors.grey[400],
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    const Text("댓글"),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        controller: scrollController,
+                        child: Column(
+                          children: [
+                            ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: 10, // number of comments
+                              itemBuilder: (context, index) {
+                                return CommentWidget(
+                                    commentModel: CommentModel(
+                                        userId: "userId",
+                                        comment: "comment",
+                                        time: "time"));
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      // MediaQuery를 사용하여 키보드가 올라올 때 Padding 조정
+                      padding: EdgeInsets.only(
+                        bottom: MediaQuery.of(context)
+                            .viewInsets
+                            .bottom, // 키보드 높이만큼 패딩
+                        top: 10.0,
+                        left: 8.0,
+                        right: 8.0,
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: textColorProvider.commentController,
+                              decoration: InputDecoration(
+                                hintText: '댓글 추가...',
+                                hintStyle: const TextStyle(color: Colors.grey),
+                                filled: true,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
+                            ),
+                          ),
+                          textColorProvider.isTextEmpty ?
+                          const IconButton(
+                            icon: Icon(Icons.send, color: Colors.grey),
+                            onPressed: null,
+                          )
+                          :
+                          IconButton(
+                            icon: const Icon(Icons.send, color: AppsColor.pastelGreen),
+                            onPressed: () {
+                              // 댓글 작성 로직
+                              print(textColorProvider.commentController.text);
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  //삭제 수정 옵션 BottomSheet
   void _showOptionsBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
