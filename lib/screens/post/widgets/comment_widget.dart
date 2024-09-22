@@ -18,14 +18,14 @@ class CommentWidget extends StatelessWidget {
             commentModel.userProfileImage == null ?
             Image.asset(
               "lib/assets/image/defaultUserProfile.png",
-              width: 50,
-              height: 50,
+              width: 45,
+              height: 45,
               fit: BoxFit.cover,
             )
                 :Image.network(
               commentModel.userProfileImage ?? "https://via.placeholder.com/60",
-              width: 50,
-              height: 50,
+              width: 45,
+              height: 45,
               fit: BoxFit.cover,
             ),
           ),
