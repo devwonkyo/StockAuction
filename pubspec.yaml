@@ -75,6 +75,7 @@ flutter:
     - lib/assets/image/pic2.png
     - lib/assets/image/pic3.jpeg
     - lib/assets/image/defaultUserProfile.png
+    - lib/assets/image/loginimage.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
