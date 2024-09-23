@@ -9,13 +9,13 @@ class PasswordResetScreen extends StatefulWidget {
 
 class _PasswordResetScreenState extends State<PasswordResetScreen> {
   final _formKey = GlobalKey<FormState>();
-  String _id = '';
+  String _email = '';
 
   void _resetPassword() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
       try {
-        await FirebaseAuth.instance.sendPasswordResetEmail(email: _id);
+        await FirebaseAuth.instance.sendPasswordResetEmail(email: _email);
         // Show success message
       } catch (e) {
         // Show error message
@@ -57,7 +57,7 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
                       ),
                       validator: (value) =>
                           value!.isEmpty ? 'Email을 입력해주세요' : null,
-                      onSaved: (value) => _id = value!,
+                      onSaved: (value) => _email = value!,
                     ),
                   ),
                   SizedBox(width: 10), // 텍스트 필드와 버튼 사이에 간격 추가
@@ -108,7 +108,7 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
                       ),
                       validator: (value) =>
                           value!.isEmpty ? 'Email을 입력해주세요' : null,
-                      onSaved: (value) => _id = value!,
+                      onSaved: (value) => _email = value!,
                     ),
                   ),
                   SizedBox(width: 10), // 텍스트 필드와 버튼 사이에 간격 추가
