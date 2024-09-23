@@ -1,3 +1,4 @@
+import 'package:auction/config/theme.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:auction/route.dart';
@@ -35,6 +36,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       theme: Provider.of<ThemeProvider>(context).currentTheme, //todo toggle 시 Provider.of<ThemeProvider>(context, listen: false).toggleTheme();
+      // theme: darkThemeData(),
       routerDelegate: router.routerDelegate,
       routeInformationParser: router.routeInformationParser,
       routeInformationProvider: router.routeInformationProvider,

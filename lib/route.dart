@@ -1,3 +1,4 @@
+import 'package:auction/screens/post/post_modify_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:auction/screens/main_screen.dart';
@@ -54,6 +55,10 @@ final GoRouter router = GoRouter(
       builder: (context, state) => PostAddScreen(),
     ),
     GoRoute(
+      path: '/post/modify',
+      builder: (context, state) => PostModifyScreen(),
+    ),
+    GoRoute(
       path: '/post/detail',
       builder: (context, state) => PostDetailScreen(),
     ),
@@ -75,10 +80,6 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/settings',
       builder: (context, state) => SettingsScreen(),
-    ),
-    GoRoute(
-      path: '/PostListScreen',
-      builder: (context, state) => PostListScreen(),
     ),
     GoRoute(
       path: '/chat',
