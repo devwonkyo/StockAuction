@@ -1,9 +1,7 @@
-import 'package:auction/providers/post_provider.dart';
-import 'package:auction/providers/theme_provider.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:auction/route.dart';
-// provider 파일
+// provider 패키지 및 파일
 import 'package:provider/provider.dart';
 import 'package:auction/providers/post_provider.dart';
 import 'package:auction/providers/theme_provider.dart';
@@ -41,10 +39,5 @@ class MyApp extends StatelessWidget {
       routeInformationParser: router.routeInformationParser,
       routeInformationProvider: router.routeInformationProvider,
     );
-    // return MaterialApp(
-    //   home: MainScreen(),
-    //   theme: lightThemeData(),
-
-    // );
   }
 }
