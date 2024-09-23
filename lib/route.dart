@@ -10,6 +10,11 @@ import 'package:auction/screens/post/post_list_screen.dart';
 import 'package:auction/screens/post/post_add_screen.dart';
 import 'package:auction/screens/post/post_detail_screen.dart';
 import 'package:auction/screens/main_screen.dart';
+import 'screens/my/my_sold_screen.dart';
+import 'screens/my/my_account_screen.dart';
+import 'screens/my/my_bought_screen.dart';
+import 'screens/my/my_deliver_screen.dart';
+import 'screens/my/my_infoupdate_screen.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -52,6 +57,30 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/chat',
       builder: (context, state) => ChatlistScreen(),
+    ),
+    GoRoute(
+      path: '/my',
+      builder: (context, state) => MyScreen(),
+    ),
+    GoRoute(
+      path: '/infoupdate',
+      builder: (context, state) => MyInfoUpdateScreen(),
+    ),
+    GoRoute(
+      path: '/deliver',
+      builder: (context, state) => MyDeliverScreen(),
+    ),
+    GoRoute(
+      path: '/account',
+      builder: (context, state) => MyAccountScreen(),
+    ),
+    GoRoute(
+      path: '/sold',
+      builder: (context, state) => MySoldScreen(),
+    ),
+    GoRoute(
+      path: '/bought',
+      builder: (context, state) => MyBoughtScreen(),
     ),
   ],
 );
