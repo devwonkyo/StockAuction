@@ -1,7 +1,7 @@
 import 'package:auction/screens/post/post_list_screen.dart';
 import 'package:flutter/material.dart';
 
-import 'auth/my_screen.dart';
+import 'my/my_screen.dart';
 import 'auth/settings_screen.dart';
 import 'chat/chat_list_screen.dart';
 import 'home/home_screen.dart';
@@ -35,7 +35,7 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('앱 이름'),
+        title: Text('Stock Auction'),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.person),

@@ -1,4 +1,5 @@
 import 'package:auction/providers/chat_provider.dart';
+import 'package:auction/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -11,6 +12,8 @@ class ChatScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final chatNotifier = Provider.of<ChatProvider>(context);
+    final authProvider = Provider.of<AuthProvider>(context);
+
     return Scaffold(
       body: Column(
         children: <Widget>[
@@ -22,7 +25,7 @@ class ChatScreen extends StatelessWidget {
                 final message = chatNotifier.messages[index];
                 return MessageBubble(
                   message.text,
-                  message.userId == 'currentUserId', // 실제 사용자 ID로 대체 필요
+                  message.userId == authProvider.currentUser?.uid, // 실제 사용자 ID로 대체 필요
                 );
               },
             ),
@@ -40,9 +43,14 @@ class ChatScreen extends StatelessWidget {
                 IconButton(
                   icon: Icon(Icons.send),
                   onPressed: () {
-                    Provider.of<ChatProvider>(context, listen: false)
-                        .sendMessage(chatId, 'currentUserId', messageController.text);
-                    messageController.clear();
+                    if (messageController.text.isNotEmpty) {
+                      Provider.of<ChatProvider>(context, listen: false).sendMessage(
+                        chatId,
+                        authProvider.currentUser?.uid ?? '', // 로그인된 사용자의 UID를 사용
+                        messageController.text,
+                      );
+                      messageController.clear();
+                    }
                   },
                 ),
               ],
