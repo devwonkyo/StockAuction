@@ -1,4 +1,7 @@
 import 'package:auction/config/theme.dart';
+import 'package:auction/providers/auth_provider.dart';
+import 'package:auction/providers/post_provider.dart';
+import 'package:auction/providers/theme_provider.dart';
 import 'package:auction/screens/auth/login_screen.dart';
 import 'package:auction/screens/main_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -14,6 +17,7 @@ import 'dart:async';
 //firebase 패키지
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,6 +28,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (context) => ThemeProvider()), //테마 변경 Provider
         ChangeNotifierProvider(create: (context) => PostProvider()), //포스트 Provider
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
       ],
       child: MyApp(),
     ),
