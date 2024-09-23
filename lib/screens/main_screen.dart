@@ -19,7 +19,7 @@ class _MainScreenState extends State<MainScreen> {
   final List<Widget> _pages = [
     HomeScreen(),
     PostListScreen(),
-    ChatlistScreen(),
+    ChatListScreen(),
     likePage(),
     SettingsScreen(),
   ];
@@ -42,7 +42,7 @@ class _MainScreenState extends State<MainScreen> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => MyScreen()),
+                MaterialPageRoute(builder: (context) => myScreen()),
               );
             },
           ),
