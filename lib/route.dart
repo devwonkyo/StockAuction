@@ -53,7 +53,6 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/post/detail',
       builder: (context, state) => PostDetailScreen(),
-      builder: (context, state) => PostDetailScreen(),
     ),
     GoRoute(
       path: '/post/list',
