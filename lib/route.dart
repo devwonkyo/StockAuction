@@ -1,3 +1,4 @@
+import 'package:auction/screens/post/bid_list_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:auction/screens/auth/login_screen.dart';
@@ -52,6 +53,15 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/post/detail',
       builder: (context, state) => PostDetailScreen(),
+      builder: (context, state) => PostDetailScreen(),
+    ),
+    GoRoute(
+      path: '/post/list',
+      builder: (context, state) => PostListScreen(),
+    ),
+    GoRoute(
+      path: '/post/bidList',
+      builder: (context, state) => BidListScreen(),
     ),
     GoRoute(
       path: '/chat/:chatId',
