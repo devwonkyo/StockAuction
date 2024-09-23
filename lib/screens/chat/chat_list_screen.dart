@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class ChatlistPage extends StatelessWidget {
+class ChatlistScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

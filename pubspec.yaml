@@ -41,6 +41,8 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
 
+  #provider
+  provider: ^6.1.2
 
   #swipe
   flutter_swiper_null_safety: ^1.0.2
@@ -72,6 +74,7 @@ flutter:
     - lib/assets/image/pic1.png
     - lib/assets/image/pic2.png
     - lib/assets/image/pic3.jpeg
+    - lib/assets/image/defaultUserProfile.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

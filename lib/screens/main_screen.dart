@@ -17,11 +17,11 @@ class _MainScreenState extends State<MainScreen> {
 
   // 각 페이지에 대한 위젯을 리스트로 생성
   final List<Widget> _pages = [
-    HomePage(),
-    SelllistPage(),
-    ChatlistPage(),
+    HomeScreen(),
+    PostListScreen(),
+    ChatlistScreen(),
     likePage(),
-    settingsPage(),
+    SettingsScreen(),
   ];
 
   // 네비게이션 탭을 클릭했을 때의 동작 정의
@@ -48,7 +48,7 @@ class _MainScreenState extends State<MainScreen> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => myPage()),
+                MaterialPageRoute(builder: (context) => myScreen()),
               );
             },
           ),

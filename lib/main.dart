@@ -18,8 +18,19 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();  // Firebase 초기화
-  runApp(MyApp());
+
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => ThemeProvider()), //테마 변경 Provider
+        ChangeNotifierProvider(create: (context) => PostProvider()), //포스트 Provider
+      ],
+      child: MyApp(),
+    ),
+  );
 }
+
+
 
 class MyApp extends StatelessWidget {
   @override
