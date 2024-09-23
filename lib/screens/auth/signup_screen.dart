@@ -1,92 +1,32 @@
-import 'package:auction/screens/auth/login_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:auction/models/user_model.dart'; // UserModel import 추가
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import 'package:auction/providers/auth_provider.dart';
 
-class SignupScreen extends StatefulWidget {
-  @override
-  _SignupScreenState createState() => _SignupScreenState();
-}
-
-class _SignupScreenState extends State<SignupScreen> {
+class SignupScreen extends StatelessWidget {
   final _formKey = GlobalKey<FormState>();
-  String _email = '';
-  String _password = '';
-  String _confirmPassword = '';
-  String _nickname = '';
-  String _phoneNumber = '';
-
-  Future<bool> _checkNickname() async {
-    var snapshot = await FirebaseFirestore.instance
-        .collection('users')
-        .where('nickname', isEqualTo: _nickname)
-        .get();
-
-    return snapshot.docs.isEmpty;
-  }
-
-  void _signup() async {
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
-
-      if (_password != _confirmPassword) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('비밀번호가 일치하지 않습니다.')),
-        );
-        return;
-      }
-
-      try {
-        // 닉네임 중복 체크
-        bool isNicknameAvailable = await _checkNickname();
-        if (!isNicknameAvailable) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('이미 사용 중인 닉네임입니다.')),
-          );
-          return;
-        }
-
-        // 사용자 생성
-        UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: _email,
-          password: _password,
-        );
-
-        // UserModel 인스턴스 생성
-        UserModel newUser = UserModel(
-          uid: userCredential.user!.uid,
-          email: _email,
-          nickname: _nickname,
-          phoneNumber: _phoneNumber,
-          pushToken: null,
-          userProfileImage: null,
-        );
-
-        // Firestore에 사용자 정보 저장
-        await FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid).set(newUser.toMap());
-
-        print('User created successfully: ${userCredential.user!.uid}');
-        print('User data saved to Firestore');
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('회원가입이 완료되었습니다.')),
-        );
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => LoginScreen()),
-        );
-      } catch (e) {
-        print('Signup Error: $e');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('회원가입에 실패했습니다: $e')),
-        );
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);
+
+    void _signup() async {
+      if (_formKey.currentState!.validate()) {
+        _formKey.currentState!.save();
+        try {
+          await authProvider.signupWithEmailVerification();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('인증 이메일을 보냈습니다. 이메일을 확인해주세요.')),
+          );
+          _showEmailVerificationDialog(context, authProvider);
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('회원가입에 실패했습니다: $e')),
+          );
+        }
+      }
+    }
+
     return Scaffold(
       appBar: AppBar(title: Text('회원가입')),
       body: SingleChildScrollView(
@@ -103,7 +43,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ),
                 validator: (value) => value!.isEmpty ? '이메일을 입력해주세요' : null,
-                onSaved: (value) => _email = value!,
+                onSaved: (value) => authProvider.setEmail(value!),
               ),
               SizedBox(height: 20),
               TextFormField(
@@ -114,7 +54,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ),
                 validator: (value) => value!.isEmpty ? '닉네임을 입력해주세요' : null,
-                onSaved: (value) => _nickname = value!,
+                onSaved: (value) => authProvider.setNickname(value!),
               ),
               SizedBox(height: 20),
               TextFormField(
@@ -123,10 +63,17 @@ class _SignupScreenState extends State<SignupScreen> {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15.0),
                   ),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      authProvider.isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                    ),
+                    onPressed: authProvider.togglePasswordVisibility,
+                  ),
                 ),
-                obscureText: true,
+                obscureText: !authProvider.isPasswordVisible,
                 validator: (value) => value!.isEmpty ? '비밀번호를 입력해주세요' : null,
-                onSaved: (value) => _password = value!,
+                onChanged: authProvider.setPassword,
+                onSaved: (value) => authProvider.setPassword(value!),
               ),
               SizedBox(height: 20),
               TextFormField(
@@ -135,10 +82,18 @@ class _SignupScreenState extends State<SignupScreen> {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15.0),
                   ),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      authProvider.isConfirmPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                    ),
+                    onPressed: authProvider.toggleConfirmPasswordVisibility,
+                  ),
+                  errorText: !authProvider.passwordsMatch ? '비밀번호가 일치하지 않습니다' : null,
                 ),
-                obscureText: true,
+                obscureText: !authProvider.isConfirmPasswordVisible,
                 validator: (value) => value!.isEmpty ? '비밀번호를 다시 입력해주세요' : null,
-                onSaved: (value) => _confirmPassword = value!,
+                onChanged: authProvider.setConfirmPassword,
+                onSaved: (value) => authProvider.setConfirmPassword(value!),
               ),
               SizedBox(height: 20),
               TextFormField(
@@ -149,7 +104,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ),
                 validator: (value) => value!.isEmpty ? '전화번호를 입력해주세요' : null,
-                onSaved: (value) => _phoneNumber = value!,
+                onSaved: (value) => authProvider.setPhoneNumber(value!),
               ),
               SizedBox(height: 20),
               ElevatedButton(
@@ -171,6 +126,44 @@ class _SignupScreenState extends State<SignupScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  void _showEmailVerificationDialog(BuildContext context, AuthProvider authProvider) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('이메일 인증'),
+          content: Text('이메일을 확인하고 인증 링크를 클릭해주세요. 인증이 완료되면 확인 버튼을 눌러주세요.'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('확인'),
+              onPressed: () async {
+                bool isVerified = await authProvider.checkEmailVerification();
+                if (isVerified) {
+                  try {
+                    await authProvider.createUserInFirestore();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('회원가입이 완료되었습니다.')),
+                    );
+                    context.go('/login');
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('오류가 발생했습니다: $e')),
+                    );
+                  }
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('이메일이 아직 인증되지 않았습니다. 다시 시도해주세요.')),
+                  );
+                }
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
