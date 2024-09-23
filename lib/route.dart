@@ -70,7 +70,7 @@ final GoRouter router = GoRouter(
     ),
     GoRoute(
       path: '/chat',
-      builder: (context, state) => ChatlistScreen(),
+      builder: (context, state) => ChatListScreen(),
     ),
     GoRoute(
       path: '/my',
