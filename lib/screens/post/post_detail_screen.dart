@@ -1,12 +1,14 @@
 import 'package:auction/config/color.dart';
 import 'package:auction/models/comment_model.dart';
 import 'package:auction/providers/auction_timer_provider.dart';
+import 'package:auction/route.dart';
 import 'package:auction/screens/post/bid_list_screen.dart';
 import 'package:auction/screens/post/widgets/comment_widget.dart';
 import 'package:auction/screens/post/widgets/favorite_button_widget.dart';
 import 'package:auction/screens/post/widgets/timer_text_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_swiper_null_safety/flutter_swiper_null_safety.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/text_provider.dart';
 
@@ -34,6 +36,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     ];
     return Scaffold(
       appBar: AppBar(
+        scrolledUnderElevation: 0,
         title: Text("게시물",style: TextStyle(fontSize: 20.0),),
         leading: IconButton(
           icon: Icon(Icons.arrow_back), // 뒤로가기 아이콘
@@ -179,7 +182,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                             style: TextStyle(
                                 fontSize: 24, fontWeight: FontWeight.bold)),
                         GestureDetector(
-                          onTap: () => Navigator.push(context,MaterialPageRoute(builder: (context) => BidListScreen())),
+                          onTap: () => context.push("/post/bidlist"),
                           child: Row(
                             children: [
                               Icon(Icons.arrow_drop_up,color: Colors.redAccent,),
@@ -374,6 +377,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                 onTap: () {
                   Navigator.of(context).pop(); // 시트 닫기
                   _deleteItem(context); // 삭제 처리
+                  context.go("/post/list");
                 },
               ),
               ListTile(
