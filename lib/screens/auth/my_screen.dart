@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class myPage extends StatelessWidget {
+class myScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -13,7 +13,7 @@ class myPage extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => myPage()),
+                MaterialPageRoute(builder: (context) => myScreen()),
               );
             },
           ),
