@@ -6,7 +6,6 @@ import 'package:auction/screens/auth/login_screen.dart';
 import 'package:auction/screens/auth/signup_screen.dart';
 import 'package:auction/screens/auth/password_reser_screen.dart';
 import 'package:auction/screens/auth/settings_screen.dart';
-import 'package:auction/screens/my/my_screen.dart';
 // import chat
 import 'package:auction/screens/chat/chat_list_screen.dart';
 import 'package:auction/screens/chat/chat_screen.dart';
@@ -16,6 +15,7 @@ import 'package:auction/screens/post/post_add_screen.dart';
 import 'package:auction/screens/post/post_detail_screen.dart';
 import 'package:auction/screens/post/bid_list_screen.dart';
 // import my
+import 'package:auction/screens/my/my_screen.dart';
 import 'package:auction/screens/my/my_sold_screen.dart';
 import 'package:auction/screens/my/my_account_screen.dart';
 import 'package:auction/screens/my/my_bought_screen.dart';
