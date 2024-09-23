@@ -105,7 +105,7 @@ class LoginScreen extends StatelessWidget {
                           onTap: () => context.push('/password-reset'),
                           child: Text(
                             '암호를 잊어버렸습니다.',
-                            style: TextStyle(color: Colors.red),
+                            style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600),
                           ),
                         ),
                       ],
@@ -153,7 +153,7 @@ class LoginScreen extends StatelessWidget {
                           onTap: () => context.push('/signup'),
                           child: Text(
                             '회원가입',
-                            style: TextStyle(color: Colors.red),
+                            style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600),
                           ),
                         ),
                       ],
