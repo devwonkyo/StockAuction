@@ -31,6 +31,12 @@ class _MyPageState extends State<MyScreen> {
       appBar: AppBar(
         title: const Text('MY'),
         centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context); // 뒤로 가기 기능
+          },
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.account_circle),
