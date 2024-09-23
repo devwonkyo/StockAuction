@@ -16,6 +16,7 @@ class _BidListScreenState extends State<BidListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        scrolledUnderElevation: 0,
         title: const Text('시세'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back), // 뒤로가기 아이콘
