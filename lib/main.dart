@@ -13,6 +13,7 @@ import 'package:provider/provider.dart';
 import 'package:auction/providers/post_provider.dart';
 import 'package:auction/providers/theme_provider.dart';
 import 'package:auction/providers/chat_provider.dart';
+import 'package:auction/providers/auth_provider.dart';
 // firebase 패키지
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
