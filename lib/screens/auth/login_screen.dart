@@ -1,4 +1,3 @@
-import 'package:auction/main.dart';
 import 'package:auction/screens/auth/password_reser_screen.dart';
 import 'package:auction/screens/auth/signup_screen.dart';
 import 'package:auction/screens/main_screen.dart';
@@ -12,7 +11,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  String _id = '';
+  String _email = '';
   String _password = '';
   bool _stayLoggedIn = false;
 
@@ -21,7 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
       _formKey.currentState!.save();
       try {
         await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: _id,
+          email: _email,
           password: _password,
         );
         Navigator.pushReplacement(
@@ -29,7 +28,7 @@ class _LoginScreenState extends State<LoginScreen> {
           MaterialPageRoute(builder: (context) => MainScreen()),
         );
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('로그인 실패: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('아이디 또는 비밀번호를 확인해주세요')));
       }
     }
   }
@@ -63,7 +62,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 validator: (value) => value!.isEmpty ? '아이디를 입력해주세요.' : null,
-                onSaved: (value) => _id = value!,
+                onSaved: (value) => _email = value!,
               ),
               SizedBox(
                 height: 30,
