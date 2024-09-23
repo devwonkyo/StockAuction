@@ -24,9 +24,10 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => ThemeProvider()), // 테마 변경 Provider
-        ChangeNotifierProvider(create: (context) => PostProvider()), // 포스트 Provider
+        ChangeNotifierProvider(create: (context) => ThemeProvider()), //테마 변경 Provider
+        ChangeNotifierProvider(create: (context) => PostProvider()), //포스트 Provider
         ChangeNotifierProvider(create: (context) => ChatProvider()), // 채팅 Provider
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
       ],
       child: MyApp(),
     ),
