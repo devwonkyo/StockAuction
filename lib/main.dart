@@ -1,12 +1,7 @@
+import 'package:auction/providers/post_provider.dart';
+import 'package:auction/providers/theme_provider.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'dart:async';
-import 'package:auction/config/theme.dart';
-import 'package:auction/screens/auth/login_screen.dart';
-import 'package:auction/screens/auth/settings_screen.dart';
-import 'package:auction/screens/auth/my_screen.dart';
-import 'package:auction/screens/chat/chat_list_screen.dart';
-import 'package:auction/screens/post/post_list_screen.dart';
-import 'package:auction/screens/main_screen.dart';
 import 'package:auction/route.dart';
 // provider 파일
 import 'package:provider/provider.dart';
@@ -46,5 +41,10 @@ class MyApp extends StatelessWidget {
       routeInformationParser: router.routeInformationParser,
       routeInformationProvider: router.routeInformationProvider,
     );
+    // return MaterialApp(
+    //   home: MainScreen(),
+    //   theme: lightThemeData(),
+
+    // );
   }
 }
