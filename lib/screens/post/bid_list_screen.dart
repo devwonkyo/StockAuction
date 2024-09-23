@@ -1,4 +1,5 @@
 import 'package:auction/screens/post/widgets/bid_item_widget.dart';
+import 'package:auction/widgets/default_appbar.dart';
 import 'package:flutter/material.dart';
 
 import '../../config/color.dart';
@@ -15,16 +16,7 @@ class _BidListScreenState extends State<BidListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        scrolledUnderElevation: 0,
-        title: const Text('시세'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back), // 뒤로가기 아이콘
-          onPressed: () {
-            Navigator.pop(context); // 이전 페이지로 이동
-          },
-        ),
-      ),
+      appBar: const DefaultAppbar(title: "시세"),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [

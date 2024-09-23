@@ -34,23 +34,12 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('앱 이름'),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.person),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => MyScreen()),
-              );
-            },
-          ),
-        ],
-      ),
-      body: IndexedStack(
-        index: _selectedIndex, // 선택된 페이지를 표시
-        children: _pages, // 모든 페이지를 스택에 포함
+      appBar: null,
+      body: SafeArea(
+        child: IndexedStack(
+          index: _selectedIndex, // 선택된 페이지를 표시
+          children: _pages, // 모든 페이지를 스택에 포함
+        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex, // 선택된 인덱스
