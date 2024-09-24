@@ -24,14 +24,36 @@ class ChatProvider extends ChangeNotifier {
   }
 
   // 메세지 보내기 함수, 마지막 채팅 시간, 내용 업데이트 기능 포함
-  Future<void> sendMessage(String chatId, String userId, String text) async {
-    await _firestore.collection('chats').doc(chatId).collection('messages').add({
+  Future<void> sendMessage(String chatId, String userId, String text, String otherUserId) async {
+    // 두 사용자 간의 채팅방이 이미 있는지 확인
+    QuerySnapshot existingChat = await _firestore
+        .collection('chats')
+        .where('participants', arrayContains: userId)
+        .get();
+
+    DocumentReference chatRef;
+    if (existingChat.docs.isNotEmpty) {
+      // 기존 채팅방이 있으면 해당 채팅방 사용
+      chatRef = existingChat.docs.first.reference;
+    } else {
+      // 기존 채팅방이 없으면 새로운 채팅방 생성
+      chatRef = _firestore.collection('chats').doc();
+      await chatRef.set({
+        'participants': [userId, otherUserId],
+        'lastActivityTime': Timestamp.now(),
+        'lastMessage': '',
+      });
+    }
+
+    // 메시지 전송
+    await chatRef.collection('messages').add({
       'text': text,
       'userId': userId,
       'createdAt': Timestamp.now(),
     });
 
-    await _firestore.collection('chats').doc(chatId).update({
+    // 마지막 메시지 및 활동 시간 업데이트
+    await chatRef.update({
       'lastActivityTime': Timestamp.now(),
       'lastMessage': text,
     });
