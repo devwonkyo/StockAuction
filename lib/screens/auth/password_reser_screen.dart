@@ -15,13 +15,9 @@ class PasswordResetScreen extends StatelessWidget {
         _formKey.currentState!.save();
         try {
           await authProvider.sendPasswordResetEmail();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('비밀번호 재설정 email을 보냈습니다. email을 확인해주세요.')),
-          );
+          _showSuccessDialog(context, '비밀번호 재설정 email을 보냈습니다. email을 확인해주세요.');
         } catch (e) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('email을 확인해 주세요.')),
-          );
+          _showErrorDialog(context, 'email을 확인해 주세요.');
         }
       }
     }
@@ -81,6 +77,46 @@ class PasswordResetScreen extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  void _showSuccessDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('성공'),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              child: Text('확인'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showErrorDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('오류'),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              child: Text('확인'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
