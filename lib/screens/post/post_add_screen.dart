@@ -1,13 +1,17 @@
 import 'dart:io';
 
 import 'package:auction/config/color.dart';
+import 'package:auction/models/post_model.dart';
+import 'package:auction/models/user_model.dart';
 import 'package:auction/providers/post_provider.dart';
 import 'package:auction/route.dart';
 import 'package:auction/screens/post/widgets/post_Image_item.dart';
 import 'package:auction/screens/post/widgets/post_item_widget.dart';
+import 'package:auction/utils/custom_alert_dialog.dart';
 import 'package:auction/widgets/default_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/post_image_provider.dart';
@@ -21,6 +25,7 @@ class PostAddScreen extends StatefulWidget {
 
 class _PostAddScreenState extends State<PostAddScreen> {
   final _priceController = TextEditingController();
+  DateTime? _selectedDateTime;
   bool _isPriceFocused = false;
 
   @override
@@ -37,112 +42,169 @@ class _PostAddScreenState extends State<PostAddScreen> {
               children: [
                 Expanded(
                     child: SingleChildScrollView(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 15),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.fromLTRB(0, 0, 10, 10),
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      postImageProvider.pickImage();
-                                    },
-                                    child: Container(
-                                      width: 70,
-                                      height: 70,
-                                      decoration: BoxDecoration(
-                                        border: Border.all(color: Colors.grey),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: const Icon(Icons.camera_alt,
-                                          color: Colors.grey),
-                                    ),
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(0, 0, 10, 10),
+                              child: GestureDetector(
+                                onTap: () {
+                                  postImageProvider.pickImage();
+                                },
+                                child: Container(
+                                  width: 70,
+                                  height: 70,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: Colors.grey),
+                                    borderRadius: BorderRadius.circular(8),
                                   ),
-                                ),
-                                Expanded(
-                                  child: SizedBox(
-                                    height: 100,
-                                    child: ListView.separated(
-                                        padding: EdgeInsets.symmetric(horizontal: 10),
-                                        scrollDirection: Axis.horizontal,
-                                        itemCount: postImageProvider.imageList.length,
-                                        itemBuilder: (BuildContext context, int index) {
-                                          return PostImageItem(
-                                            imageUrl:
-                                            postImageProvider.imageList[index],
-                                            index: index,
-                                          );
-                                        },
-                                        separatorBuilder:
-                                            (BuildContext context, int index) =>
-                                            SizedBox(
-                                              width: 5,
-                                            )),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const Text('제목',
-                                style: TextStyle(fontWeight: FontWeight.bold)),
-                            const SizedBox(height: 10),
-                            const TextField(
-                              decoration: InputDecoration(
-                                  hintText: '제목',
-                                  border: OutlineInputBorder(),
-                                  focusedBorder: OutlineInputBorder(
-                                      borderSide: BorderSide(width: 1,color: AppsColor.pastelGreen)),),
-                            ),
-                            const SizedBox(height: 20),
-                            const Text('초기 입찰가',
-                                style: TextStyle(fontWeight: FontWeight.bold)),
-                            const SizedBox(height: 5),
-                            Focus(
-                              onFocusChange: (hasFocus) {
-                                setState(() {
-                                  _isPriceFocused = hasFocus;
-                                });
-                              },
-                              child: TextField(
-                                controller: _priceController,
-                                keyboardType: TextInputType.number,
-                                decoration: InputDecoration(
-                                  hintText: '가격을 입력해주세요.',
-                                  prefixIcon: Icon(
-                                    Icons.attach_money,
-                                    color: _isPriceFocused ? AppsColor.pastelGreen : Colors.grey,
-                                  ),
-                                  enabledBorder: const OutlineInputBorder(),
-                                  focusedBorder: const OutlineInputBorder(
-                                    borderSide: BorderSide(color: AppsColor.pastelGreen,)
-                                  ),
+                                  child: const Icon(Icons.camera_alt,
+                                      color: Colors.grey),
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 20),
-                            const Text('자세한 설명',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold,)),
-                            const SizedBox(height: 5),
-                            const TextField(
-                              maxLines: 5,
-                              decoration: InputDecoration(
-                                  hintText:
-                                  '올릴 게시글 내용을 작성해 주세요. (판매 금지 물품은 게시가 제한될 수 있어요.)\n\n신뢰할 수 있는 거래를 위해 자세히 적어주세요.\n과학기술정보통신부, 한국 인터넷진흥원과 함께 해요.',
-                                  border: OutlineInputBorder(),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(width: 1.0, color: AppsColor.pastelGreen),
-                                  )),
+                            Expanded(
+                              child: SizedBox(
+                                height: 100,
+                                child: ListView.separated(
+                                    padding:
+                                        EdgeInsets.symmetric(horizontal: 10),
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount:
+                                        postImageProvider.imageList.length,
+                                    itemBuilder:
+                                        (BuildContext context, int index) {
+                                      return PostImageItem(
+                                        imageUrl:
+                                            postImageProvider.imageList[index],
+                                        index: index,
+                                      );
+                                    },
+                                    separatorBuilder:
+                                        (BuildContext context, int index) =>
+                                            SizedBox(
+                                              width: 5,
+                                            )),
+                              ),
                             ),
-                            const SizedBox(height: 20),
                           ],
                         ),
-                      ),
-                    )),
+                        const Text('제목',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 10),
+                        const TextField(
+                          decoration: InputDecoration(
+                            hintText: '제목',
+                            hintStyle: TextStyle(color: Colors.grey),
+                            border: OutlineInputBorder(),
+                            focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                    width: 1, color: AppsColor.pastelGreen)),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        const Text('초기 입찰가',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 5),
+                        Focus(
+                          onFocusChange: (hasFocus) {
+                            setState(() {
+                              _isPriceFocused = hasFocus;
+                            });
+                          },
+                          child: TextField(
+                            controller: _priceController,
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
+                              hintText: '가격을 입력해주세요.',
+                              hintStyle: TextStyle(color: Colors.grey),
+                              prefixIcon: Icon(
+                                Icons.attach_money,
+                                color: _isPriceFocused
+                                    ? AppsColor.pastelGreen
+                                    : Colors.grey,
+                              ),
+                              enabledBorder: const OutlineInputBorder(),
+                              focusedBorder: const OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                color: AppsColor.pastelGreen,
+                              )),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        const Text('경매 종료 시간설정',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 10),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Container(
+                                padding: EdgeInsets.all(14.0),
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    width: 1.0, // 테두리 두께
+                                  ),
+                                  borderRadius:
+                                      BorderRadius.circular(8.0), // 테두리 둥글게 만들기
+                                ),
+                                child: Text(
+                                  _selectedDateTime != null
+                                      ? '종료시간 : ${DateFormat('yyyy-MM-dd HH:mm:ss').format(_selectedDateTime!)}'
+                                      : '종료시간을 선택해주세요.',
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 20,
+                            ),
+                            ElevatedButton(
+                              onPressed: () => _selectDateTime(context),
+                              style: ElevatedButton.styleFrom(
+                                padding: EdgeInsets.all(14.0),
+                                // 버튼 내부 패딩 설정
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    side: BorderSide(
+                                      color: Colors.grey,
+                                      width: 1.0,
+                                    ) // 버튼 모서리 둥글게 만들기
+                                    ),
+                              ),
+                              child: Icon(Icons.access_time),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                        const Text('자세한 설명',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            )),
+                        const SizedBox(height: 5),
+                        const TextField(
+                          maxLines: 5,
+                          decoration: InputDecoration(
+                              hintText:
+                                  '올릴 게시글 내용을 작성해 주세요. (판매 금지 물품은 게시가 제한될 수 있어요.)\n\n신뢰할 수 있는 거래를 위해 자세히 적어주세요.\n과학기술정보통신부, 한국 인터넷진흥원과 함께 해요.',
+                              hintStyle: TextStyle(color: Colors.grey),
+                              border: OutlineInputBorder(),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                    width: 1.0, color: AppsColor.pastelGreen),
+                              )),
+                        ),
+                        const SizedBox(height: 20),
+                      ],
+                    ),
+                  ),
+                )),
                 Align(
                   alignment: Alignment.bottomCenter,
                   child: Container(
@@ -151,9 +213,23 @@ class _PostAddScreenState extends State<PostAddScreen> {
                     child: Padding(
                         padding: const EdgeInsets.all(10.0),
                         child: ElevatedButton(
-                            onPressed: () {
-                              postProvider.addPostItem();
-                              print('작성 완료');
+                            onPressed: () async {
+                              final postModel = PostModel(
+                                  writeUser: UserModel(uid: "", email: "email", nickname: "nickname", phoneNumber: "phoneNumber"),
+                                  postTitle: "postTitle",
+                                  postContent: "postContent",
+                                  createTime: DateTime.now(),
+                                  endTime: _selectedDateTime ?? DateTime.now(),
+                                  postImageList: postImageProvider.imageList,
+                                  priceList: List.of(["300,000"]), postUid: ''
+                              );
+                              final result = await postProvider.addPostItem(postModel);
+
+                              if(result.isSuccess){
+                                showCustomAlertDialog(context: context, title:  "알림", message: result.message ?? "게시물을 등록했습니다.", onClick: () => context.go('/main/post'));
+                              }else{
+                                showCustomAlertDialog(context: context, title: "알림", message: result.message ?? "게시물 등록에 실패했습니다.");
+                              }
                             },
                             style: ElevatedButton.styleFrom(
                                 backgroundColor: AppsColor.pastelGreen,
@@ -173,6 +249,45 @@ class _PostAddScreenState extends State<PostAddScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _selectDateTime(BuildContext context) async {
+    // 날짜 선택
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2100),
+    );
+
+    // 시간이 선택되면 시간도 선택
+    if (pickedDate != null) {
+      final TimeOfDay? pickedTime = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.now(),
+      );
+
+      if (pickedTime != null) {
+        final selectedDateTime = DateTime(
+          pickedDate.year,
+          pickedDate.month,
+          pickedDate.day,
+          pickedTime.hour,
+          pickedTime.minute,
+        );
+
+        if (selectedDateTime.isBefore(DateTime.now())) {
+          // 다이얼로그를 띄움
+          showCustomAlertDialog(context: context, title: "알림", message: "현재보다 이후시간을 선택해주세요.");
+
+        } else {
+          // 선택한 시간이 유효할 경우 상태를 업데이트
+          setState(() {
+            _selectedDateTime = selectedDateTime;
+          });
+        }
+      }
+    }
   }
 
   @override
