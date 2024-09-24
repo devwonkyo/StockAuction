@@ -53,6 +53,8 @@ dependencies:
 
   #swipe
   flutter_swiper_null_safety: ^1.0.2
+  #Firebase storage
+  firebase_storage: ^12.3.1
 
 dev_dependencies:
   flutter_test:
