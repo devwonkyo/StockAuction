@@ -86,23 +86,29 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  ClipOval(
-                                    child:
-                                    // commentModel.userProfileImage == "" ?
-                                    Image.asset(
-                                      "lib/assets/image/defaultUserProfile.png",
-                                      width: 45,
-                                      height: 45,
-                                      fit: BoxFit.cover,
+                              GestureDetector(
+                                onTap: (){
+                                  //profile 화면 이동
+                                  print("profile 화면 이동");
+                                },
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    ClipOval(
+                                      child:
+                                      // userProfileImage == "" ?
+                                      Image.asset(
+                                        "lib/assets/image/defaultUserProfile.png",
+                                        width: 45,
+                                        height: 45,
+                                        fit: BoxFit.cover,
+                                      ),
                                     ),
-                                  ),
-                                    SizedBox(width: 10,),
-                                    Text("UserName"),
-                                ],
+                                      SizedBox(width: 10,),
+                                      Text("UserName"),
+                                  ],
+                                ),
                               ),
                               Divider(thickness: 1,color: AppsColor.lightGray,),
                               Row(

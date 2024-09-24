@@ -13,20 +13,26 @@ class CommentWidget extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          ClipOval(
-            child:
-            commentModel.userProfileImage == "" ?
-            Image.asset(
-              "lib/assets/image/defaultUserProfile.png",
-              width: 45,
-              height: 45,
-              fit: BoxFit.cover,
-            )
-                :Image.network(
-              commentModel.userProfileImage ?? "https://via.placeholder.com/60",
-              width: 45,
-              height: 45,
-              fit: BoxFit.cover,
+          GestureDetector(
+            onTap: (){
+              print("profile 화면이동");
+              //profile 화면이동
+            },
+            child: ClipOval(
+              child:
+              commentModel.userProfileImage == "" ?
+              Image.asset(
+                "lib/assets/image/defaultUserProfile.png",
+                width: 45,
+                height: 45,
+                fit: BoxFit.cover,
+              )
+                  :Image.network(
+                commentModel.userProfileImage ?? "https://via.placeholder.com/60",
+                width: 45,
+                height: 45,
+                fit: BoxFit.cover,
+              ),
             ),
           ),
           const SizedBox(width: 10,),
