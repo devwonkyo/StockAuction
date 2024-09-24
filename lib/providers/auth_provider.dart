@@ -36,6 +36,7 @@ class AuthProvider extends ChangeNotifier {
   bool get stayLoggedIn => _stayLoggedIn;
   bool get resetEmailSent => _resetEmailSent;
   bool get isEmailVerified => _isEmailVerified;
+  User? get currentUser => _auth.currentUser;
 
   // Setters
   void setEmail(String value) {
