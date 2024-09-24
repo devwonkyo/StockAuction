@@ -154,7 +154,7 @@ class AuthProvider extends ChangeNotifier {
         nickname: _nickname,
         phoneNumber: _phoneNumber,
         pushToken: null,
-        userProfileImage: null,
+        userProfileImage: "https://via.placeholder.com/150",
         birthDate: null, // 기본값으로 null 설정
       );
 

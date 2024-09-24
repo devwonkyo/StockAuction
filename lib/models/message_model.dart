@@ -5,12 +5,14 @@ class Message {
   final String text;
   final String userId;
   final Timestamp createdAt;
+  String? profileImageUrl;
 
   Message({
     required this.id,
     required this.text,
     required this.userId,
     required this.createdAt,
+    this.profileImageUrl,
   });
 
   factory Message.fromDocument(DocumentSnapshot doc) {
