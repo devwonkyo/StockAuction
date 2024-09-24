@@ -14,11 +14,20 @@ import 'package:provider/provider.dart';
 import '../../providers/text_provider.dart';
 
 class PostDetailScreen extends StatefulWidget {
+  final String postUid;
+
+  const PostDetailScreen({super.key, required this.postUid});
+
   @override
   _PostDetailScreenState createState() => _PostDetailScreenState();
 }
 
 class _PostDetailScreenState extends State<PostDetailScreen> {
+  @override
+  void initState() {
+    super.initState();
+    print("${widget.postUid}");
+  }
 
   @override
   Widget build(BuildContext context) {
