@@ -15,6 +15,8 @@ class ChatScreen extends StatelessWidget {
     final chatNotifier = Provider.of<ChatProvider>(context);
     final authProvider = Provider.of<AuthProvider>(context);
 
+    final otherUserId = chatId.replaceFirst(authProvider.currentUser?.uid ?? '', '');
+
     return Scaffold(
       body: Column(
         children: <Widget>[
@@ -54,6 +56,7 @@ class ChatScreen extends StatelessWidget {
                         chatId,
                         authProvider.currentUser?.uid ?? '',
                         messageController.text,
+                        otherUserId, // 상대방 userId 전달
                       );
                       messageController.clear();
                     }
