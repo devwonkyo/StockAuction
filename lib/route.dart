@@ -19,7 +19,6 @@ import 'package:auction/screens/my/my_screen.dart';
 import 'package:auction/screens/my/my_sold_screen.dart';
 import 'package:auction/screens/my/my_account_screen.dart';
 import 'package:auction/screens/my/my_bought_screen.dart';
-import 'package:auction/screens/my/my_deliver_screen.dart';
 import 'package:auction/screens/my/my_infoupdate_screen.dart';
 
 // 보통 아래와 같은 방식으로 이동 가능합니다
