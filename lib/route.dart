@@ -50,6 +50,18 @@ final GoRouter router = GoRouter(
       builder: (context, state) => MainScreen(),
     ),
     GoRoute(
+      path: '/main/post',
+      builder: (context, state) => MainScreen(pageIndex: 1,),
+    ),
+    GoRoute(
+      path: '/main/chat',
+      builder: (context, state) => MainScreen(pageIndex: 2,),
+    ),
+    GoRoute(
+      path: '/main/like',
+      builder: (context, state) => MainScreen(pageIndex: 3,),
+    ),
+    GoRoute(
       path: '/post/add',
       builder: (context, state) => PostAddScreen(),
     ),
@@ -59,7 +71,8 @@ final GoRouter router = GoRouter(
     ),
     GoRoute(
       path: '/post/detail',
-      builder: (context, state) => PostDetailScreen(),
+      builder: (context, state) => PostDetailScreen(
+        postUid: state.extra as String),
     ),
     GoRoute(
       path: '/post/list',

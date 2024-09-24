@@ -140,7 +140,7 @@ class _PostModifyScreenState extends State<PostModifyScreen> {
                         padding: const EdgeInsets.all(10.0),
                         child: ElevatedButton(
                             onPressed: () {
-                              postProvider.addPostItem();
+                              // postProvider.addPostItem();
                               print('작성 완료');
                             },
                             style: ElevatedButton.styleFrom(
