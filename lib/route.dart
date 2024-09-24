@@ -28,7 +28,7 @@ import 'package:auction/screens/my/my_infoupdate_screen.dart';
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 
 final GoRouter router = GoRouter(
-  initialLocation: '/main',
+  initialLocation: '/login',
   navigatorKey: rootNavigatorKey,
   routes: [
     GoRoute(
