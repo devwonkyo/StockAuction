@@ -7,12 +7,22 @@ import 'home/home_screen.dart';
 import 'like/my_likes.dart';
 
 class MainScreen extends StatefulWidget {
+  late int pageIndex;
+
+  MainScreen({super.key, this.pageIndex = 0});
+
   @override
   _MainScreenState createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _selectedIndex = 0; // 선택된 페이지의 인덱스
+  late int _selectedIndex; // 선택된 페이지의 인덱스
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.pageIndex;
+  }
 
   // 각 페이지에 대한 위젯을 리스트로 생성
   final List<Widget> _pages = [

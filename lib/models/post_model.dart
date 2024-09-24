@@ -3,6 +3,7 @@ import 'package:auction/models/comment_model.dart';
 import 'package:auction/models/user_model.dart';
 
 class PostModel{
+  String postUid;
   UserModel writeUser;
   String postTitle;
   String postContent;
@@ -16,6 +17,7 @@ class PostModel{
   bool isDone;
 
   PostModel({
+    required this.postUid,
     required this.writeUser,
     required this.postTitle,
     required this.postContent,
@@ -23,16 +25,20 @@ class PostModel{
     required this.endTime,
     required this.postImageList,
     required this.priceList,
-    this.favoriteList = const [],
-    this.commentList = const [],  // 기본값으로 빈 리스트 설정
-    this.bidList = const [],      // 기본값으로 빈 리스트 설정
-    this.isDone = false,          // 기본값으로 false 설정
-  });
+    List<UserModel>? favoriteList,
+    List<CommentModel>? commentList,
+    List<BidModel>? bidList,
+    bool? isDone,
+  }) : favoriteList = favoriteList ?? [],
+        commentList = commentList ?? [],
+        bidList = bidList ?? [],
+        isDone = isDone ?? false;
 
   // PostModel을 Map으로 변환
   Map<String, dynamic> toMap() {
     return {
-      'writeUser': writeUser.toMap(), // UserModel 변환
+      'postUid': postUid, // UserModel 변환
+      'writeUser': writeUser.toMap(),
       'postTitle': postTitle,
       'postContent': postContent,
       'createTime': createTime,
@@ -49,6 +55,7 @@ class PostModel{
   // Map을 PostModel로 변환
   factory PostModel.fromMap(Map<String, dynamic> map) {
     return PostModel(
+      postUid: map['postUid'] ?? '',
       writeUser: UserModel.fromMap(map['writeUser']), // UserModel 변환
       postTitle: map['postTitle'] ?? '',
       postContent: map['postContent'] ?? '',
