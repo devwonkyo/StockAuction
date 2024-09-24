@@ -24,7 +24,6 @@ class _MyPageState extends State<MyScreen> {
   void initState() {
     super.initState();
     _fetchUserData();
-    _requestPermission();
   }
 
   // Firestore에서 사용자 데이터를 가져오는 함수
@@ -63,26 +62,9 @@ class _MyPageState extends State<MyScreen> {
     }
   }
 
-  // 파일 접근 권한 요청 함수
-  Future<bool> _requestPermission() async {
-    var status = await Permission.photos.request(); // 갤러리 접근 권한 요청
-    if (status.isGranted) {
-      return true; // 권한이 허용되었을 경우
-    } else {
-      return false; // 권한이 허용되지 않았을 경우
-    }
-  }
 
   // 이미지를 선택하는 함수
   Future<void> _pickImage() async {
-    bool hasPermission = await _requestPermission();
-    if (!hasPermission) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('사진 접근 권한이 필요합니다.')),
-      );
-      return;
-    }
-
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {

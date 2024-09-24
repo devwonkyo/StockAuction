@@ -14,18 +14,19 @@ import 'package:provider/provider.dart';
 import '../../providers/text_provider.dart';
 
 class PostDetailScreen extends StatefulWidget {
+  final String postUid;
+
+  const PostDetailScreen({super.key, required this.postUid});
+
   @override
   _PostDetailScreenState createState() => _PostDetailScreenState();
 }
 
 class _PostDetailScreenState extends State<PostDetailScreen> {
-  int _selectedIndex = 0;
-
-  // 네비게이터의 아이템 선택 시 처리 함수
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+  @override
+  void initState() {
+    super.initState();
+    print("${widget.postUid}");
   }
 
   @override
