@@ -1,8 +1,6 @@
+import 'package:auction/screens/my/my_screen.dart';
 import 'package:auction/screens/post/post_list_screen.dart';
 import 'package:flutter/material.dart';
-
-import 'auth/my_screen.dart';
-import 'auth/settings_screen.dart';
 import 'chat/chat_list_screen.dart';
 import 'home/home_screen.dart';
 import 'like/my_likes.dart';
@@ -21,7 +19,6 @@ class _MainScreenState extends State<MainScreen> {
     PostListScreen(),
     ChatListScreen(),
     likePage(),
-    SettingsScreen(),
   ];
 
   // 네비게이션 탭을 클릭했을 때의 동작 정의

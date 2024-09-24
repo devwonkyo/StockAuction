@@ -6,7 +6,6 @@ import 'package:auction/screens/main_screen.dart';
 import 'package:auction/screens/auth/login_screen.dart';
 import 'package:auction/screens/auth/signup_screen.dart';
 import 'package:auction/screens/auth/password_reser_screen.dart';
-import 'package:auction/screens/auth/settings_screen.dart';
 // import chat
 import 'package:auction/screens/chat/chat_list_screen.dart';
 import 'package:auction/screens/chat/chat_screen.dart';
