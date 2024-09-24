@@ -78,13 +78,6 @@ class _MyPageState extends State<MyScreen> {
             ),
             ListTile(
               leading: const Icon(Icons.folder),
-              title: const Text('배송지 관리'),
-              onTap: () {
-                context.go('/deliver'); // 배송지 관리로 이동
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.folder),
               title: const Text('계정 설정'),
               onTap: () {
                 context.go('/account'); // 계정 설정으로 이동
