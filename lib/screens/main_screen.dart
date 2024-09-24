@@ -1,6 +1,7 @@
 import 'package:auction/screens/my/my_screen.dart';
 import 'package:auction/screens/post/post_list_screen.dart';
 import 'package:flutter/material.dart';
+// import 'my/my_screen.dart'; // 이 줄은 제거합니다.
 import 'chat/chat_list_screen.dart';
 import 'home/home_screen.dart';
 import 'like/my_likes.dart';
