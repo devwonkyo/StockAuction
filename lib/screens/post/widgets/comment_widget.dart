@@ -1,5 +1,6 @@
 import 'package:auction/models/comment_model.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class CommentWidget extends StatelessWidget {
   final CommentModel commentModel;
@@ -15,8 +16,8 @@ class CommentWidget extends StatelessWidget {
         children: [
           GestureDetector(
             onTap: (){
-              print("profile 화면이동");
               //profile 화면이동
+              GoRouter.of(context).push('/other/profile/${commentModel.userId}');
             },
             child: ClipOval(
               child:
@@ -38,13 +39,12 @@ class CommentWidget extends StatelessWidget {
           const SizedBox(width: 10,),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            // 텍스트 수평 정렬 (왼쪽 정렬)
             children: [
               Text(
                 commentModel.userId,
                 style: TextStyle(fontSize: 12),
               ),
-              const SizedBox(height: 4), // 텍스트 사이의 간격
+              const SizedBox(height: 4),
               Text(
                 commentModel.comment,
                 style: const TextStyle(fontSize: 16),
