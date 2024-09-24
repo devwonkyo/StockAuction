@@ -69,7 +69,8 @@ final GoRouter router = GoRouter(
     ),
     GoRoute(
       path: '/post/detail',
-      builder: (context, state) => PostDetailScreen(),
+      builder: (context, state) => PostDetailScreen(
+        postUid: state.extra as String),
     ),
     GoRoute(
       path: '/post/list',
