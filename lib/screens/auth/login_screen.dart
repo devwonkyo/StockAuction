@@ -1,3 +1,4 @@
+import 'package:auction/utils/SharedPrefsUtil.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -6,53 +7,98 @@ import 'package:auction/providers/auth_provider.dart';
 class LoginScreen extends StatelessWidget {
   final _formKey = GlobalKey<FormState>();
 
+  void _showErrorDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('로그인 오류'),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              child: Text('확인'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _login(BuildContext context, AuthProvider authProvider) async {
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+      try {
+        await authProvider.login();
+        context.go('/main');
+      } catch (e) {
+        _showErrorDialog(context, '아이디 또는 비밀번호를 확인해주세요');
+      }
+    }
+  }
+
+  void _showLocalData(BuildContext context) async {
+    Map<String, dynamic> userData = await SharedPrefsUtil.getUserData();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('로컬 저장소 데이터'),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('사용자 데이터:'),
+                if (userData.isEmpty)
+                  Text('저장된 사용자 데이터가 없습니다.')
+                else
+                  ...userData.entries.map((entry) => Text('${entry.key}: ${entry.value}')),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('삭제'),
+              onPressed: () async {
+                await _clearLocalData(context);
+              },
+            ),
+            TextButton(
+              child: Text('확인'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _clearLocalData(BuildContext context) async {
+    await SharedPrefsUtil.clearAllData();
+    Navigator.of(context).pop(); // 현재 대화상자 닫기
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('로컬 데이터가 모두 삭제되었습니다.')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
 
-    void _showErrorDialog(String message) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('로그인 오류'),
-            content: Text(message),
-            actions: <Widget>[
-              TextButton(
-                child: Text('확인'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
-    }
-
-    void _login() async {
-      if (_formKey.currentState!.validate()) {
-        _formKey.currentState!.save();
-        try {
-          await authProvider.login();
-          context.go('/main');
-        } catch (e) {
-          _showErrorDialog('아이디 또는 비밀번호를 확인해주세요');
-        }
-      }
-    }
-
     return Scaffold(
       body: Stack(
         children: [
-          // 배경 이미지
           Image.asset(
             'lib/assets/image/loginimage.png',
             fit: BoxFit.cover,
             width: double.infinity,
             height: double.infinity,
           ),
-          // 기존 콘텐츠
           SingleChildScrollView(
             child: Padding(
               padding: EdgeInsets.fromLTRB(20, 200, 20, 0),
@@ -136,7 +182,7 @@ class LoginScreen extends StatelessWidget {
                         '로그인',
                         style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Colors.white),
                       ),
-                      onPressed: _login,
+                      onPressed: () => _login(context, authProvider),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color(0XFF949119),
                         minimumSize: Size(double.infinity, 50),
@@ -177,6 +223,16 @@ class LoginScreen extends StatelessWidget {
                           ),
                         ),
                       ],
+                    ),
+                    SizedBox(height: 200),
+                    GestureDetector(
+                      onTap: () => _showLocalData(context),
+                      child: Text(
+                        '로컬데이터베이스 정보확인',
+                        style: TextStyle(
+                          color: Colors.red,
+                        ),
+                      ),
                     ),
                   ],
                 ),
