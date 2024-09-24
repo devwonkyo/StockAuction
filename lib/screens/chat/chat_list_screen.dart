@@ -17,7 +17,10 @@ class ChatListScreen extends StatelessWidget {
 
     return Scaffold(
       body: StreamBuilder(
-        stream: FirebaseFirestore.instance.collection('chats').snapshots(),
+        stream: FirebaseFirestore.instance
+            .collection('chats')
+            .orderBy('lastActivityTime', descending: true)
+            .snapshots(),
         builder: (ctx, AsyncSnapshot<QuerySnapshot> chatSnapshot) {
           if (chatSnapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
@@ -29,7 +32,12 @@ class ChatListScreen extends StatelessWidget {
             itemCount: chatDocs.length,
             itemBuilder: (ctx, index) {
               return ListTile(
+                leading: CircleAvatar(
+                  // 유저 프로필 이미지 갖고 오기, 없으면 기본값
+                  backgroundImage: NetworkImage(chatDocs[index]['userProfileImage'] ?? 'https://via.placeholder.com/150'),
+                ),
                 title: Text(chatDocs[index]['username']),
+                subtitle: Text(chatDocs[index]['lastMessage'] ?? ''),
                 onTap: () {
                   Provider.of<ChatProvider>(context, listen: false).listenToMessages(chatDocs[index].id);
                   GoRouter.of(context).go('/chat/${chatDocs[index].id}');
