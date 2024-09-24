@@ -15,7 +15,7 @@ class CommentWidget extends StatelessWidget {
         children: [
           ClipOval(
             child:
-            commentModel.userProfileImage == null ?
+            commentModel.userProfileImage == "" ?
             Image.asset(
               "lib/assets/image/defaultUserProfile.png",
               width: 45,
