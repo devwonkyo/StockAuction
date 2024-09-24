@@ -9,6 +9,7 @@ import 'package:auction/providers/theme_provider.dart';
 import 'package:auction/providers/chat_provider.dart';
 import 'package:auction/providers/auth_provider.dart';
 import 'package:auction/providers/my_provider.dart';
+import 'package:auction/providers/user_provider.dart';
 // firebase 패키지
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -26,10 +27,12 @@ void main() async {
             create: (context) => PostProvider()), //포스트 Provider
         ChangeNotifierProvider(
             create: (context) => ChatProvider()), // 채팅 Provider
-        ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(
-          create: (context) => MyProvider(),
-        ),
+          create: (_) => AuthProvider()),
+        ChangeNotifierProvider(
+          create: (context) => MyProvider()),
+        ChangeNotifierProvider(
+          create: (_) => UserProvider()),
       ],
       child: MyApp(),
     ),

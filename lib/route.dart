@@ -20,6 +20,8 @@ import 'package:auction/screens/my/my_sold_screen.dart';
 import 'package:auction/screens/my/my_account_screen.dart';
 import 'package:auction/screens/my/my_bought_screen.dart';
 import 'package:auction/screens/my/my_infoupdate_screen.dart';
+// import other
+import 'package:auction/screens/other/other_profile_screen.dart';
 
 // 보통 아래와 같은 방식으로 이동 가능합니다
 // GoRouter.of(context).go('/example');
@@ -28,7 +30,7 @@ import 'package:auction/screens/my/my_infoupdate_screen.dart';
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 
 final GoRouter router = GoRouter(
-  initialLocation: '/main',
+  initialLocation: '/login',
   navigatorKey: rootNavigatorKey,
   routes: [
     GoRoute(
@@ -114,6 +116,13 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/bought',
       builder: (context, state) => MyBoughtScreen(),
+    ),
+    GoRoute(
+      path: '/other/profile/:userId',
+      builder: (BuildContext context, GoRouterState state) {
+        final userId = state.pathParameters['userId']!;
+        return OtherProfileScreen(userId: userId); // userId 전달
+      },
     ),
   ],
 );
