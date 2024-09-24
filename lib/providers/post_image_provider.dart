@@ -4,9 +4,8 @@ import 'package:image_picker/image_picker.dart';
 class PostImageProvider with ChangeNotifier{
   List<String> imageList;
 
-  PostImageProvider([
-    this.imageList = const []
-  ]);
+  PostImageProvider([List<String>? imageList])
+      : imageList = imageList ?? [];
 
   Future<void> pickImage() async {
     final ImagePicker picker = ImagePicker();
