@@ -24,9 +24,19 @@ class PostAddScreen extends StatefulWidget {
 }
 
 class _PostAddScreenState extends State<PostAddScreen> {
-  final _priceController = TextEditingController();
+  late TextEditingController _titleController;
+  late TextEditingController _priceController;
+  late TextEditingController _contentController;
   DateTime? _selectedDateTime;
   bool _isPriceFocused = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _priceController = TextEditingController();
+    _titleController = TextEditingController();
+    _contentController = TextEditingController();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -88,7 +98,7 @@ class _PostAddScreenState extends State<PostAddScreen> {
                                     },
                                     separatorBuilder:
                                         (BuildContext context, int index) =>
-                                            SizedBox(
+                                            const SizedBox(
                                               width: 5,
                                             )),
                               ),
@@ -98,8 +108,9 @@ class _PostAddScreenState extends State<PostAddScreen> {
                         const Text('제목',
                             style: TextStyle(fontWeight: FontWeight.bold)),
                         const SizedBox(height: 10),
-                        const TextField(
-                          decoration: InputDecoration(
+                        TextField(
+                          controller: _titleController,
+                          decoration: const InputDecoration(
                             hintText: '제목',
                             hintStyle: TextStyle(color: Colors.grey),
                             border: OutlineInputBorder(),
@@ -162,7 +173,7 @@ class _PostAddScreenState extends State<PostAddScreen> {
                                 ),
                               ),
                             ),
-                            SizedBox(
+                            const SizedBox(
                               width: 20,
                             ),
                             ElevatedButton(
@@ -172,13 +183,13 @@ class _PostAddScreenState extends State<PostAddScreen> {
                                 // 버튼 내부 패딩 설정
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8.0),
-                                    side: BorderSide(
+                                    side: const BorderSide(
                                       color: Colors.grey,
                                       width: 1.0,
                                     ) // 버튼 모서리 둥글게 만들기
                                     ),
                               ),
-                              child: Icon(Icons.access_time),
+                              child: const Icon(Icons.access_time),
                             ),
                           ],
                         ),
@@ -188,9 +199,10 @@ class _PostAddScreenState extends State<PostAddScreen> {
                               fontWeight: FontWeight.bold,
                             )),
                         const SizedBox(height: 5),
-                        const TextField(
+                        TextField(
                           maxLines: 5,
-                          decoration: InputDecoration(
+                          controller: _contentController,
+                          decoration: const InputDecoration(
                               hintText:
                                   '올릴 게시글 내용을 작성해 주세요. (판매 금지 물품은 게시가 제한될 수 있어요.)\n\n신뢰할 수 있는 거래를 위해 자세히 적어주세요.\n과학기술정보통신부, 한국 인터넷진흥원과 함께 해요.',
                               hintStyle: TextStyle(color: Colors.grey),
@@ -207,7 +219,7 @@ class _PostAddScreenState extends State<PostAddScreen> {
                 )),
                 Align(
                   alignment: Alignment.bottomCenter,
-                  child: Container(
+                  child: SizedBox(
                     width: double.infinity,
                     height: 70,
                     child: Padding(
@@ -215,13 +227,14 @@ class _PostAddScreenState extends State<PostAddScreen> {
                         child: ElevatedButton(
                             onPressed: () async {
                               final postModel = PostModel(
+                                  postUid: '',
                                   writeUser: UserModel(uid: "", email: "email", nickname: "nickname", phoneNumber: "phoneNumber"),
-                                  postTitle: "postTitle",
-                                  postContent: "postContent",
+                                  postTitle: _titleController.text,
+                                  postContent: _contentController.text,
                                   createTime: DateTime.now(),
                                   endTime: _selectedDateTime ?? DateTime.now(),
                                   postImageList: postImageProvider.imageList,
-                                  priceList: List.of(["300,000"]), postUid: ''
+                                  priceList: List.of([_priceController.text]),
                               );
                               final result = await postProvider.addPostItem(postModel);
 
@@ -236,7 +249,7 @@ class _PostAddScreenState extends State<PostAddScreen> {
                                 foregroundColor: Colors.white,
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10.0))),
-                            child: Text(
+                            child: const Text(
                               "작성 완료",
                               style: TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 14),
