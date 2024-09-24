@@ -1,10 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class UserModel {
   final String uid;
   final String email;
   final String nickname;
   final String phoneNumber;
-  String? pushToken;
-  String? userProfileImage;
+  final String? pushToken;
+  final String? userProfileImage;
+  final DateTime? birthDate; // Changed to nullable
 
   UserModel({
     required this.uid,
@@ -13,6 +16,7 @@ class UserModel {
     required this.phoneNumber,
     this.pushToken,
     this.userProfileImage,
+    this.birthDate, // Now optional
   });
 
   Map<String, dynamic> toMap() {
@@ -23,6 +27,7 @@ class UserModel {
       'phoneNumber': phoneNumber,
       'pushToken': pushToken,
       'userProfileImage': userProfileImage,
+      'birthDate': birthDate, // This will be null if not set
     };
   }
 
@@ -34,6 +39,7 @@ class UserModel {
       phoneNumber: map['phoneNumber'],
       pushToken: map['pushToken'],
       userProfileImage: map['userProfileImage'],
+      birthDate: map['birthDate'] != null ? (map['birthDate'] as Timestamp).toDate() : null,
     );
   }
 }

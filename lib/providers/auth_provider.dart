@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:auction/models/user_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthProvider extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -18,6 +19,10 @@ class AuthProvider extends ChangeNotifier {
   bool _stayLoggedIn = false;
   bool _resetEmailSent = false;
   bool _isEmailVerified = false;
+
+  AuthProvider() {
+    _loadStayLoggedIn();
+  }
 
   // Getters
   String get email => _email;
@@ -76,9 +81,22 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setStayLoggedIn(bool value) {
+  Future<void> setStayLoggedIn(bool value) async {
     _stayLoggedIn = value;
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('stayLoggedIn', value);
     notifyListeners();
+  }
+
+  Future<void> _loadStayLoggedIn() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    _stayLoggedIn = prefs.getBool('stayLoggedIn') ?? false;
+    notifyListeners();
+
+    // 자동 로그인을 원하지 않으면 로그아웃
+    if (!_stayLoggedIn && _auth.currentUser != null) {
+      await logout();
+    }
   }
 
   void setResetEmailSent(bool value) {
@@ -98,6 +116,10 @@ class AuthProvider extends ChangeNotifier {
   Future<void> signupWithEmailVerification() async {
     if (_password != _confirmPassword) {
       throw Exception('비밀번호가 일치하지 않습니다.');
+    }
+
+    if (_password.length < 6) {
+      throw Exception('비밀번호는 최소 6자리 이상이어야 합니다.');
     }
 
     bool isNicknameAvailable = await checkNickname();
@@ -133,6 +155,7 @@ class AuthProvider extends ChangeNotifier {
         phoneNumber: _phoneNumber,
         pushToken: null,
         userProfileImage: null,
+        birthDate: null, // 기본값으로 null 설정
       );
 
       await _firestore.collection('users').doc(user.uid).set(newUser.toMap());
@@ -142,10 +165,20 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> login() async {
-    await _auth.signInWithEmailAndPassword(
-      email: _email,
-      password: _password,
-    );
+    try {
+      await _auth.signInWithEmailAndPassword(
+        email: _email,
+        password: _password,
+      );
+      notifyListeners();
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  Future<void> logout() async {
+    await _auth.signOut();
+    notifyListeners();
   }
 
   Future<void> sendPasswordResetEmail() async {

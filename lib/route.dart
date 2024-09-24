@@ -22,7 +22,6 @@ import 'package:auction/screens/my/my_bought_screen.dart';
 import 'package:auction/screens/my/my_deliver_screen.dart';
 import 'package:auction/screens/my/my_infoupdate_screen.dart';
 
-
 // 보통 아래와 같은 방식으로 이동 가능합니다
 // GoRouter.of(context).go('/example');
 // GoRouter.of(context).push('/example');
@@ -73,10 +72,6 @@ final GoRouter router = GoRouter(
       },
     ),
     GoRoute(
-      path: '/settings',
-      builder: (context, state) => SettingsScreen(),
-    ),
-    GoRoute(
       path: '/PostListScreen',
       builder: (context, state) => PostListScreen(),
     ),
@@ -91,10 +86,6 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/infoupdate',
       builder: (context, state) => MyInfoUpdateScreen(),
-    ),
-    GoRoute(
-      path: '/deliver',
-      builder: (context, state) => MyDeliverScreen(),
     ),
     GoRoute(
       path: '/account',
