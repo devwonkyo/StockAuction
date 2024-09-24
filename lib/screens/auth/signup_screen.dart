@@ -15,14 +15,9 @@ class SignupScreen extends StatelessWidget {
         _formKey.currentState!.save();
         try {
           await authProvider.signupWithEmailVerification();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('인증 이메일을 보냈습니다. 이메일을 확인해주세요.')),
-          );
           _showEmailVerificationDialog(context, authProvider);
         } catch (e) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('회원가입에 실패했습니다: $e')),
-          );
+          _showErrorDialog(context, '회원가입에 실패했습니다: $e');
         }
       }
     }
@@ -69,9 +64,18 @@ class SignupScreen extends StatelessWidget {
                     ),
                     onPressed: authProvider.togglePasswordVisibility,
                   ),
+                  errorStyle: TextStyle(color: Colors.red),
                 ),
                 obscureText: !authProvider.isPasswordVisible,
-                validator: (value) => value!.isEmpty ? '비밀번호를 입력해주세요' : null,
+                validator: (value) {
+                  if (value!.isEmpty) {
+                    return '비밀번호를 입력해주세요';
+                  }
+                  if (value.length < 6) {
+                    return '비밀번호는 최소 6자리 이상이어야 합니다';
+                  }
+                  return null;
+                },
                 onChanged: authProvider.setPassword,
                 onSaved: (value) => authProvider.setPassword(value!),
               ),
@@ -89,6 +93,7 @@ class SignupScreen extends StatelessWidget {
                     onPressed: authProvider.toggleConfirmPasswordVisibility,
                   ),
                   errorText: !authProvider.passwordsMatch ? '비밀번호가 일치하지 않습니다' : null,
+                  errorStyle: TextStyle(color: Colors.red),
                 ),
                 obscureText: !authProvider.isConfirmPasswordVisible,
                 validator: (value) => value!.isEmpty ? '비밀번호를 다시 입력해주세요' : null,
@@ -145,20 +150,54 @@ class SignupScreen extends StatelessWidget {
                 if (isVerified) {
                   try {
                     await authProvider.createUserInFirestore();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('회원가입이 완료되었습니다.')),
-                    );
-                    context.go('/login');
+                    _showSuccessDialog(context, '회원가입이 완료되었습니다.');
                   } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('오류가 발생했습니다: $e')),
-                    );
+                    _showErrorDialog(context, '오류가 발생했습니다: $e');
                   }
                 } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('이메일이 아직 인증되지 않았습니다. 다시 시도해주세요.')),
-                  );
+                  _showErrorDialog(context, '이메일이 아직 인증되지 않았습니다. 다시 시도해주세요.');
                 }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showErrorDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('오류'),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              child: Text('확인'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showSuccessDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('성공'),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              child: Text('확인'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                context.go('/login');
               },
             ),
           ],
