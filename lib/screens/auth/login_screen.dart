@@ -10,6 +10,26 @@ class LoginScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
 
+    void _showErrorDialog(String message) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('로그인 오류'),
+            content: Text(message),
+            actions: <Widget>[
+              TextButton(
+                child: Text('확인'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
+
     void _login() async {
       if (_formKey.currentState!.validate()) {
         _formKey.currentState!.save();
@@ -17,7 +37,7 @@ class LoginScreen extends StatelessWidget {
           await authProvider.login();
           context.go('/main');
         } catch (e) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('아이디 또는 비밀번호를 확인해주세요')));
+          _showErrorDialog('아이디 또는 비밀번호를 확인해주세요');
         }
       }
     }
