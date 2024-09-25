@@ -16,18 +16,15 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController messageController = TextEditingController();
   String? otherUserNickname;
-  String? otherUserId;
-
+  
   @override
   void initState() {
     super.initState();
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-
-    final ids = widget.chatId.split('_');
-    otherUserId = ids[0] == authProvider.currentUser?.uid ? ids[1] : ids[0];
+    final otherUserId = widget.chatId.replaceFirst(authProvider.currentUser?.uid ?? '', '');
 
     // 상대방의 닉네임을 가져오기
-    authProvider.getUserNickname(otherUserId!).then((thisUserName) {
+    authProvider.getUserNickname(otherUserId).then((thisUserName) {
       setState(() {
         otherUserNickname = thisUserName ?? 'Unknown User';
       });
@@ -36,10 +33,17 @@ class _ChatScreenState extends State<ChatScreen> {
     Provider.of<ChatProvider>(context, listen: false).listenToMessages(widget.chatId);
   }
 
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   Provider.of<ChatProvider>(context, listen: false).listenToMessages(widget.chatId);
+  // }
+
   @override
   Widget build(BuildContext context) {
     final chatNotifier = Provider.of<ChatProvider>(context);
     final authProvider = Provider.of<AuthProvider>(context);
+    final otherUserId = widget.chatId.replaceFirst(authProvider.currentUser?.uid ?? '', '');
 
     return Scaffold(
       appBar: AppBar(
@@ -83,9 +87,8 @@ class _ChatScreenState extends State<ChatScreen> {
                         widget.chatId,
                         authProvider.currentUser?.uid ?? '',
                         messageController.text,
-                        otherUserId!,
-                        authProvider.currentUserModel?.nickname ?? 'Unknown User',
-                        authProvider.currentUserModel?.userProfileImage ?? '',
+                        otherUserId,
+                        otherUserNickname ?? 'Unknown User',
                       );
                       messageController.clear();
                     }
