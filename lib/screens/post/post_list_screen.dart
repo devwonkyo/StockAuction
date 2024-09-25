@@ -4,9 +4,7 @@ import 'package:auction/models/result_model.dart';
 import 'package:auction/providers/post_provider.dart';
 import 'package:auction/route.dart';
 import 'package:auction/screens/post/widgets/post_item_widget.dart';
-import 'package:auction/widgets/default_appbar.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -26,7 +24,7 @@ class _PostListScreenState extends State<PostListScreen> {
 
   Future<void> _fetchPosts() async {
     final postProvider = Provider.of<PostProvider>(context, listen: false);
-    result = await postProvider.getAllPostList();
+    await postProvider.getAllPostList();
   }
 
   @override
