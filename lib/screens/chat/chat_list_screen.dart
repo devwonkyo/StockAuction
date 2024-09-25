@@ -13,7 +13,7 @@ import 'package:auction/providers/auth_provider.dart';
 class ChatListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-     final authProvider = Provider.of<AuthProvider>(context);
+    final authProvider = Provider.of<AuthProvider>(context);
 
     return Scaffold(
       body: StreamBuilder(
@@ -26,18 +26,23 @@ class ChatListScreen extends StatelessWidget {
             return Center(child: CircularProgressIndicator());
           }
 
-          final chatDocs = chatSnapshot.data!.docs;
+          if (chatSnapshot.hasError) {
+            return Center(child: Text('Error: ${chatSnapshot.error}'));
+          }
+
+          final chatDocs = chatSnapshot.data?.docs ?? [];
 
           return ListView.builder(
             itemCount: chatDocs.length,
             itemBuilder: (ctx, index) {
               return ListTile(
                 leading: CircleAvatar(
-                  // 유저 프로필 이미지 갖고 오기, 없으면 기본값
-                  backgroundImage: NetworkImage(chatDocs[index]['userProfileImage'] ?? 'https://via.placeholder.com/150'),
+                  backgroundImage: NetworkImage(
+                    chatDocs[index]['userProfileImage'] ?? 'https://via.placeholder.com/150',
+                  ),
                 ),
                 title: Text(chatDocs[index]['username']),
-                subtitle: Text(chatDocs[index]['lastMessage'] ?? ''),
+                subtitle: Text(chatDocs[index]['lastMessage'] ?? 'No messages yet'),
                 onTap: () {
                   Provider.of<ChatProvider>(context, listen: false).listenToMessages(chatDocs[index].id);
                   GoRouter.of(context).go('/chat/${chatDocs[index].id}');
@@ -50,3 +55,4 @@ class ChatListScreen extends StatelessWidget {
     );
   }
 }
+

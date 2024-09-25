@@ -15,8 +15,8 @@ class _MyBoughtScreenState extends State<MyBoughtScreen> {
 
   // 임시로 사용할 구매 리스트 데이터
   final List<Map<String, dynamic>> boughtItems = [
-    {'title': '상품 1', 'price': 30000, 'image': 'lib/images/item1.png'},
-    {'title': '상품 2', 'price': 45000, 'image': 'lib/images/item2.png'},
+    {'title': '상품 1', 'price': 30000, 'image': 'lib/assets/image/item1.png'},
+    {'title': '상품 2', 'price': 45000, 'image': 'lib/assets/image/item2.png'},
   ];
 
   @override
