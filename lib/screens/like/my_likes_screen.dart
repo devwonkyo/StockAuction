@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class likePage extends StatelessWidget {
+class MyLikesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
