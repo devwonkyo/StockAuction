@@ -18,37 +18,32 @@ class ChatProvider extends ChangeNotifier {
         .snapshots()
         .listen((querySnapshot) {
       _messages = querySnapshot.docs.map((doc) => Message.fromDocument(doc)).toList();
-      fetchProfileImages(_messages.map((msg) => msg.userId).toList());
+      fetchProfileImages(_messages.map((msg) => msg.uId).toList());
       notifyListeners();
     });
   }
 
   // 메세지 보내기 함수, 마지막 채팅 시간, 내용 업데이트 기능 포함
-  Future<void> sendMessage(String chatId, String userId, String text, String otherUserId) async {
+  Future<void> sendMessage(String chatId, String userId, String text, String otherUserId, String username) async {
+    DocumentReference chatRef = _firestore.collection('chats').doc(chatId);
+    
     // 두 사용자 간의 채팅방이 이미 있는지 확인
-    QuerySnapshot existingChat = await _firestore
-        .collection('chats')
-        .where('participants', arrayContains: userId)
-        .get();
-
-    DocumentReference chatRef;
-    if (existingChat.docs.isNotEmpty) {
-      // 기존 채팅방이 있으면 해당 채팅방 사용
-      chatRef = existingChat.docs.first.reference;
-    } else {
-      // 기존 채팅방이 없으면 새로운 채팅방 생성
-      chatRef = _firestore.collection('chats').doc();
+    DocumentSnapshot chatSnapshot = await chatRef.get();
+    if (!chatSnapshot.exists) {
+      // 새 채팅방을 생성합니다.
       await chatRef.set({
         'participants': [userId, otherUserId],
         'lastActivityTime': Timestamp.now(),
         'lastMessage': '',
+        'username': username, // 채팅방에 사용자 이름 저장
       });
     }
 
     // 메시지 전송
     await chatRef.collection('messages').add({
       'text': text,
-      'userId': userId,
+      'uId': userId,
+      'username': username, // 메시지에 사용자 이름 저장
       'createdAt': Timestamp.now(),
     });
 
@@ -73,7 +68,7 @@ class ChatProvider extends ChangeNotifier {
     );
 
     for (var message in _messages) {
-      message.profileImageUrl = userProfiles[message.userId];
+      message.profileImageUrl = userProfiles[message.uId];
     }
     notifyListeners();
   }

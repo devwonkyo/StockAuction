@@ -1,23 +1,54 @@
+import 'package:provider/provider.dart';
 import 'package:auction/providers/chat_provider.dart';
 import 'package:auction/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
-class ChatScreen extends StatelessWidget {
+class ChatScreen extends StatefulWidget {
   final String chatId;
-  final TextEditingController messageController = TextEditingController();
 
   ChatScreen({required this.chatId});
+
+  @override
+  _ChatScreenState createState() => _ChatScreenState();
+}
+
+class _ChatScreenState extends State<ChatScreen> {
+  final TextEditingController messageController = TextEditingController();
+  String? otherUserNickname;
+  
+  @override
+  void initState() {
+    super.initState();
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final otherUserId = widget.chatId.replaceFirst(authProvider.currentUser?.uid ?? '', '');
+
+    // 상대방의 닉네임을 가져오기
+    authProvider.getUserNickname(otherUserId).then((thisUserName) {
+      setState(() {
+        otherUserNickname = thisUserName ?? 'Unknown User';
+      });
+    });
+
+    Provider.of<ChatProvider>(context, listen: false).listenToMessages(widget.chatId);
+  }
+
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   Provider.of<ChatProvider>(context, listen: false).listenToMessages(widget.chatId);
+  // }
 
   @override
   Widget build(BuildContext context) {
     final chatNotifier = Provider.of<ChatProvider>(context);
     final authProvider = Provider.of<AuthProvider>(context);
-
-    final otherUserId = chatId.replaceFirst(authProvider.currentUser?.uid ?? '', '');
+    final otherUserId = widget.chatId.replaceFirst(authProvider.currentUser?.uid ?? '', '');
 
     return Scaffold(
+      appBar: AppBar(
+        title: Text('$otherUserNickname님과의 채팅'),
+      ),
       body: Column(
         children: <Widget>[
           // 메시지 올라오는 공간
@@ -30,7 +61,7 @@ class ChatScreen extends StatelessWidget {
                 final message = chatNotifier.messages[index];
                 return MessageBubble(
                   message.text,
-                  message.userId == authProvider.currentUser?.uid,
+                  message.uId == authProvider.currentUser?.uid,
                   message.profileImageUrl,
                 );
               },
@@ -53,10 +84,11 @@ class ChatScreen extends StatelessWidget {
                   onPressed: () {
                     if (messageController.text.isNotEmpty) {
                       Provider.of<ChatProvider>(context, listen: false).sendMessage(
-                        chatId,
+                        widget.chatId,
                         authProvider.currentUser?.uid ?? '',
                         messageController.text,
-                        otherUserId, // 상대방 userId 전달
+                        otherUserId,
+                        otherUserNickname ?? 'Unknown User',
                       );
                       messageController.clear();
                     }
