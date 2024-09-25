@@ -18,53 +18,54 @@ class PostItemWidget extends StatelessWidget {
         print('postitemwidget postUid : ${postModel.postUid}');
         context.push("/post/detail", extra: postModel.postUid);
       },
-      child: Stack(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AspectRatio(
-                aspectRatio: 1,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8.0),
-                  child: CachedNetworkImage(
-                      imageUrl: postModel.postImageList[0],
-                      errorWidget: (context, url, error) => const Icon(Icons.error),
-                      fit: BoxFit.cover),
-                ),
-              ),
-              const SizedBox(height: 10,),
-              Text(postModel.postTitle,style: const TextStyle(fontSize: 16,
-                  fontWeight: FontWeight.bold),),
-              const SizedBox(height: 10),
-              Text(postModel.postContent,
-                style: TextStyle(fontSize: 14),
-                overflow: TextOverflow.ellipsis,
-                maxLines: 2,),
-              const SizedBox(height: 20,),
-              Text(postModel.priceList.last,style: const TextStyle(fontSize: 18 ,fontWeight: FontWeight.bold),),
-              const Text("현재 입찰가",style: TextStyle(fontSize: 12,color: AppsColor.darkGray),),
-              const SizedBox(height: 5,),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  const Icon(Icons.article_outlined,size: 14,),
-                  Text(postModel.commentList.length.toString(),style: const TextStyle(fontSize: 14),)
-                ],
-              )
-            ],
-          ),
-          Positioned(
-            bottom: 0,
-            right: 0,
-            child: GestureDetector(
-              onTap: () {
-                // 하트 버튼 클릭 시 처리
-                print("하트 클릭됨");
-              },
-              child: FavoriteButtonWidget(isFavorited: false,size: 24, onPressed: () {  },)
+          AspectRatio(
+            aspectRatio: 1,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8.0),
+              child: CachedNetworkImage(
+                  imageUrl: postModel.postImageList[0],
+                  errorWidget: (context, url, error) => const Icon(Icons.error),
+                  fit: BoxFit.cover),
             ),
           ),
+          const SizedBox(height: 10,),
+          Text(postModel.postTitle,style: const TextStyle(fontSize: 16,
+              fontWeight: FontWeight.bold),),
+          const SizedBox(height: 10),
+          Text(postModel.postContent,
+            style: TextStyle(fontSize: 14),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 2,),
+          const SizedBox(height: 20,),
+          Text(postModel.priceList.last,style: const TextStyle(fontSize: 18 ,fontWeight: FontWeight.bold),),
+          const Text("현재 입찰가",style: TextStyle(fontSize: 12,color: AppsColor.darkGray),),
+          const SizedBox(height: 5,),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              GestureDetector(
+                onTap: (){
+                  print('click comment');
+                },
+                child: Row(
+                  children: [
+                    FavoriteButtonWidget(isFavorited: false,size: 16,),
+                    Text(postModel.favoriteList.length.toString(),style: const TextStyle(fontSize: 16),)
+                  ],
+                ),
+              ),
+              const SizedBox(width: 5,),
+              Row(
+                children: [
+                  const Icon(Icons.article_outlined,size: 16,),
+                  Text(postModel.commentList.length.toString(),style: const TextStyle(fontSize: 16),)
+                ],
+              ),
+            ],
+          )
         ],
       ),
     );

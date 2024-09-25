@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 class PostProvider with ChangeNotifier {
   bool isLoading = false;
   List<PostModel> postList = [];
+  PostModel? postModel;
 
   Future<DataResult> getAllPostList() async {
     isLoading = true;
@@ -17,6 +18,9 @@ class PostProvider with ChangeNotifier {
     try {
       final querySnapshot =
       await FirebaseFirestore.instance.collection('posts').get();
+          await FirebaseFirestore.instance.collection('posts')
+              // .where('isDone', isEqualTo: true) // 안끝난 것만 필터
+              .orderBy('createTime',descending: true).get();
       for (QueryDocumentSnapshot snapshot in querySnapshot.docs) {
         PostModel postModel =
         PostModel.fromMap(snapshot.data() as Map<String, dynamic>);
@@ -139,6 +143,19 @@ class PostProvider with ChangeNotifier {
     } catch (e) {
       print("Error checking favorite status: $e");
       return false;
+    }
+  // Future<DataResult<PostModel>> getPostItem(String postUid) async {
+  Future<Result> getPostItem(String postUid) async {
+    isLoading = true;
+    try{
+      final ref = await FirebaseFirestore.instance.collection('posts').doc(postUid).get();
+      postModel = PostModel.fromMap(ref.data() as Map<String,dynamic>);
+      return Result.success("post 가져오기 성공");
+    }catch(e){
+      return Result.failure("데이터를 불러오지 못했습니다. 에러메시지 : $e");
+    }finally{
+      isLoading = false;
+      notifyListeners();
     }
   }
 }
