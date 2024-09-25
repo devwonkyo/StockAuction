@@ -42,6 +42,7 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        scrolledUnderElevation: 0,
         title: Text('Stock Auction'),
         actions: <Widget>[
           IconButton(
