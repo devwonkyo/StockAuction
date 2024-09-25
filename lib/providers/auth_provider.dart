@@ -264,4 +264,15 @@ class AuthProvider extends ChangeNotifier {
     setResetEmailSent(true);
     print("Password reset email sent");
   }
+
+  /////////////////////////////////////////////
+  // 채팅방 관련 함수
+  // 상대방 닉네임 갖고오는 함수
+  Future<String> getUserNickname(String uid) async {
+    DocumentSnapshot userSnapshot = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+    if (userSnapshot.exists) {
+      return userSnapshot['nickname'] ?? 'Unknown User';
+    }
+    return 'Unknown User';
+  }
 }

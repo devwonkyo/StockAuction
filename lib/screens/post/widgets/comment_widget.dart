@@ -17,7 +17,7 @@ class CommentWidget extends StatelessWidget {
           GestureDetector(
             onTap: (){
               //profile 화면이동
-              GoRouter.of(context).push('/other/profile/${commentModel.userId}');
+              GoRouter.of(context).push('/other/profile/${commentModel.uId}');
             },
             child: ClipOval(
               child:
@@ -41,7 +41,7 @@ class CommentWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                commentModel.userId,
+                commentModel.uId,
                 style: TextStyle(fontSize: 12),
               ),
               const SizedBox(height: 4),
