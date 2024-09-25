@@ -3,7 +3,7 @@ import 'package:auction/screens/post/post_list_screen.dart';
 import 'package:flutter/material.dart';
 import 'chat/chat_list_screen.dart';
 import 'home/home_screen.dart';
-import 'like/my_likes.dart';
+import 'like/my_likes_screen.dart';
 
 class MainScreen extends StatefulWidget {
   late int pageIndex;
@@ -28,7 +28,7 @@ class _MainScreenState extends State<MainScreen> {
     HomeScreen(),
     PostListScreen(),
     ChatListScreen(),
-    likePage(),
+    MyLikesScreen(),
   ];
 
   // 네비게이션 탭을 클릭했을 때의 동작 정의
