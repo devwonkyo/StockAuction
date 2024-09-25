@@ -33,19 +33,19 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   final List<CommentModel> testComments = [
     CommentModel(
       uId: "YJpJbJiNdGdXVKdScC8CqVrPIl13",
-      userProfileImage: "https://via.placeholder.com/150",
+      userProfileImage: "https://firebasestorage.googleapis.com/v0/b/auctionproject-cea5a.appspot.com/o/userProfileImages%2FdefaultImage%2Fdefault_blue.png?alt=media&token=8781d8c6-2943-4d9b-b3ea-6a70bc1617bc",
       comment: "첫 번째 테스트 댓글",
       commentTime: "2024-09-21 12:00:01",
     ),
     CommentModel(
       uId: "b07EFZ5ZT0Yb5sTWHMbFNyCurw02",
-      userProfileImage: "https://via.placeholder.com/150",
+      userProfileImage: "https://firebasestorage.googleapis.com/v0/b/auctionproject-cea5a.appspot.com/o/userProfileImages%2FdefaultImage%2Fdefault_mint.png?alt=media&token=38ec6d81-580a-4e4c-8d97-1ea0fec6e109",
       comment: "두 번째 테스트 댓글",
       commentTime: "2024-09-21 12:05:02",
     ),
     CommentModel(
       uId: "B0zTmmVGvNhS8L37ktocNK4FZfG3",
-      userProfileImage: "https://via.placeholder.com/150",
+      userProfileImage: "https://firebasestorage.googleapis.com/v0/b/auctionproject-cea5a.appspot.com/o/userProfileImages%2FdefaultImage%2Fdefault_red.png?alt=media&token=2c618b77-fda3-4a6f-ae00-2aa262beb1be",
       comment: "세 번째 테스트 댓글",
       commentTime: "2024-09-21 12:10:03",
     ),
