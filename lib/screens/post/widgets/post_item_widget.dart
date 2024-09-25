@@ -52,7 +52,7 @@ class PostItemWidget extends StatelessWidget {
                 },
                 child: Row(
                   children: [
-                    FavoriteButtonWidget(isFavorited: false,size: 16,),
+                    FavoriteButtonWidget(isFavorited: false,size: 16, onPressed: () {  },),
                     Text(postModel.favoriteList.length.toString(),style: const TextStyle(fontSize: 16),)
                   ],
                 ),
