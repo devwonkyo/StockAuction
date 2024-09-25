@@ -7,6 +7,7 @@ import 'package:auction/providers/post_provider.dart';
 import 'package:auction/route.dart';
 import 'package:auction/screens/post/widgets/post_Image_item.dart';
 import 'package:auction/screens/post/widgets/post_item_widget.dart';
+import 'package:auction/utils/SharedPrefsUtil.dart';
 import 'package:auction/utils/custom_alert_dialog.dart';
 import 'package:auction/widgets/default_appbar.dart';
 import 'package:flutter/material.dart';
@@ -29,6 +30,7 @@ class _PostAddScreenState extends State<PostAddScreen> {
   late TextEditingController _contentController;
   DateTime? _selectedDateTime;
   bool _isPriceFocused = false;
+  final _priceFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -36,6 +38,23 @@ class _PostAddScreenState extends State<PostAddScreen> {
     _priceController = TextEditingController();
     _titleController = TextEditingController();
     _contentController = TextEditingController();
+
+    _priceFocusNode.addListener(() {
+      setState(() {
+        _isPriceFocused = _priceFocusNode.hasFocus;
+      });
+    });
+  }
+
+  // 숫자를 가격 형식으로 변환하는 함수
+  String _formatPrice(String value) {
+    if (value.isEmpty) return '';
+    // 숫자만 남기기 위해 정규 표현식을 사용
+    final newValue = value.replaceAll(RegExp(r'[^0-9]'), '');
+
+    // 숫자를 3자리마다 콤마(,) 추가
+    final formatter = NumberFormat('#,###');
+    return formatter.format(int.parse(newValue));
   }
 
   @override
@@ -132,6 +151,14 @@ class _PostAddScreenState extends State<PostAddScreen> {
                           child: TextField(
                             controller: _priceController,
                             keyboardType: TextInputType.number,
+                            focusNode: _priceFocusNode,
+                            onChanged: (value){
+                              final formattedValue = _formatPrice(value);
+                              _priceController.value = TextEditingValue(
+                                text: formattedValue,
+                                selection: TextSelection.collapsed(offset: formattedValue.length),
+                              );
+                            },
                             decoration: InputDecoration(
                               hintText: '가격을 입력해주세요.',
                               hintStyle: TextStyle(color: Colors.grey),
@@ -226,15 +253,24 @@ class _PostAddScreenState extends State<PostAddScreen> {
                         padding: const EdgeInsets.all(10.0),
                         child: ElevatedButton(
                             onPressed: () async {
-                              final postModel = PostModel(
+                              //빈 항목 검증
+                              if(_titleController.text.isEmpty || _selectedDateTime == null || _contentController.text.isEmpty || postImageProvider.imageList.isEmpty ){
+                                showCustomAlertDialog(context: context, title: "알림", message: "모든 항목을 입력해주세요.");
+                                return;
+                              }
+
+                              final userData = await SharedPrefsUtil.getUserData();
+                              final loginUserData = UserModel.fromMap(userData);
+
+                              final postModel = PostModel(//Todo price 숫자 검증
                                   postUid: '',
-                                  writeUser: UserModel(uid: "", email: "email", nickname: "nickname", phoneNumber: "phoneNumber"),
+                                  writeUser: loginUserData,
                                   postTitle: _titleController.text,
                                   postContent: _contentController.text,
                                   createTime: DateTime.now(),
                                   endTime: _selectedDateTime ?? DateTime.now(),
                                   postImageList: postImageProvider.imageList,
-                                  priceList: List.of([_priceController.text]),
+                                  priceList: List.of(["${_priceController.text}원"]),
                               );
                               final result = await postProvider.addPostItem(postModel);
 
