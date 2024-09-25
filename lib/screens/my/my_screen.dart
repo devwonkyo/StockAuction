@@ -143,7 +143,7 @@ class _MyPageState extends State<MyScreen> {
                 radius: 50,
                 backgroundImage: _imageFile == null
                     ? (_profileImageUrl.isEmpty
-                        ? const AssetImage('lib/images/pic1.png') // 기본 이미지
+                        ? const AssetImage('lib/assets/image/pic1.png') // 기본 이미지
                         : NetworkImage(_profileImageUrl)) // 프로필 이미지
                     : FileImage(File(_imageFile!.path)) as ImageProvider,
                 child: _imageFile == null && _profileImageUrl.isEmpty
