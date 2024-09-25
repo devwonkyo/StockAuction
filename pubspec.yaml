@@ -57,6 +57,9 @@ dependencies:
   firebase_storage: ^12.3.1
   permission_handler: ^11.3.1
 
+  #splashscreen:
+  flutter_native_splash: ^2.4.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

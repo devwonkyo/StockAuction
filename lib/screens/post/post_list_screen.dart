@@ -34,7 +34,7 @@ class _PostListScreenState extends State<PostListScreen> {
     return Consumer<PostProvider>(
       builder: (context, postProvider, child) {
         return Scaffold(
-          appBar: const DefaultAppbar(title: "물품 리스트", existIcon: false,),
+          appBar: null,
           body: Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
             child: RefreshIndicator(
