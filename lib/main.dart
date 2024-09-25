@@ -2,7 +2,7 @@ import 'package:auction/config/theme.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:auction/route.dart';
-// provider 패키지 및 파일
+// provider 패키지 및 파일 뭐지용
 import 'package:provider/provider.dart';
 import 'package:auction/providers/post_provider.dart';
 import 'package:auction/providers/theme_provider.dart';
