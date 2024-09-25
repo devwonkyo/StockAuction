@@ -3,6 +3,7 @@ import 'package:auction/models/comment_model.dart';
 import 'package:auction/models/user_model.dart';
 import 'package:auction/providers/auction_timer_provider.dart';
 import 'package:auction/providers/post_provider.dart';
+import 'package:auction/providers/auth_provider.dart';
 import 'package:auction/route.dart';
 import 'package:auction/screens/post/bid_list_screen.dart';
 import 'package:auction/screens/post/widgets/comment_widget.dart';
@@ -26,12 +27,27 @@ class PostDetailScreen extends StatefulWidget {
 }
 
 class _PostDetailScreenState extends State<PostDetailScreen> {
+  bool isFavorited = false; // 좋아요 상태를 저장할 변수
   UserModel? loginedUser;
   bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
+    print("PostUid: ${widget.postUid}");
+    // 여기서 초기 좋아요 상태를 불러올 수 있습니다.
+    _loadFavoriteStatus();
+  }
+
+  void _loadFavoriteStatus() async {
+    final postProvider = Provider.of<PostProvider>(context, listen: false);
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final currentUser = await authProvider.getCurrentUser();
+    if (currentUser != null) {
+      // PostProvider에 해당 포스트의 좋아요 상태를 확인하는 메서드를 추가해야 합니다.
+      bool favorited = await postProvider.isPostFavorited(widget.postUid, currentUser.uid);
+      setState(() {
+        isFavorited = favorited;
     _loadData();
   }
 
@@ -53,6 +69,19 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     }
   }
 
+  void _toggleFavorite() async {
+    final postProvider = Provider.of<PostProvider>(context, listen: false);
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final currentUser = await authProvider.getCurrentUser();
+    if (currentUser != null) {
+      await postProvider.toggleFavorite(widget.postUid, currentUser);
+      setState(() {
+        isFavorited = !isFavorited;
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('로그인이 필요합니다.')),
+      );
   Future<void> _fetchPostItem(String postUid) async {
     final postProvider = Provider.of<PostProvider>(context, listen: false);
     final result = await postProvider.getPostItem(postUid);
@@ -408,7 +437,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     });
   }
 
-  //Comment Bottom Sheet
   void _showCommentBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -523,7 +551,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     );
   }
 
-  //삭제 수정 옵션 BottomSheet
   void _showOptionsBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -537,16 +564,16 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                 leading: Icon(Icons.edit),
                 title: Text('수정'),
                 onTap: () {
-                  Navigator.of(context).pop(); // 시트 닫기
-                  context.push("/post/modify"); // 수정 처리
+                  Navigator.of(context).pop();
+                  context.push("/post/modify");
                 },
               ),
               ListTile(
                 leading: Icon(Icons.delete),
                 title: Text('삭제'),
                 onTap: () {
-                  Navigator.of(context).pop(); // 시트 닫기
-                  _deleteItem(context); // 삭제 처리
+                  Navigator.of(context).pop();
+                  _deleteItem(context);
                   context.go("/post/list");
                 },
               ),
@@ -554,7 +581,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                 leading: Icon(Icons.cancel),
                 title: Text('취소'),
                 onTap: () {
-                  Navigator.of(context).pop(); // 시트 닫기
+                  Navigator.of(context).pop();
                 },
               ),
             ],
@@ -564,15 +591,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     );
   }
 
-  void _editItem(BuildContext context) {
-    // 수정 처리 로직
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('수정 기능이 호출되었습니다.')),
-    );
-  }
-
   void _deleteItem(BuildContext context) {
-    // 삭제 처리 로직
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('삭제 기능이 호출되었습니다.')),
     );
