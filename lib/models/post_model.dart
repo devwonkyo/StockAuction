@@ -12,7 +12,7 @@ class PostModel {
   DateTime endTime;
   List<String> postImageList;
   List<String> priceList;
-  List<UserModel> favoriteList;
+  List<Map<String, dynamic>> favoriteList;
   List<CommentModel> commentList;
   List<BidModel> bidList;
   bool isDone;
@@ -26,7 +26,7 @@ class PostModel {
     required this.endTime,
     required this.postImageList,
     required this.priceList,
-    List<UserModel>? favoriteList,
+    List<Map<String, dynamic>>? favoriteList,
     List<CommentModel>? commentList,
     List<BidModel>? bidList,
     bool? isDone,
@@ -40,14 +40,14 @@ class PostModel {
   Map<String, dynamic> toMap() {
     return {
       'postUid': postUid,
-      'writeUser': writeUser.toMap(), // Assuming UserModel has a toMap() method
+      'writeUser': writeUser.toMap(),
       'postTitle': postTitle,
       'postContent': postContent,
       'createTime': Timestamp.fromDate(createTime),
       'endTime': Timestamp.fromDate(endTime),
       'postImageList': postImageList,
       'priceList': priceList,
-      'favoriteList': favoriteList.map((user) => user.toMap()).toList(),
+      'favoriteList': favoriteList,
       'commentList': commentList.map((comment) => comment.toMap()).toList(),
       'bidList': bidList.map((bid) => bid.toMap()).toList(),
       'isDone': isDone,
@@ -59,17 +59,13 @@ class PostModel {
     return PostModel(
       postUid: map['postUid'] ?? '',
       writeUser: UserModel.fromMap(map['writeUser']),
-      // Assuming UserModel has a fromMap() method
       postTitle: map['postTitle'] ?? '',
       postContent: map['postContent'] ?? '',
       createTime: (map['createTime'] as Timestamp).toDate(),
       endTime: (map['endTime'] as Timestamp).toDate(),
       postImageList: List<String>.from(map['postImageList'] ?? []),
       priceList: List<String>.from(map['priceList'] ?? []),
-      favoriteList: (map['favoriteList'] as List<dynamic>?)
-          ?.map((userMap) => UserModel.fromMap(userMap))
-          .toList() ??
-          [],
+      favoriteList: List<Map<String, dynamic>>.from(map['favoriteList'] ?? []),
       commentList: (map['commentList'] as List<dynamic>?)
           ?.map((commentMap) => CommentModel.fromMap(commentMap))
           .toList() ??
@@ -80,5 +76,22 @@ class PostModel {
           [],
       isDone: map['isDone'] ?? false,
     );
+  }
+
+  // Helper method to check if a user has favorited this post
+  bool isFavoritedBy(String userId) {
+    return favoriteList.any((user) => user['uid'] == userId);
+  }
+
+  // Helper method to add a user to favorites
+  void addToFavorites(UserModel user) {
+    if (!isFavoritedBy(user.uid)) {
+      favoriteList.add(user.toMap());
+    }
+  }
+
+  // Helper method to remove a user from favorites
+  void removeFromFavorites(String userId) {
+    favoriteList.removeWhere((userMap) => userMap['uid'] == userId);
   }
 }
