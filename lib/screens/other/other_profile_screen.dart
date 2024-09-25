@@ -31,16 +31,18 @@ class _OtherProfileScreenState extends State<OtherProfileScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('${userProvider.user!.nickname}님의 프로필'),
+        title: Text(userProvider.user != null 
+          ? '${userProvider.user!.nickname}님의 프로필' 
+          : '프로필 로딩 중'),
       ),
       body: Center(
-        child: userProvider.user == null
-            ? userProvider.fetchStatus == FetchStatus.loading
-              ? CircularProgressIndicator()
-              : Text(
-                  "사용자를 찾을 수 없습니다.",
-                  style: TextStyle(fontSize: 16, color: Colors.red),
-                )
+        child: userProvider.fetchStatus == FetchStatus.loading
+          ? CircularProgressIndicator()
+          : userProvider.fetchStatus == FetchStatus.failed
+            ? Text(
+                "사용자를 찾을 수 없습니다.",
+                style: TextStyle(fontSize: 16, color: Colors.red),
+              )
             : Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -72,7 +74,8 @@ class _OtherProfileScreenState extends State<OtherProfileScreen> {
                       color: Colors.blue,
                       onPressed: () {
                         // 채팅 화면으로 이동
-                        GoRouter.of(context).push('/chat/${widget.uId}');
+                        final chatId = [widget.uId, authProvider.currentUser?.uid].join('_');
+                        GoRouter.of(context).push('/chat/$chatId');
                       },
                     ),
                 ],
