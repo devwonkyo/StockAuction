@@ -26,10 +26,7 @@ class ChatListScreen extends StatelessWidget {
             return Center(child: CircularProgressIndicator());
           }
 
-          final chatDocs = chatSnapshot.data!.docs.where((doc) {
-            final participants = List<String>.from(doc['participants']);
-            return participants.contains(authProvider.currentUser?.uid);
-          }).toList();
+          final chatDocs = chatSnapshot.data!.docs;
 
           return ListView.builder(
             itemCount: chatDocs.length,
@@ -38,23 +35,12 @@ class ChatListScreen extends StatelessWidget {
 
               return ListTile(
                 leading: CircleAvatar(
-                  backgroundImage: chatData['userProfileImages'] != null &&
-                                  chatData['userProfileImages'][authProvider.currentUser?.uid == chatData['participants'][0] 
-                                      ? chatData['participants'][1] 
-                                      : chatData['participants'][0]] != null &&
-                                  chatData['userProfileImages'][authProvider.currentUser?.uid == chatData['participants'][0] 
-                                      ? chatData['participants'][1] 
-                                      : chatData['participants'][0]].isNotEmpty
-                    ? NetworkImage(chatData['userProfileImages'][authProvider.currentUser?.uid == chatData['participants'][0] 
-                        ? chatData['participants'][1] 
-                        : chatData['participants'][0]])
+                  // 유저 프로필 이미지 갖고 오기, 없으면 기본값
+                  backgroundImage: chatData.containsKey('userProfileImage') && chatData['userProfileImage'] != null
+                    ? NetworkImage(chatData['userProfileImage'])
                     : AssetImage('lib/assets/image/defaultUserProfile.png') as ImageProvider,
                 ),
-                title: Text(
-                  chatData['usernames'][authProvider.currentUser?.uid == chatData['participants'][0] 
-                    ? chatData['participants'][1] 
-                    : chatData['participants'][0]] ?? 'Unknown User',
-                ),
+                title: Text(chatData['username'] ?? 'Unknown User'),
                 subtitle: Text(chatData['lastMessage'] ?? ''),
                 onTap: () {
                   Provider.of<ChatProvider>(context, listen: false).listenToMessages(chatDocs[index].id);
