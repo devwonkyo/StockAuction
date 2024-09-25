@@ -8,11 +8,6 @@ class FavoriteButtonWidget extends StatefulWidget {
   FavoriteButtonWidget({super.key, required this.isFavorited, this.size = 30.0, this.padding = 0});
 
   @override
-  State<FavoriteButtonWidget> createState() => _FavoriteButtonWidgetState();
-}
-
-class _FavoriteButtonWidgetState extends State<FavoriteButtonWidget> {
-  @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
