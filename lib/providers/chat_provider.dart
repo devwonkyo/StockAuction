@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:auction/models/message_model.dart';
-import 'package:provider/provider.dart';
 
 class ChatProvider extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -25,28 +24,18 @@ class ChatProvider extends ChangeNotifier {
   }
 
   // 메세지 보내기 함수, 마지막 채팅 시간, 내용 업데이트 기능 포함
-  Future<void> sendMessage(String chatId, String userId, String text, String otherUserId, String username, String currentUserProfileImage) async {
+  Future<void> sendMessage(String chatId, String userId, String text, String otherUserId, String username) async {
     DocumentReference chatRef = _firestore.collection('chats').doc(chatId);
     
     // 두 사용자 간의 채팅방이 이미 있는지 확인
     DocumentSnapshot chatSnapshot = await chatRef.get();
     if (!chatSnapshot.exists) {
-      String otherUserName = await _getOtherUserNickname(otherUserId);
-      String otherUserProfileImage = await _getOtherUserProfileImage(otherUserId);
-
       // 새 채팅방을 생성합니다.
       await chatRef.set({
         'participants': [userId, otherUserId],
         'lastActivityTime': Timestamp.now(),
         'lastMessage': '',
-        'usernames': {
-          userId: username,
-          otherUserId: otherUserName,
-        },
-        'userProfileImages': {
-            userId: currentUserProfileImage,
-            otherUserId: otherUserProfileImage,
-        }
+        'username': username, // 채팅방에 사용자 이름 저장
       });
     }
 
@@ -82,23 +71,5 @@ class ChatProvider extends ChangeNotifier {
       message.profileImageUrl = userProfiles[message.uId];
     }
     notifyListeners();
-  }
-
-  // 상대방 닉네임 가져오기
-  Future<String> _getOtherUserNickname(String uid) async {
-    DocumentSnapshot userSnapshot = await _firestore.collection('users').doc(uid).get();
-    if (userSnapshot.exists) {
-      return userSnapshot['nickname'] ?? 'Unknown User';
-    }
-    return 'Unknown User';
-  }
-
-  // 상대방 프로필 이미지 가져오기
-  Future<String> _getOtherUserProfileImage(String uid) async {
-      DocumentSnapshot userSnapshot = await _firestore.collection('users').doc(uid).get();
-      if (userSnapshot.exists) {
-          return userSnapshot['userProfileImage'] ?? '';
-      }
-      return '';
   }
 }
