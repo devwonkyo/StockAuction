@@ -6,9 +6,9 @@ import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 class OtherProfileScreen extends StatefulWidget {
-  final String userId;
+  final String uId;
 
-  const OtherProfileScreen({super.key, required this.userId});
+  const OtherProfileScreen({super.key, required this.uId});
 
   @override
   State<OtherProfileScreen> createState() => _OtherProfileScreenState();
@@ -18,19 +18,29 @@ class _OtherProfileScreenState extends State<OtherProfileScreen> {
   @override
   void initState() {
     super.initState();
-    Provider.of<UserProvider>(context, listen: false).fetchUser(widget.userId);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<UserProvider>(context, listen: false).fetchUser(widget.uId);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
     final userProvider = Provider.of<UserProvider>(context);
-    final isCurrentUser = authProvider.currentUser?.uid == widget.userId;
+    final isCurrentUser = authProvider.currentUser?.uid == widget.uId;
 
     return Scaffold(
+      appBar: AppBar(
+        title: Text('${userProvider.user!.nickname}님의 프로필'),
+      ),
       body: Center(
         child: userProvider.user == null
-            ? CircularProgressIndicator()
+            ? userProvider.fetchStatus == FetchStatus.loading
+              ? CircularProgressIndicator()
+              : Text(
+                  "사용자를 찾을 수 없습니다.",
+                  style: TextStyle(fontSize: 16, color: Colors.red),
+                )
             : Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -62,7 +72,7 @@ class _OtherProfileScreenState extends State<OtherProfileScreen> {
                       color: Colors.blue,
                       onPressed: () {
                         // 채팅 화면으로 이동
-                        GoRouter.of(context).push('/chat/${widget.userId}');
+                        GoRouter.of(context).push('/chat/${widget.uId}');
                       },
                     ),
                 ],

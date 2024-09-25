@@ -13,7 +13,7 @@ import 'package:auction/providers/auth_provider.dart';
 class ChatListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context);
+     final authProvider = Provider.of<AuthProvider>(context);
 
     return Scaffold(
       body: StreamBuilder(
@@ -26,26 +26,25 @@ class ChatListScreen extends StatelessWidget {
             return Center(child: CircularProgressIndicator());
           }
 
-          if (chatSnapshot.hasError) {
-            return Center(child: Text('Error: ${chatSnapshot.error}'));
-          }
-
-          final chatDocs = chatSnapshot.data?.docs ?? [];
+          final chatDocs = chatSnapshot.data!.docs;
 
           return ListView.builder(
             itemCount: chatDocs.length,
             itemBuilder: (ctx, index) {
+              final chatData = chatDocs[index].data() as Map<String, dynamic>;
+
               return ListTile(
                 leading: CircleAvatar(
-                  backgroundImage: NetworkImage(
-                    chatDocs[index]['userProfileImage'] ?? 'https://via.placeholder.com/150',
-                  ),
+                  // 유저 프로필 이미지 갖고 오기, 없으면 기본값
+                  backgroundImage: chatData.containsKey('userProfileImage') && chatData['userProfileImage'] != null
+                    ? NetworkImage(chatData['userProfileImage'])
+                    : AssetImage('lib/assets/image/defaultUserProfile.png') as ImageProvider,
                 ),
-                title: Text(chatDocs[index]['username']),
-                subtitle: Text(chatDocs[index]['lastMessage'] ?? 'No messages yet'),
+                title: Text(chatData['username'] ?? 'Unknown User'),
+                subtitle: Text(chatData['lastMessage'] ?? ''),
                 onTap: () {
                   Provider.of<ChatProvider>(context, listen: false).listenToMessages(chatDocs[index].id);
-                  GoRouter.of(context).go('/chat/${chatDocs[index].id}');
+                  GoRouter.of(context).push('/chat/${chatDocs[index].id}');
                 },
               );
             },
@@ -55,4 +54,3 @@ class ChatListScreen extends StatelessWidget {
     );
   }
 }
-

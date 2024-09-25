@@ -118,10 +118,10 @@ final GoRouter router = GoRouter(
       builder: (context, state) => MyBoughtScreen(),
     ),
     GoRoute(
-      path: '/other/profile/:userId',
+      path: '/other/profile/:uId',
       builder: (BuildContext context, GoRouterState state) {
-        final userId = state.pathParameters['userId']!;
-        return OtherProfileScreen(userId: userId); // userId 전달
+        final uId = state.pathParameters['uId']!;
+        return OtherProfileScreen(uId: uId); // userId 전달
       },
     ),
   ],
