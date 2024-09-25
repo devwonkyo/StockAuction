@@ -11,22 +11,21 @@ class PostProvider with ChangeNotifier {
   List<PostModel> postList = [];
   PostModel? postModel;
 
-  Future<DataResult> getAllPostList() async {
+  Future<DataResult<List<PostModel>>> getAllPostList() async {
     isLoading = true;
+    notifyListeners();
 
-    postList.clear();
     try {
-      final querySnapshot =
-      await FirebaseFirestore.instance.collection('posts').get();
-          await FirebaseFirestore.instance.collection('posts')
-              // .where('isDone', isEqualTo: true) // 안끝난 것만 필터
-              .orderBy('createTime',descending: true).get();
-      for (QueryDocumentSnapshot snapshot in querySnapshot.docs) {
-        PostModel postModel =
-        PostModel.fromMap(snapshot.data() as Map<String, dynamic>);
-        postList.add(postModel);
-      }
-      return DataResult<List<PostModel>>.success(postList, "success");
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('posts')
+          .orderBy('createTime', descending: true)
+          .get();
+
+      postList = querySnapshot.docs
+          .map((snapshot) => PostModel.fromMap(snapshot.data() as Map<String, dynamic>))
+          .toList();
+
+      return DataResult.success(postList, "success");
     } catch (e) {
       return DataResult.failure("Error fetching post list: $e");
     } finally {
@@ -37,11 +36,10 @@ class PostProvider with ChangeNotifier {
 
   Future<List<String>> _uploadImages(List<String> postImageList) async {
     FirebaseStorage storage = FirebaseStorage.instance;
-
     List<String> downloadPostImageList = [];
+
     for (String imagePath in postImageList) {
       String fileName = DateTime.now().toIso8601String();
-
       Reference ref = storage.ref().child('post/$fileName');
 
       try {
@@ -59,29 +57,24 @@ class PostProvider with ChangeNotifier {
 
   Future<Result> addPostItem(PostModel post) async {
     isLoading = true;
-
-    final downloadPostImageList = await _uploadImages(post.postImageList);
-    for (String a in post.postImageList) {
-      print("이전 postImage url: $a");
-    }
-    post.postImageList = downloadPostImageList;
-
-    for (String a in post.postImageList) {
-      print("이후 Dwonload postImage url: $a");
-    }
+    notifyListeners();
 
     try {
+      final downloadPostImageList = await _uploadImages(post.postImageList);
+      post.postImageList = downloadPostImageList;
+
       post.postUid = FirebaseFirestore.instance.collection("posts").doc().id;
-      FirebaseFirestore.instance
+      await FirebaseFirestore.instance
           .collection("posts")
           .doc(post.postUid)
           .set(post.toMap());
+
       return Result.success("게시물을 등록했습니다.");
     } catch (e) {
       return Result.failure("게시물 등록에 실패했습니다. 오류메시지 : $e");
     } finally {
-      notifyListeners();
       isLoading = false;
+      notifyListeners();
     }
   }
 
@@ -131,7 +124,6 @@ class PostProvider with ChangeNotifier {
     });
   }
 
-
   Future<bool> isPostFavorited(String postUid, String userId) async {
     try {
       final postDoc = await FirebaseFirestore.instance.collection('posts').doc(postUid).get();
@@ -144,16 +136,19 @@ class PostProvider with ChangeNotifier {
       print("Error checking favorite status: $e");
       return false;
     }
-  // Future<DataResult<PostModel>> getPostItem(String postUid) async {
+  }
+
   Future<Result> getPostItem(String postUid) async {
     isLoading = true;
-    try{
+    notifyListeners();
+
+    try {
       final ref = await FirebaseFirestore.instance.collection('posts').doc(postUid).get();
-      postModel = PostModel.fromMap(ref.data() as Map<String,dynamic>);
+      postModel = PostModel.fromMap(ref.data() as Map<String, dynamic>);
       return Result.success("post 가져오기 성공");
-    }catch(e){
+    } catch (e) {
       return Result.failure("데이터를 불러오지 못했습니다. 에러메시지 : $e");
-    }finally{
+    } finally {
       isLoading = false;
       notifyListeners();
     }

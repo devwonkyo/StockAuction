@@ -5,7 +5,14 @@ class FavoriteButtonWidget extends StatefulWidget {
   double size;
   double padding;
 
-  FavoriteButtonWidget({super.key, required this.isFavorited, this.size = 30.0, this.padding = 0});
+  FavoriteButtonWidget(
+      {super.key, required this.isFavorited, this.size = 30.0, this.padding = 0, required void Function() onPressed});
+
+  @override
+  State createState() => _FavoriteButtonWidgetState();
+}
+class _FavoriteButtonWidgetState extends State<FavoriteButtonWidget> {
+
 
   @override
   Widget build(BuildContext context) {
