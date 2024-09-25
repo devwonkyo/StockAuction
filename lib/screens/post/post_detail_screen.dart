@@ -29,6 +29,28 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     print("${widget.postUid}");
   }
 
+  // 테스트용 댓글 리스트
+  final List<CommentModel> testComments = [
+    CommentModel(
+      uId: "YJpJbJiNdGdXVKdScC8CqVrPIl13",
+      userProfileImage: "https://via.placeholder.com/150",
+      comment: "첫 번째 테스트 댓글",
+      commentTime: "2024-09-21 12:00:01",
+    ),
+    CommentModel(
+      uId: "b07EFZ5ZT0Yb5sTWHMbFNyCurw02",
+      userProfileImage: "https://via.placeholder.com/150",
+      comment: "두 번째 테스트 댓글",
+      commentTime: "2024-09-21 12:05:02",
+    ),
+    CommentModel(
+      uId: "B0zTmmVGvNhS8L37ktocNK4FZfG3",
+      userProfileImage: "https://via.placeholder.com/150",
+      comment: "세 번째 테스트 댓글",
+      commentTime: "2024-09-21 12:10:03",
+    ),
+  ];
+
   @override
   Widget build(BuildContext context) {
     final List<String> _images = [
@@ -146,40 +168,64 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                               SizedBox(
                                 height: 30.0,
                               ),
+                              //////////////////////////////////////////////////
+                              // 테스트용 코드
                               Row(
-                                mainAxisAlignment: MainAxisAlignment
-                                    .spaceBetween,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    '댓글 3', //Todo 댓글 수 추가
+                                    '댓글 ${testComments.length}', // 댓글 수 표시
                                     style: TextStyle(fontSize: 14),
                                   ),
-                                  GestureDetector(
-                                    onTap: () {
-                                      _showCommentBottomSheet(context);
-                                    },
-                                    child: Text(
-                                      '댓글 쓰기',
-                                      style: TextStyle(fontSize: 14),
-                                    ),
-                                  )
                                 ],
                               ),
-                              SizedBox(
-                                height: 20,
-                              ),
+                              SizedBox(height: 20),
                               ListView.builder(
                                 shrinkWrap: true,
                                 physics: NeverScrollableScrollPhysics(),
-                                itemCount: 3,
+                                itemCount: testComments.length,
                                 itemBuilder: (context, index) {
                                   return CommentWidget(
-                                      commentModel: CommentModel(
-                                          userId: "userId",
-                                          comment: "comment",
-                                          commentTime: "time"));
+                                    commentModel: testComments[index],
+                                  );
                                 },
-                              )
+                              ),
+                              //////////////////////////////////////////////////
+                              // 원본 코드
+                              // Row(
+                              //   mainAxisAlignment: MainAxisAlignment
+                              //       .spaceBetween,
+                              //   children: [
+                              //     Text(
+                              //       '댓글 3', //Todo 댓글 수 추가
+                              //       style: TextStyle(fontSize: 14),
+                              //     ),
+                              //     GestureDetector(
+                              //       onTap: () {
+                              //         _showCommentBottomSheet(context);
+                              //       },
+                              //       child: Text(
+                              //         '댓글 쓰기',
+                              //         style: TextStyle(fontSize: 14),
+                              //       ),
+                              //     )
+                              //   ],
+                              // ),
+                              // SizedBox(
+                              //   height: 20,
+                              // ),
+                              // ListView.builder(
+                              //   shrinkWrap: true,
+                              //   physics: NeverScrollableScrollPhysics(),
+                              //   itemCount: 3,
+                              //   itemBuilder: (context, index) {
+                              //     return CommentWidget(
+                              //         commentModel: CommentModel(
+                              //             uId: "userId",
+                              //             comment: "comment",
+                              //             commentTime: "time"));
+                              //   },
+                              // )
                             ],
                           ),
                         ),
@@ -334,7 +380,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                               itemBuilder: (context, index) {
                                 return CommentWidget(
                                     commentModel: CommentModel(
-                                        userId: "userId",
+                                        uId: "userId",
                                         comment: "comment",
                                         commentTime: "time"));
                               },
