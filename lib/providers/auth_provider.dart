@@ -51,6 +51,18 @@ class AuthProvider extends ChangeNotifier {
     print("Auth state initialized");
   }
 
+  Future<UserModel?> getCurrentUser() async {
+    User? firebaseUser = _auth.currentUser;
+    if (firebaseUser != null) {
+      DocumentSnapshot userDoc = await _firestore.collection('users').doc(firebaseUser.uid).get();
+      if (userDoc.exists) {
+        _currentUserModel = UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
+        return _currentUserModel;
+      }
+    }
+    return null;
+  }
+
   // Setters
   void setEmail(String value) {
     _email = value;
