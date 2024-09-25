@@ -31,16 +31,20 @@ class ChatListScreen extends StatelessWidget {
           return ListView.builder(
             itemCount: chatDocs.length,
             itemBuilder: (ctx, index) {
+              final chatData = chatDocs[index].data() as Map<String, dynamic>;
+
               return ListTile(
                 leading: CircleAvatar(
                   // 유저 프로필 이미지 갖고 오기, 없으면 기본값
-                  backgroundImage: NetworkImage(chatDocs[index]['userProfileImage'] ?? 'https://via.placeholder.com/150'),
+                  backgroundImage: chatData.containsKey('userProfileImage') && chatData['userProfileImage'] != null
+                    ? NetworkImage(chatData['userProfileImage'])
+                    : AssetImage('lib/assets/image/defaultUserProfile.png') as ImageProvider,
                 ),
-                title: Text(chatDocs[index]['username']),
-                subtitle: Text(chatDocs[index]['lastMessage'] ?? ''),
+                title: Text(chatData['username'] ?? 'Unknown User'),
+                subtitle: Text(chatData['lastMessage'] ?? ''),
                 onTap: () {
                   Provider.of<ChatProvider>(context, listen: false).listenToMessages(chatDocs[index].id);
-                  GoRouter.of(context).go('/chat/${chatDocs[index].id}');
+                  GoRouter.of(context).push('/chat/${chatDocs[index].id}');
                 },
               );
             },
