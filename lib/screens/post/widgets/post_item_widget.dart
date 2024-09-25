@@ -62,7 +62,7 @@ class PostItemWidget extends StatelessWidget {
                 // 하트 버튼 클릭 시 처리
                 print("하트 클릭됨");
               },
-              child: FavoriteButtonWidget(isFavorited: false,size: 24,)
+              child: FavoriteButtonWidget(isFavorited: false,size: 24, onPressed: () {  },)
             ),
           ),
         ],

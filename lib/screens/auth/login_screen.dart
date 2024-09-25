@@ -184,7 +184,7 @@ class LoginScreen extends StatelessWidget {
                       ),
                       onPressed: () => _login(context, authProvider),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0XFF949119),
+                        backgroundColor: Color(0XFF5C4439),
                         minimumSize: Size(double.infinity, 50),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15.0),
