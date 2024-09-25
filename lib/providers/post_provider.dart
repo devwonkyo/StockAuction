@@ -12,9 +12,6 @@ class PostProvider with ChangeNotifier {
   PostModel? postModel;
 
   Future<DataResult<List<PostModel>>> getAllPostList() async {
-    isLoading = true;
-    notifyListeners();
-
     try {
       final querySnapshot = await FirebaseFirestore.instance
           .collection('posts')
@@ -28,9 +25,6 @@ class PostProvider with ChangeNotifier {
       return DataResult.success(postList, "success");
     } catch (e) {
       return DataResult.failure("Error fetching post list: $e");
-    } finally {
-      isLoading = false;
-      notifyListeners();
     }
   }
 

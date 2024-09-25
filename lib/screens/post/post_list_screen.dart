@@ -10,16 +10,27 @@ import 'package:provider/provider.dart';
 
 class PostListScreen extends StatefulWidget {
   @override
-  State<PostListScreen> createState() => _PostListScreenState();
+  _PostListScreenState createState() => _PostListScreenState();
 }
 
-
 class _PostListScreenState extends State<PostListScreen> {
-  late final result;
   @override
   void initState() {
     super.initState();
-    _fetchPosts();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadPosts();
+    });
+  }
+
+  Future<void> _loadPosts() async {
+    final postProvider = Provider.of<PostProvider>(context, listen: false);
+    postProvider.isLoading = true;
+    postProvider.notifyListeners();
+
+    await postProvider.getAllPostList();
+
+    postProvider.isLoading = false;
+    postProvider.notifyListeners();
   }
 
   Future<void> _fetchPosts() async {
@@ -31,6 +42,9 @@ class _PostListScreenState extends State<PostListScreen> {
   Widget build(BuildContext context) {
     return Consumer<PostProvider>(
       builder: (context, postProvider, child) {
+        if (postProvider.isLoading) {
+          return Center(child: CircularProgressIndicator());
+        }
         return Scaffold(
           appBar: null,
           body: Padding(
