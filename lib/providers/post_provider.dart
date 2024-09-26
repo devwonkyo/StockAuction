@@ -8,23 +8,33 @@ import 'package:flutter/material.dart';
 
 class PostProvider with ChangeNotifier {
   bool isLoading = false;
+  bool hasError = false; // 오류 상태 추가
   List<PostModel> postList = [];
   PostModel? postModel;
 
   Future<DataResult<List<PostModel>>> getAllPostList() async {
     try {
+      isLoading = true;
+      hasError = false; // 요청 시작 시 오류 상태 초기화
+      notifyListeners();
+
       final querySnapshot = await FirebaseFirestore.instance
           .collection('posts')
           .orderBy('createTime', descending: true)
           .get();
 
       postList = querySnapshot.docs
-          .map((snapshot) => PostModel.fromMap(snapshot.data() as Map<String, dynamic>))
+          .map((snapshot) =>
+              PostModel.fromMap(snapshot.data() as Map<String, dynamic>))
           .toList();
 
       return DataResult.success(postList, "success");
     } catch (e) {
+      hasError = true; // 오류 발생 시 오류 상태 설정
       return DataResult.failure("Error fetching post list: $e");
+    } finally {
+      isLoading = false;
+      notifyListeners();
     }
   }
 
@@ -51,6 +61,7 @@ class PostProvider with ChangeNotifier {
 
   Future<Result> addPostItem(PostModel post) async {
     isLoading = true;
+    hasError = false; // 초기화
     notifyListeners();
 
     try {
@@ -65,6 +76,7 @@ class PostProvider with ChangeNotifier {
 
       return Result.success("게시물을 등록했습니다.");
     } catch (e) {
+      hasError = true; // 오류 발생 시 오류 상태 설정
       return Result.failure("게시물 등록에 실패했습니다. 오류메시지 : $e");
     } finally {
       isLoading = false;
@@ -74,7 +86,8 @@ class PostProvider with ChangeNotifier {
 
   Future<void> toggleFavorite(String postUid, UserModel currentUser) async {
     try {
-      final postDoc = FirebaseFirestore.instance.collection('posts').doc(postUid);
+      final postDoc =
+          FirebaseFirestore.instance.collection('posts').doc(postUid);
 
       await FirebaseFirestore.instance.runTransaction((transaction) async {
         final postSnapshot = await transaction.get(postDoc);
@@ -86,7 +99,8 @@ class PostProvider with ChangeNotifier {
         final isCurrentlyFavorited = post.isFavoritedBy(currentUser.uid);
 
         if (isCurrentlyFavorited) {
-          post.favoriteList.removeWhere((user) => user['uid'] == currentUser.uid);
+          post.favoriteList
+              .removeWhere((user) => user['uid'] == currentUser.uid);
         } else {
           post.favoriteList.add({
             'uid': currentUser.uid,
@@ -111,16 +125,20 @@ class PostProvider with ChangeNotifier {
         .where('favoriteList', arrayContains: {'uid': userId})
         .snapshots()
         .map((snapshot) {
-      print("Received ${snapshot.docs.length} favorite posts");
-      return snapshot.docs
-          .map((doc) => PostModel.fromMap(doc.data() as Map<String, dynamic>))
-          .toList();
-    });
+          print("Received ${snapshot.docs.length} favorite posts");
+          return snapshot.docs
+              .map((doc) =>
+                  PostModel.fromMap(doc.data() as Map<String, dynamic>))
+              .toList();
+        });
   }
 
   Future<bool> isPostFavorited(String postUid, String userId) async {
     try {
-      final postDoc = await FirebaseFirestore.instance.collection('posts').doc(postUid).get();
+      final postDoc = await FirebaseFirestore.instance
+          .collection('posts')
+          .doc(postUid)
+          .get();
       if (postDoc.exists) {
         final post = PostModel.fromMap(postDoc.data()!);
         return post.isFavoritedBy(userId);
@@ -134,13 +152,18 @@ class PostProvider with ChangeNotifier {
 
   Future<Result> getPostItem(String postUid) async {
     isLoading = true;
+    hasError = false; // 초기화
     notifyListeners();
 
     try {
-      final ref = await FirebaseFirestore.instance.collection('posts').doc(postUid).get();
+      final ref = await FirebaseFirestore.instance
+          .collection('posts')
+          .doc(postUid)
+          .get();
       postModel = PostModel.fromMap(ref.data() as Map<String, dynamic>);
       return Result.success("post 가져오기 성공");
     } catch (e) {
+      hasError = true; // 오류 발생 시 오류 상태 설정
       return Result.failure("데이터를 불러오지 못했습니다. 에러메시지 : $e");
     } finally {
       isLoading = false;
