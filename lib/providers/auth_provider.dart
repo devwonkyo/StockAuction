@@ -241,7 +241,8 @@ class AuthProvider extends ChangeNotifier {
       if (userDoc.exists) {
         UserModel user = UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
         await saveUserToLocalStorage(user);
-        await setStayLoggedIn(true);  // 로그인 시 stayLoggedIn을 true로 설정
+        await setStayLoggedIn(true);
+        _currentUserModel = user;  // 현재 사용자 모델 업데이트
         print("Login successful, user saved locally and stay logged in set to true");
       } else {
         print("User document not found in Firestore");
@@ -286,5 +287,17 @@ class AuthProvider extends ChangeNotifier {
       return userSnapshot['nickname'] ?? 'Unknown User';
     }
     return 'Unknown User';
+  }
+
+  UserModel _convertToUserModel(User firebaseUser) {
+    return UserModel(
+      uid: firebaseUser.uid,
+      email: firebaseUser.email ?? '',
+      nickname: firebaseUser.displayName ?? '',
+      phoneNumber: '',
+      pushToken: null,
+      userProfileImage: firebaseUser.photoURL,
+      birthDate: null,
+    );
   }
 }
