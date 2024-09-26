@@ -40,8 +40,10 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final chatNotifier = Provider.of<ChatProvider>(context);
+    final chatProvider = Provider.of<ChatProvider>(context);
     final authProvider = Provider.of<AuthProvider>(context);
+
+    chatProvider.setCurrentChatInfo(widget.chatId, authProvider.currentUser?.uid ?? '', authProvider.currentUserModel?.nickname ?? 'Unknown User');
 
     return Scaffold(
       appBar: AppBar(
@@ -52,15 +54,15 @@ class _ChatScreenState extends State<ChatScreen> {
           // 메시지 올라오는 공간
           Expanded(
             child: ListView.builder(
-              // reverse 실행 UI 확인 후 수정해야될수도
               reverse: true,
-              itemCount: chatNotifier.messages.length,
+              itemCount: chatProvider.messages.length,
               itemBuilder: (ctx, index) {
-                final message = chatNotifier.messages[index];
+                final message = chatProvider.messages[index];
                 return MessageBubble(
                   message.text,
                   message.uId == authProvider.currentUser?.uid,
                   message.profileImageUrl,
+                  imageUrl: message.imageUrl,
                 );
               },
             ),
