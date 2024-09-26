@@ -9,6 +9,7 @@ import 'package:auction/screens/post/widgets/post_Image_item.dart';
 import 'package:auction/screens/post/widgets/post_item_widget.dart';
 import 'package:auction/utils/SharedPrefsUtil.dart';
 import 'package:auction/utils/custom_alert_dialog.dart';
+import 'package:auction/utils/string_util.dart';
 import 'package:auction/widgets/default_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -46,16 +47,7 @@ class _PostAddScreenState extends State<PostAddScreen> {
     });
   }
 
-  // 숫자를 가격 형식으로 변환하는 함수
-  String _formatPrice(String value) {
-    if (value.isEmpty) return '';
-    // 숫자만 남기기 위해 정규 표현식을 사용
-    final newValue = value.replaceAll(RegExp(r'[^0-9]'), '');
 
-    // 숫자를 3자리마다 콤마(,) 추가
-    final formatter = NumberFormat('#,###');
-    return formatter.format(int.parse(newValue));
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -153,7 +145,7 @@ class _PostAddScreenState extends State<PostAddScreen> {
                             keyboardType: TextInputType.number,
                             focusNode: _priceFocusNode,
                             onChanged: (value){
-                              final formattedValue = _formatPrice(value);
+                              final formattedValue = formatPrice(value);
                               _priceController.value = TextEditingValue(
                                 text: formattedValue,
                                 selection: TextSelection.collapsed(offset: formattedValue.length),
