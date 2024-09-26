@@ -6,6 +6,7 @@ class Message {
   final String uId;
   final Timestamp createdAt;
   String? profileImageUrl;
+  String? imageUrl;
 
   Message({
     required this.id,
@@ -13,14 +14,29 @@ class Message {
     required this.uId,
     required this.createdAt,
     this.profileImageUrl,
+    this.imageUrl,
   });
 
   factory Message.fromDocument(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>?;
+
     return Message(
       id: doc.id,
-      text: doc['text'],
-      uId: doc['uId'],
-      createdAt: doc['createdAt'],
+      text: data?['text'] ?? '',
+      uId: data?['uId'] ?? '',
+      createdAt: data?['createdAt'] ?? Timestamp.now(),
+      profileImageUrl: data?['profileImageUrl'],
+      imageUrl: data?['imageUrl'],
     );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'text': text,
+      'uId': uId,
+      'createdAt': createdAt,
+      'profileImageUrl': profileImageUrl,
+      'imageUrl': imageUrl,
+    };
   }
 }
