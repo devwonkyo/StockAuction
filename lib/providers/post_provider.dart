@@ -15,9 +15,11 @@ class PostProvider with ChangeNotifier {
   List<String> _likedPostTitles = [];
   Stream<DocumentSnapshot>? _postStream; //포스트 스트림으로 받아와서 실시간 업데이트
   String? _priceDifferenceAndPercentage;
+  int? _postAuctionEndTime;
 
 
   String? get priceDifferenceAndPercentage => _priceDifferenceAndPercentage;
+  int? get postAuctionEndTime => _postAuctionEndTime;
   List<String> get likedPostTitles => _likedPostTitles;
 
   PostProvider() {
@@ -86,14 +88,14 @@ class PostProvider with ChangeNotifier {
     _postStream!.listen((DocumentSnapshot snapshot) {
       if (snapshot.exists) {
         postModel = PostModel.fromMap(snapshot.data() as Map<String, dynamic>);
-        _calculatePriceDifference();
+        _calculateData();
         isLoading = false;
-        postModel == null;
         notifyListeners();
       } else {
         // 문서가 존재하지 않는 경우 처리
         postModel = null;
         _priceDifferenceAndPercentage = null;
+        _postAuctionEndTime = null;
         isLoading = false;
         notifyListeners();
       }
@@ -185,7 +187,6 @@ class PostProvider with ChangeNotifier {
       final ref = await FirebaseFirestore.instance.collection('posts').doc(postUid).get();
       if (ref.exists) {
         postModel = PostModel.fromMap(ref.data() as Map<String, dynamic>);
-        _calculatePriceDifference();
         return DataResult<PostModel>.success(postModel!, "post 가져오기 성공");
       } else {
         return Result.failure("해당 게시물을 찾을 수 없습니다.");
@@ -281,7 +282,9 @@ class PostProvider with ChangeNotifier {
     }
   }
 
-  void _calculatePriceDifference() {
+
+  void _calculateData() {
+    //입찰가 가격차이 , 퍼센트
     if ((postModel?.priceList.length ?? 0) > 1) {
       final firstPrice = postModel!.priceList.first;
       final lastPrice = postModel!.priceList.last;
@@ -292,9 +295,28 @@ class PostProvider with ChangeNotifier {
     } else {
       _priceDifferenceAndPercentage = null;
     }
+
+    _postAuctionEndTime = calculateEndTimeSeconds(postModel?.endTime);
+    //경매 남은 시간 계산
+
+
   }
 
 
+  int calculateEndTimeSeconds(DateTime? endTime) {
+    //null 일 경우 0 출력
+    if(endTime == null){
+      return 0;
+    }
+
+    final now = DateTime.now();
+    final difference = endTime.difference(now);
+
+    // difference.inSeconds가 음수일 경우 (즉, 종료 시간이 이미 지났을 경우) 0을 반환
+    return difference.inSeconds > 0 ? difference.inSeconds : 0;
+  }
+
+  //마지막 입찰가 - 첫 입찰가
   String calculatePriceDifferenceAndPercentage(
       {required String firstPriceString, required String lastPriceString}) {
     // 숫자 형태로 변환 (숫자와 쉼표 제거)
