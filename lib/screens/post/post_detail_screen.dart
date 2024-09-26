@@ -1,3 +1,4 @@
+import 'package:auction/utils/string_util.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
@@ -25,12 +26,22 @@ class PostDetailScreen extends StatefulWidget {
 }
 
 class _PostDetailScreenState extends State<PostDetailScreen> {
+  late TextEditingController _priceTextController;
   UserModel? loginedUser;
   bool isLoading = true;
+  bool _isPriceFocused = false;
+  final _priceFocusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
+    _priceTextController = TextEditingController();
+    _priceFocusNode.addListener(() {
+      setState(() {
+        _isPriceFocused = _priceFocusNode.hasFocus;
+      });
+    });
+
     _loadData();
   }
 
@@ -64,7 +75,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   // }
 
   Future<void> _fetchPostItem(String postUid) async {
-    final postProvider = Provider.of<PostProvider>(context, listen: false);
+    /*final postProvider = Provider.of<PostProvider>(context, listen: false);
     final result = await postProvider.getPostItem(postUid);
 
     if (!result.isSuccess || postProvider.postModel == null) {
@@ -73,7 +84,11 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         title: "알림",
         message: result.message ?? "데이터를 가져오지 못했습니다.",
       );
-    }
+    }*/
+    final postProvider = Provider.of<PostProvider>(context, listen: false);
+    postProvider.listenToPost(widget.postUid);
+
+    // showCustomAlertDialog(context: context, title: "알림", message: "경매 데이터를 불러오지 못했습니다.",onClick: () => context.go("/main/post"));
   }
 
   void _toggleFavorite(PostProvider postProvider, UserModel currentUser) async {
@@ -86,8 +101,14 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     return Consumer<PostProvider>(
       builder: (context, postProvider, child) {
         if (isLoading) {
-          return Scaffold(
+          return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        if (postProvider.postModel == null) {
+          return const Scaffold(
+            body: Center(child: Text("경매 데이터를 불러오지 못했습니다.")),
           );
         }
 
@@ -140,16 +161,16 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         itemBuilder: (BuildContext context, int index) {
           return postProvider.postModel?.postImageList[index] != null
               ? Image.network(
-            postProvider.postModel!.postImageList[index],
-            fit: BoxFit.cover,
-          )
+                  postProvider.postModel!.postImageList[index],
+                  fit: BoxFit.cover,
+                )
               : const Center(
-            child: Text(
-              "사진을 불러오지 못했습니다",
-              style: TextStyle(color: Colors.white, fontSize: 16),
-              textAlign: TextAlign.center,
-            ),
-          );
+                  child: Text(
+                    "사진을 불러오지 못했습니다",
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                    textAlign: TextAlign.center,
+                  ),
+                );
         },
         itemCount: postProvider.postModel?.postImageList.length ?? 0,
         pagination: postProvider.postModel!.postImageList.length >= 2
@@ -171,7 +192,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
           const SizedBox(height: 15),
           Text(
             postProvider.postModel?.postContent ?? "Unknown Content",
-            style: TextStyle(fontSize: 15),
+            style: const TextStyle(fontSize: 15),
           ),
           const SizedBox(height: 30.0),
           const Divider(height: 1, color: Colors.grey),
@@ -192,19 +213,19 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         children: [
           ClipOval(
             child: postProvider.postModel?.writeUser.userProfileImage == "" ||
-                postProvider.postModel?.writeUser.userProfileImage == null
+                    postProvider.postModel?.writeUser.userProfileImage == null
                 ? Image.asset(
-              "lib/assets/image/defaultUserProfile.png",
-              width: 45,
-              height: 45,
-              fit: BoxFit.cover,
-            )
+                    "lib/assets/image/defaultUserProfile.png",
+                    width: 45,
+                    height: 45,
+                    fit: BoxFit.cover,
+                  )
                 : Image.network(
-              postProvider.postModel!.writeUser.userProfileImage!,
-              width: 45,
-              height: 45,
-              fit: BoxFit.cover,
-            ),
+                    postProvider.postModel!.writeUser.userProfileImage!,
+                    width: 45,
+                    height: 45,
+                    fit: BoxFit.cover,
+                  ),
           ),
           const SizedBox(width: 10),
           Text(postProvider.postModel?.writeUser.nickname ?? "Unknown User"),
@@ -246,47 +267,50 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              '댓글 ${postProvider.postModel?.commentList.length}',
-              style: const TextStyle(fontSize: 14),
-            ),
-            GestureDetector(
-              onTap: () => _showCommentBottomSheet(context),
-              child: const Text(
-                '댓글 쓰기',
-                style: TextStyle(fontSize: 14),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '댓글 ${postProvider.postModel?.commentList.length}',
+                style: const TextStyle(fontSize: 14),
               ),
-            ),
-          ],
+              GestureDetector(
+                onTap: () => _showCommentBottomSheet(context),
+                child: const Text(
+                  '댓글 쓰기',
+                  style: TextStyle(fontSize: 14),
+                ),
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 20),
         postProvider.postModel!.commentList.isEmpty
-            ? Padding(
-          padding: const EdgeInsets.symmetric(vertical: 20.0),
-          child: Center(
-            child: Text(
-              "아직 작성된 댓글이 없어요.\n제일 먼저 댓글을 작성해 보세요.",
-              textAlign: TextAlign.center,
-            ),
-          ),
-        )
+            ? const Padding(
+                padding: EdgeInsets.symmetric(vertical: 20.0),
+                child: Center(
+                  child: Text(
+                    "아직 작성된 댓글이 없어요.\n제일 먼저 댓글을 작성해 보세요.",
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              )
             : ListView.builder(
-          shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
-          itemCount: postProvider.postModel?.commentList.length,
-          itemBuilder: (context, index) {
-            return CommentWidget(
-              commentModel: CommentModel(
-                uId: "userId",
-                comment: "comment",
-                commentTime: "time",
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: postProvider.postModel?.commentList.length,
+                itemBuilder: (context, index) {
+                  return CommentWidget(
+                    commentModel: CommentModel(
+                      uId: "userId",
+                      comment: "comment",
+                      commentTime: "time",
+                    ),
+                  );
+                },
               ),
-            );
-          },
-        ),
       ],
     );
   }
@@ -302,7 +326,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildPriceAndTimer(),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               _buildBidInputAndButton(),
             ],
           ),
@@ -316,32 +340,51 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       builder: (context, postProvider, _) {
         return Column(
           children: [
-            Row(
+            const Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('현재 입찰가', style: TextStyle(fontSize: 16)),
-                const TimerTextWidget(time: 30),
+                TimerTextWidget(time: 30),
               ],
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  postProvider.postModel!.priceList[0],
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-                GestureDetector(
-                  onTap: () => context.push("/post/bidlist"),
-                  child: Row(
-                    children: [
-                      Icon(Icons.arrow_drop_up, color: Colors.redAccent),
-                      Text(
-                        '90,000원 (+13.6%)',
-                        style: TextStyle(fontSize: 18, color: Colors.redAccent),
-                      ),
-                    ],
+                Flexible(
+                  flex: 1,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      postProvider.postModel!.priceList.last,
+                      style: const TextStyle(
+                          fontSize: 24, fontWeight: FontWeight.bold),
+                    ),
                   ),
                 ),
+                postProvider.priceDifferenceAndPercentage != null ?
+                Flexible(
+                  flex: 1, // 오른쪽 부분에도 1의 가중치 부여
+                  child: GestureDetector(
+                    onTap: () => context.push("/post/bidlist"),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerRight,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          const Icon(Icons.arrow_drop_up,
+                              color: Colors.redAccent),
+                          Text(
+                            postProvider.priceDifferenceAndPercentage ?? "",
+                            style: const TextStyle(
+                                fontSize: 18, color: Colors.redAccent),
+                          ),
+                        ],
+                      )
+                    ),
+                  ),
+                ) : const SizedBox.shrink()
               ],
             ),
           ],
@@ -356,8 +399,18 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       children: [
         Expanded(
           child: TextField(
+            controller: _priceTextController,
             keyboardType: TextInputType.number,
-            decoration: InputDecoration(
+            focusNode: _priceFocusNode,
+            onChanged: (value) {
+              final formattedValue = formatPrice(value);
+              _priceTextController.value = TextEditingValue(
+                text: formattedValue,
+                selection:
+                    TextSelection.collapsed(offset: formattedValue.length),
+              );
+            },
+            decoration: const InputDecoration(
               border: OutlineInputBorder(),
               labelText: '가격을 입력해주세요',
             ),
@@ -369,16 +422,16 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
             return ElevatedButton(
               onPressed: auctionTimerProvider.remainingTime != 0
                   ? () {
-                // Bid logic here
-              }
+                      // Bid logic here
+                    }
                   : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: auctionTimerProvider.remainingTime != 0
-                    ? Color(0xFF65AE7E)
+                    ? AppsColor.pastelGreen
                     : Colors.grey,
-                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               ),
-              child: Text('입찰하기', style: TextStyle(color: Colors.white)),
+              child: const Text('입찰하기', style: TextStyle(color: Colors.white)),
             );
           },
         ),
@@ -408,7 +461,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     );
   }
 
-  Widget _buildCommentBottomSheetContent(BuildContext context, ScrollController scrollController) {
+  Widget _buildCommentBottomSheetContent(
+      BuildContext context, ScrollController scrollController) {
     final textColorProvider = Provider.of<TextProvider>(context);
     return Container(
       decoration: const BoxDecoration(
@@ -435,7 +489,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
               child: Column(
                 children: [
                   ListView.builder(
-                    padding: EdgeInsets.symmetric(horizontal: 20),
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: 10,
@@ -470,7 +524,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                       hintStyle: const TextStyle(color: Colors.grey),
                       filled: true,
                       fillColor: AppsColor.lightGray,
-                      contentPadding: EdgeInsets.only(left: 20),
+                      contentPadding: const EdgeInsets.only(left: 20),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(30),
                         borderSide: BorderSide.none,
@@ -480,16 +534,17 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                 ),
                 textColorProvider.isTextEmpty
                     ? const IconButton(
-                  icon: Icon(Icons.send, color: Colors.grey),
-                  onPressed: null,
-                )
+                        icon: Icon(Icons.send, color: Colors.grey),
+                        onPressed: null,
+                      )
                     : IconButton(
-                  icon: const Icon(Icons.send, color: AppsColor.pastelGreen),
-                  onPressed: () {
-                    // 댓글 작성 로직
-                    print(textColorProvider.commentController.text);
-                  },
-                ),
+                        icon: const Icon(Icons.send,
+                            color: AppsColor.pastelGreen),
+                        onPressed: () {
+                          // 댓글 작성 로직
+                          print(textColorProvider.commentController.text);
+                        },
+                      ),
               ],
             ),
           ),
@@ -503,29 +558,29 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       context: context,
       builder: (BuildContext context) {
         return Container(
-          padding: EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                leading: Icon(Icons.edit),
-                title: Text('수정'),
+                leading: const Icon(Icons.edit),
+                title: const Text('수정'),
                 onTap: () {
                   Navigator.of(context).pop();
                   context.push("/post/modify");
                 },
               ),
               ListTile(
-                leading: Icon(Icons.delete),
-                title: Text('삭제'),
+                leading: const Icon(Icons.delete),
+                title: const Text('삭제'),
                 onTap: () {
                   Navigator.of(context).pop();
                   _deleteItem(context);
                 },
               ),
               ListTile(
-                leading: Icon(Icons.cancel),
-                title: Text('취소'),
+                leading: const Icon(Icons.cancel),
+                title: const Text('취소'),
                 onTap: () {
                   Navigator.of(context).pop();
                 },
@@ -540,7 +595,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   void _deleteItem(BuildContext context) {
     // 삭제 로직 구현
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('삭제 기능이 호출되었습니다.')),
+      const SnackBar(content: Text('삭제 기능이 호출되었습니다.')),
     );
     context.go("/post/list");
   }
