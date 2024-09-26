@@ -27,12 +27,9 @@ void main() async {
             create: (context) => PostProvider()), //포스트 Provider
         ChangeNotifierProvider(
             create: (context) => ChatProvider()), // 채팅 Provider
-        ChangeNotifierProvider(
-          create: (_) => AuthProvider()),
-        ChangeNotifierProvider(
-          create: (context) => MyProvider()),
-        ChangeNotifierProvider(
-          create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (context) => MyProvider()),
+        ChangeNotifierProvider(create: (_) => UserProvider()),
       ],
       child: MyApp(),
     ),
@@ -42,13 +39,19 @@ void main() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      theme: Provider.of<ThemeProvider>(context)
-          .currentTheme, //todo toggle 시 Provider.of<ThemeProvider>(context, listen: false).toggleTheme();
-      // theme: darkThemeData(),
-      routerDelegate: router.routerDelegate,
-      routeInformationParser: router.routeInformationParser,
-      routeInformationProvider: router.routeInformationProvider,
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        return MaterialApp.router(
+          theme: themeProvider.currentTheme, // 라이트 모드 테마
+          darkTheme: darkThemeData(), // 다크 모드 테마
+          themeMode: themeProvider.isDarkTheme
+              ? ThemeMode.dark
+              : ThemeMode.light, // 테마 모드 설정
+          routerDelegate: router.routerDelegate,
+          routeInformationParser: router.routeInformationParser,
+          routeInformationProvider: router.routeInformationProvider,
+        );
+      },
     );
   }
 }
