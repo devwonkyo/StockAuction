@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class BottomSheetWidget {
-  static void showBottomSheetMenu(BuildContext context) {
+  void showBottomSheetMenu(BuildContext context) {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {

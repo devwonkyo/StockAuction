@@ -16,6 +16,7 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController messageController = TextEditingController();
+  final BottomSheetWidget bottomSheetWidget = BottomSheetWidget();
   String? otherUserNickname;
   String? otherUserId;
 
@@ -72,7 +73,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 IconButton(
                   icon: Icon(Icons.add),
                   onPressed: () {
-                    BottomSheetWidget.showBottomSheetMenu(context);
+                    bottomSheetWidget.showBottomSheetMenu(context);
                   },
                 ),
                 // 메시지 입력 공간
