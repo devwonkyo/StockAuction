@@ -5,13 +5,24 @@ import 'package:auction/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PostProvider with ChangeNotifier {
   bool isLoading = false;
   List<PostModel> postList = [];
   PostModel? postModel;
+  List<String> _likedPostTitles = [];
+
+  List<String> get likedPostTitles => _likedPostTitles;
+
+  PostProvider() {
+    loadLikedPostTitles();
+  }
 
   Future<DataResult<List<PostModel>>> getAllPostList() async {
+    isLoading = true;
+    notifyListeners();
+
     try {
       final querySnapshot = await FirebaseFirestore.instance
           .collection('posts')
@@ -25,6 +36,9 @@ class PostProvider with ChangeNotifier {
       return DataResult.success(postList, "success");
     } catch (e) {
       return DataResult.failure("Error fetching post list: $e");
+    } finally {
+      isLoading = false;
+      notifyListeners();
     }
   }
 
@@ -86,36 +100,46 @@ class PostProvider with ChangeNotifier {
         final isCurrentlyFavorited = post.isFavoritedBy(currentUser.uid);
 
         if (isCurrentlyFavorited) {
-          post.favoriteList.removeWhere((user) => user['uid'] == currentUser.uid);
+          post.removeFromFavorites(currentUser.uid);
+          _likedPostTitles.remove(post.postTitle);
         } else {
-          post.favoriteList.add({
-            'uid': currentUser.uid,
-            'email': currentUser.email,
-            'nickname': currentUser.nickname,
-          });
+          post.addToFavorites(currentUser);
+          _likedPostTitles.add(post.postTitle);
         }
 
         transaction.update(postDoc, {'favoriteList': post.favoriteList});
       });
 
+      // Update the local postModel if it's the currently viewed post
+      if (postModel?.postUid == postUid) {
+        await getPostItem(postUid);
+      }
+
+      await _saveLikedPostTitles();
       notifyListeners();
     } catch (e) {
       print("Error toggling favorite: $e");
     }
   }
 
-  Stream<List<PostModel>> getFavoritePosts(String userId) {
-    print("Fetching favorite posts for user: $userId");
-    return FirebaseFirestore.instance
-        .collection('posts')
-        .where('favoriteList', arrayContains: {'uid': userId})
-        .snapshots()
-        .map((snapshot) {
-      print("Received ${snapshot.docs.length} favorite posts");
-      return snapshot.docs
-          .map((doc) => PostModel.fromMap(doc.data() as Map<String, dynamic>))
-          .toList();
-    });
+  Future<Result> getPostItem(String postUid) async {
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      final ref = await FirebaseFirestore.instance.collection('posts').doc(postUid).get();
+      if (ref.exists) {
+        postModel = PostModel.fromMap(ref.data() as Map<String, dynamic>);
+        return DataResult<PostModel>.success(postModel!, "post 가져오기 성공");
+      } else {
+        return Result.failure("해당 게시물을 찾을 수 없습니다.");
+      }
+    } catch (e) {
+      return Result.failure("데이터를 불러오지 못했습니다. 에러메시지 : $e");
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
   }
 
   Future<bool> isPostFavorited(String postUid, String userId) async {
@@ -132,19 +156,69 @@ class PostProvider with ChangeNotifier {
     }
   }
 
-  Future<Result> getPostItem(String postUid) async {
-    isLoading = true;
-    notifyListeners();
+  Stream<List<PostModel>> getFavoritePosts(String userId) {
+    return FirebaseFirestore.instance
+        .collection('posts')
+        .where('favoriteList', arrayContains: {'uid': userId})
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs
+          .map((doc) => PostModel.fromMap(doc.data() as Map<String, dynamic>))
+          .toList();
+    });
+  }
 
+  Future<void> _saveLikedPostTitles() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('likedPostTitles', _likedPostTitles);
+  }
+
+  Future<void> loadLikedPostTitles() async {
+    final prefs = await SharedPreferences.getInstance();
+    _likedPostTitles = prefs.getStringList('likedPostTitles') ?? [];
+    notifyListeners();
+  }
+
+  bool isPostLiked(String postTitle) {
+    return _likedPostTitles.contains(postTitle);
+  }
+
+  Future<String?> getPostIdByTitle(String title) async {
     try {
-      final ref = await FirebaseFirestore.instance.collection('posts').doc(postUid).get();
-      postModel = PostModel.fromMap(ref.data() as Map<String, dynamic>);
-      return Result.success("post 가져오기 성공");
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('posts')
+          .where('postTitle', isEqualTo: title)
+          .limit(1)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        return querySnapshot.docs.first.id;
+      }
+      return null;
     } catch (e) {
-      return Result.failure("데이터를 불러오지 못했습니다. 에러메시지 : $e");
-    } finally {
-      isLoading = false;
-      notifyListeners();
+      print("Error getting post ID by title: $e");
+      return null;
+    }
+  }
+  Future<String?> getFirstImageUrlByTitle(String title) async {
+    try {
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('posts')
+          .where('postTitle', isEqualTo: title)
+          .limit(1)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        final postData = querySnapshot.docs.first.data();
+        final List<dynamic> imageList = postData['postImageList'];
+        if (imageList.isNotEmpty) {
+          return imageList[0] as String;
+        }
+      }
+      return null;
+    } catch (e) {
+      print("Error getting first image URL by title: $e");
+      return null;
     }
   }
 }
