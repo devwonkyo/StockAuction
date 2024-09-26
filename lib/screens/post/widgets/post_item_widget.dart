@@ -60,7 +60,7 @@ class PostItemWidget extends StatelessWidget {
                         ),
                         const Spacer(),
                         Text(
-                          postModel.priceList.last,
+                          postModel.bidList.last.bidPrice,
                           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                         const Text("현재 입찰가", style: TextStyle(fontSize: 12, color: AppsColor.darkGray)),
