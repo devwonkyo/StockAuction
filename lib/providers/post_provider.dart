@@ -12,7 +12,11 @@ class PostProvider with ChangeNotifier {
   List<PostModel> postList = [];
   PostModel? postModel;
   List<String> _likedPostTitles = [];
+  Stream<DocumentSnapshot>? _postStream; //포스트 스트림으로 받아와서 실시간 업데이트
+  String? _priceDifferenceAndPercentage;
 
+
+  String? get priceDifferenceAndPercentage => _priceDifferenceAndPercentage;
   List<String> get likedPostTitles => _likedPostTitles;
 
   PostProvider() {
@@ -61,6 +65,37 @@ class PostProvider with ChangeNotifier {
     }
 
     return downloadPostImageList;
+  }
+
+  void listenToPost(String postUid) {
+    isLoading = true;
+    notifyListeners();
+
+    _postStream = FirebaseFirestore.instance
+        .collection('posts')
+        .doc(postUid)
+        .snapshots();
+
+    _postStream!.listen((DocumentSnapshot snapshot) {
+      if (snapshot.exists) {
+        postModel = PostModel.fromMap(snapshot.data() as Map<String, dynamic>);
+        _calculatePriceDifference();
+        isLoading = false;
+        postModel == null;
+        notifyListeners();
+      } else {
+        // 문서가 존재하지 않는 경우 처리
+        postModel = null;
+        _priceDifferenceAndPercentage = null;
+        isLoading = false;
+        notifyListeners();
+      }
+    }, onError: (error) {
+      // 에러 처리
+      print("Error: $error");
+      isLoading = false;
+      notifyListeners();
+    });
   }
 
   Future<Result> addPostItem(PostModel post) async {
@@ -130,6 +165,7 @@ class PostProvider with ChangeNotifier {
       final ref = await FirebaseFirestore.instance.collection('posts').doc(postUid).get();
       if (ref.exists) {
         postModel = PostModel.fromMap(ref.data() as Map<String, dynamic>);
+        _calculatePriceDifference();
         return DataResult<PostModel>.success(postModel!, "post 가져오기 성공");
       } else {
         return Result.failure("해당 게시물을 찾을 수 없습니다.");
@@ -221,4 +257,45 @@ class PostProvider with ChangeNotifier {
       return null;
     }
   }
+
+  void _calculatePriceDifference() {
+    if ((postModel?.priceList.length ?? 0) > 1) {
+      final firstPrice = postModel!.priceList.first;
+      final lastPrice = postModel!.priceList.last;
+      _priceDifferenceAndPercentage = calculatePriceDifferenceAndPercentage(
+        firstPriceString: firstPrice,
+        lastPriceString: lastPrice,
+      );
+    } else {
+      _priceDifferenceAndPercentage = null;
+    }
+  }
+
+
+  String calculatePriceDifferenceAndPercentage(
+      {required String firstPriceString, required String lastPriceString}) {
+    // 숫자 형태로 변환 (숫자와 쉼표 제거)
+    int lastPrice =
+    int.parse(lastPriceString.replaceAll(',', '').replaceAll('원', ''));
+    int firstPrice =
+    int.parse(firstPriceString.replaceAll(',', '').replaceAll('원', ''));
+
+    // 가격 차이 계산
+    int difference = (lastPrice - firstPrice).abs();
+
+    // 오른 가격 비율 계산
+    double percentage = ((difference / firstPrice) * 100);
+
+    // 쉼표를 포함한 금액 형태로 변환하는 함수
+    String formatWithCommas(int price) {
+      return price.toString().replaceAllMapped(
+        RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
+            (Match match) => '${match[1]},',
+      );
+    }
+
+    // 결과를 문자열로 반환
+    return '${formatWithCommas(difference)}원 (+${percentage.toStringAsFixed(1)}%)';
+  }
+
 }
