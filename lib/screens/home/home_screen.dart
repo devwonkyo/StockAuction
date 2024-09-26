@@ -1,6 +1,9 @@
 import 'dart:async';
-
+import 'package:auction/models/post_model.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:auction/providers/theme_provider.dart';
+import 'package:auction/providers/post_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -19,12 +22,11 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // Timer 설정: 3초마다 페이지 변경
     Timer.periodic(Duration(seconds: 3), (Timer timer) {
       if (_currentPage < _images.length - 1) {
         _currentPage++;
       } else {
-        _currentPage = 0; // 마지막 페이지에서 처음으로 돌아감
+        _currentPage = 0;
       }
       _pageController.animateToPage(
         _currentPage,
@@ -32,11 +34,21 @@ class _HomeScreenState extends State<HomeScreen> {
         curve: Curves.easeInOut,
       );
     });
+
+    // 포스트 로드
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final postProvider = Provider.of<PostProvider>(context, listen: false);
+      postProvider.getAllPostList(); // 포스트 로드
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Provider.of<ThemeProvider>(context).currentTheme;
+    final postProvider = Provider.of<PostProvider>(context);
+
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Column(
         children: <Widget>[
           Expanded(
@@ -55,7 +67,6 @@ class _HomeScreenState extends State<HomeScreen> {
           Container(
             margin: EdgeInsets.all(10),
             padding: EdgeInsets.all(5),
-            color: Colors.white70,
             width: double.infinity,
             child: Text(
               '방금 시작된 경매',
@@ -63,24 +74,31 @@ class _HomeScreenState extends State<HomeScreen> {
               style: TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
-                color: Colors.black,
+                color: theme.textTheme.headlineLarge!.color,
               ),
             ),
           ),
           Expanded(
             flex: 1,
-            child: Container(
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    auctionItem(),
-                    auctionItem(),
-                    auctionItem(),
-                    auctionItem(),
-                  ],
-                ),
-              ),
+            child: Consumer<PostProvider>(
+              builder: (context, postProvider, child) {
+                if (postProvider.isLoading) {
+                  return Center(child: CircularProgressIndicator());
+                }
+
+                if (postProvider.hasError) {
+                  return Center(child: Text('포스트를 불러오는 데 오류가 발생했습니다.'));
+                }
+
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: postProvider.postList.map((post) {
+                      return auctionItem(theme, post);
+                    }).toList(),
+                  ),
+                );
+              },
             ),
           ),
         ],
@@ -88,20 +106,47 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget auctionItem() {
+  Widget auctionItem(ThemeData theme, PostModel post) {
     return Container(
-      margin: EdgeInsets.only(right: 10), // 항목 사이 간격
-      color: Colors.white70,
+      margin: EdgeInsets.only(right: 10),
+      color: theme.cardColor,
+      width: 150, // 원하는 너비 설정
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.book_outlined, size: 100),
+          // 게시물 이미지 표시
+          Image.network(
+            post.postImageList.isNotEmpty ? post.postImageList[0] : '',
+            height: 100, // 이미지 높이 설정
+            width: double.infinity,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                color: Colors.grey[300], // 이미지 로딩 실패 시 회색 배경 표시
+                height: 100,
+                child: Center(child: Icon(Icons.error, color: Colors.red)),
+              );
+            },
+          ),
+          SizedBox(height: 5), // 이미지와 제목 간격
           Text(
-            '경매도서이름',
+            post.postTitle,
             style: TextStyle(
               fontSize: 18,
+              color: theme.textTheme.bodyLarge!.color,
             ),
+            overflow: TextOverflow.ellipsis, // 넘칠 경우 ...로 표시
+            maxLines: 1, // 최대 줄 수
           ),
-          Text('경매도서설명어쩌구'),
+          SizedBox(height: 3), // 제목과 내용 간격
+          Text(
+            post.postContent,
+            style: TextStyle(
+              color: theme.textTheme.bodyMedium!.color,
+            ),
+            overflow: TextOverflow.ellipsis, // 넘칠 경우 ...로 표시
+            maxLines: 2, // 최대 줄 수
+          ),
         ],
       ),
     );
