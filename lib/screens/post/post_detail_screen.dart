@@ -233,7 +233,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       ),
     );
   }
-
+  //포스트 상세화면 제목 내용
   Widget _buildPostTitle(PostProvider postProvider) {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, _) {
@@ -262,7 +262,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       },
     );
   }
-
+  //댓글 창
   Widget _buildCommentSection(PostProvider postProvider) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -314,10 +314,10 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       ],
     );
   }
-
+  //포스트 상세 화면 바텀 바
   Widget _buildBottomSection(PostProvider postProvider) {
     return ChangeNotifierProvider(
-      create: (context) => AuctionTimerProvider(20),
+      create: (context) => AuctionTimerProvider(postProvider.postAuctionEndTime ?? 0),
       child: Align(
         alignment: Alignment.bottomCenter,
         child: Padding(
@@ -334,7 +334,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       ),
     );
   }
-
+  //입찰 정보
   Widget _buildPriceAndTimer() {
     return Consumer<PostProvider>(
       builder: (context, postProvider, _) {
@@ -392,7 +392,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       },
     );
   }
-
+  //입찰 가격 버튼
   Widget _buildBidInputAndButton() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
