@@ -6,8 +6,9 @@ class MessageBubble extends StatelessWidget {
   final String message;
   final bool isMe;
   final String? profileImageUrl;
+  final String? imageUrl;
 
-  MessageBubble(this.message, this.isMe, this.profileImageUrl);
+  MessageBubble(this.message, this.isMe, this.profileImageUrl, {this.imageUrl});
 
   @override
   Widget build(BuildContext context) {
@@ -30,12 +31,20 @@ class MessageBubble extends StatelessWidget {
           ),
           padding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
           margin: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-          child: Text(
-            message,
-            style: TextStyle(
-              color: isMe ? Colors.black : Colors.white,
-            ),
-          ),
+          // 이미지를 첨부할 경우 CachedNetworkImage를 보낸다
+          // 이미지 아니면 Text 보냄
+          child: imageUrl != null && imageUrl!.isNotEmpty
+              ? CachedNetworkImage(
+                  imageUrl: imageUrl!,
+                  placeholder: (context, url) => CircularProgressIndicator(),
+                  errorWidget: (context, url, error) => Icon(Icons.error),
+                )
+              : Text(
+                  message,
+                  style: TextStyle(
+                    color: isMe ? Colors.black : Colors.white,
+                  ),
+                ),
         ),
       ],
     );
