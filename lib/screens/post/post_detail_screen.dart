@@ -239,7 +239,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       builder: (context, authProvider, _) {
         final currentUser = authProvider.currentUserModel;
         final postTitle = postProvider.postModel?.postTitle ?? "Unknown Title";
-        final isLiked = postProvider.isPostLiked(postTitle);
+        final isLiked = postProvider.isPostLiked(widget.postUid);
 
         return Row(
           children: [
@@ -255,7 +255,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                   isLiked ? Icons.favorite : Icons.favorite_border,
                   color: isLiked ? Colors.red : null,
                 ),
-                onPressed: () => _toggleFavorite(postProvider, currentUser),
+                onPressed: () => postProvider.toggleFavorite(widget.postUid, currentUser),
               ),
           ],
         );
