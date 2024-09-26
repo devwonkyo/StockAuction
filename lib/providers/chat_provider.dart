@@ -43,8 +43,8 @@ class ChatProvider extends ChangeNotifier {
           otherUserId: otherUserName,
         },
         'userProfileImages': {
-            userId: currentUserProfileImage,
-            otherUserId: otherUserProfileImage,
+          userId: currentUserProfileImage,
+          otherUserId: otherUserProfileImage,
         }
       });
     }
