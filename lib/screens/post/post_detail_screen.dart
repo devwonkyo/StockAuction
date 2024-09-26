@@ -32,6 +32,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   @override
   void initState() {
     super.initState();
+
     _loadData();
   }
 
@@ -58,7 +59,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final currentUser = await authProvider.getCurrentUser();
     if (currentUser != null) {
-      bool favorited = await postProvider.isPostFavorited(widget.postUid, currentUser.uid);
+      bool favorited =
+          await postProvider.isPostFavorited(widget.postUid, currentUser.uid);
       setState(() {
         isFavorited = favorited;
       });
@@ -153,16 +155,16 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         itemBuilder: (BuildContext context, int index) {
           return postProvider.postModel?.postImageList[index] != null
               ? Image.network(
-            postProvider.postModel!.postImageList[index],
-            fit: BoxFit.cover,
-          )
+                  postProvider.postModel!.postImageList[index],
+                  fit: BoxFit.cover,
+                )
               : const Center(
-            child: Text(
-              "사진을 불러오지 못했습니다",
-              style: TextStyle(color: Colors.white, fontSize: 16),
-              textAlign: TextAlign.center,
-            ),
-          );
+                  child: Text(
+                    "사진을 불러오지 못했습니다",
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                    textAlign: TextAlign.center,
+                  ),
+                );
         },
         itemCount: postProvider.postModel?.postImageList.length ?? 0,
         pagination: postProvider.postModel!.postImageList.length >= 2
@@ -205,19 +207,19 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         children: [
           ClipOval(
             child: postProvider.postModel?.writeUser.userProfileImage == "" ||
-                postProvider.postModel?.writeUser.userProfileImage == null
+                    postProvider.postModel?.writeUser.userProfileImage == null
                 ? Image.asset(
-              "lib/assets/image/defaultUserProfile.png",
-              width: 45,
-              height: 45,
-              fit: BoxFit.cover,
-            )
+                    "lib/assets/image/defaultUserProfile.png",
+                    width: 45,
+                    height: 45,
+                    fit: BoxFit.cover,
+                  )
                 : Image.network(
-              postProvider.postModel!.writeUser.userProfileImage!,
-              width: 45,
-              height: 45,
-              fit: BoxFit.cover,
-            ),
+                    postProvider.postModel!.writeUser.userProfileImage!,
+                    width: 45,
+                    height: 45,
+                    fit: BoxFit.cover,
+                  ),
           ),
           const SizedBox(width: 10),
           Text(postProvider.postModel?.writeUser.nickname ?? "Unknown User"),
@@ -267,28 +269,28 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         const SizedBox(height: 20),
         postProvider.postModel!.commentList.isEmpty
             ? Padding(
-          padding: const EdgeInsets.symmetric(vertical: 20.0),
-          child: Center(
-            child: Text(
-              "아직 작성된 댓글이 없어요.\n제일 먼저 댓글을 작성해 보세요.",
-              textAlign: TextAlign.center,
-            ),
-          ),
-        )
+                padding: const EdgeInsets.symmetric(vertical: 20.0),
+                child: Center(
+                  child: Text(
+                    "아직 작성된 댓글이 없어요.\n제일 먼저 댓글을 작성해 보세요.",
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              )
             : ListView.builder(
-          shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
-          itemCount: postProvider.postModel?.commentList.length,
-          itemBuilder: (context, index) {
-            return CommentWidget(
-              commentModel: CommentModel(
-                uId: "userId",
-                comment: "comment",
-                commentTime: "time",
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemCount: postProvider.postModel?.commentList.length,
+                itemBuilder: (context, index) {
+                  return CommentWidget(
+                    commentModel: CommentModel(
+                      uId: "userId",
+                      comment: "comment",
+                      commentTime: "time",
+                    ),
+                  );
+                },
               ),
-            );
-          },
-        ),
       ],
     );
   }
@@ -371,8 +373,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
             return ElevatedButton(
               onPressed: auctionTimerProvider.remainingTime != 0
                   ? () {
-                // Bid logic here
-              }
+                      // Bid logic here
+                    }
                   : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: auctionTimerProvider.remainingTime != 0
@@ -410,7 +412,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     );
   }
 
-  Widget _buildCommentBottomSheetContent(BuildContext context, ScrollController scrollController) {
+  Widget _buildCommentBottomSheetContent(
+      BuildContext context, ScrollController scrollController) {
     final textColorProvider = Provider.of<TextProvider>(context);
     return Container(
       decoration: const BoxDecoration(
@@ -482,16 +485,17 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                 ),
                 textColorProvider.isTextEmpty
                     ? const IconButton(
-                  icon: Icon(Icons.send, color: Colors.grey),
-                  onPressed: null,
-                )
+                        icon: Icon(Icons.send, color: Colors.grey),
+                        onPressed: null,
+                      )
                     : IconButton(
-                  icon: const Icon(Icons.send, color: AppsColor.pastelGreen),
-                  onPressed: () {
-                    // 댓글 작성 로직
-                    print(textColorProvider.commentController.text);
-                  },
-                ),
+                        icon: const Icon(Icons.send,
+                            color: AppsColor.pastelGreen),
+                        onPressed: () {
+                          // 댓글 작성 로직
+                          print(textColorProvider.commentController.text);
+                        },
+                      ),
               ],
             ),
           ),
