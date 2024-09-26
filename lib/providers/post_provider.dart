@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class PostProvider with ChangeNotifier {
   bool isLoading = false;
+  bool hasError = false; // 오류 상태 추가
   List<PostModel> postList = [];
   PostModel? postModel;
   List<String> _likedPostTitles = [];
@@ -28,6 +29,10 @@ class PostProvider with ChangeNotifier {
     notifyListeners();
 
     try {
+      isLoading = true;
+      hasError = false; // 요청 시작 시 오류 상태 초기화
+      notifyListeners();
+
       final querySnapshot = await FirebaseFirestore.instance
           .collection('posts')
           .orderBy('createTime', descending: true)
@@ -39,6 +44,7 @@ class PostProvider with ChangeNotifier {
 
       return DataResult.success(postList, "success");
     } catch (e) {
+      hasError = true; // 오류 발생 시 오류 상태 설정
       return DataResult.failure("Error fetching post list: $e");
     } finally {
       isLoading = false;
@@ -101,6 +107,7 @@ class PostProvider with ChangeNotifier {
 
   Future<Result> addPostItem(PostModel post) async {
     isLoading = true;
+    hasError = false; // 초기화
     notifyListeners();
 
     try {
@@ -115,6 +122,7 @@ class PostProvider with ChangeNotifier {
 
       return Result.success("게시물을 등록했습니다.");
     } catch (e) {
+      hasError = true; // 오류 발생 시 오류 상태 설정
       return Result.failure("게시물 등록에 실패했습니다. 오류메시지 : $e");
     } finally {
       isLoading = false;
@@ -183,6 +191,7 @@ class PostProvider with ChangeNotifier {
         return Result.failure("해당 게시물을 찾을 수 없습니다.");
       }
     } catch (e) {
+      hasError = true; // 오류 발생 시 오류 상태 설정
       return Result.failure("데이터를 불러오지 못했습니다. 에러메시지 : $e");
     } finally {
       isLoading = false;
@@ -249,6 +258,7 @@ class PostProvider with ChangeNotifier {
       return null;
     }
   }
+
   Future<String?> getFirstImageUrlByTitle(String title) async {
     try {
       final querySnapshot = await FirebaseFirestore.instance

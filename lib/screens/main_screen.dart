@@ -1,9 +1,11 @@
 import 'package:auction/screens/my/my_screen.dart';
 import 'package:auction/screens/post/post_list_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'chat/chat_list_screen.dart';
 import 'home/home_screen.dart';
 import 'like/my_likes_screen.dart';
+import 'package:auction/providers/theme_provider.dart';
 
 class MainScreen extends StatefulWidget {
   late int pageIndex;
@@ -15,7 +17,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  late int _selectedIndex; // 선택된 페이지의 인덱스
+  late int _selectedIndex;
 
   @override
   void initState() {
@@ -23,7 +25,6 @@ class _MainScreenState extends State<MainScreen> {
     _selectedIndex = widget.pageIndex;
   }
 
-  // 각 페이지에 대한 위젯을 리스트로 생성
   final List<Widget> _pages = [
     HomeScreen(),
     PostListScreen(),
@@ -31,22 +32,31 @@ class _MainScreenState extends State<MainScreen> {
     MyLikesScreen(),
   ];
 
-  // 네비게이션 탭을 클릭했을 때의 동작 정의
   void _onItemTapped(int index) {
     setState(() {
-      _selectedIndex = index; // 선택된 인덱스를 업데이트하여 페이지 전환
+      _selectedIndex = index;
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
         scrolledUnderElevation: 0,
-        title: Text('Stock Auction'),
+        title: Text(
+          'Stock Auction',
+          style: TextStyle(
+            color: themeProvider.isDarkTheme ? Colors.white : Colors.black,
+          ), // 다크모드에 맞춰 텍스트 색상 전환
+        ),
+        backgroundColor:
+            themeProvider.isDarkTheme ? Colors.black : Colors.white,
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.person),
+            icon: Icon(Icons.person,
+                color: themeProvider.isDarkTheme ? Colors.white : Colors.black),
             onPressed: () {
               Navigator.push(
                 context,
@@ -57,17 +67,20 @@ class _MainScreenState extends State<MainScreen> {
         ],
       ),
       body: IndexedStack(
-        index: _selectedIndex, // 선택된 페이지를 표시
-        children: _pages, // 모든 페이지를 스택에 포함
+        index: _selectedIndex,
+        children: _pages,
       ),
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex, // 선택된 인덱스
-        selectedItemColor: Colors.red,
+        currentIndex: _selectedIndex,
+        selectedItemColor:
+            themeProvider.isDarkTheme ? Colors.amber : Colors.red,
         unselectedItemColor: Colors.grey,
         showSelectedLabels: true,
         showUnselectedLabels: false,
-        onTap: _onItemTapped, // 탭을 눌렀을 때 호출
-        items: [
+        backgroundColor:
+            themeProvider.isDarkTheme ? Colors.black : Colors.white,
+        onTap: _onItemTapped,
+        items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(
               icon: Icon(Icons.menu_book_sharp), label: 'Selllist'),
