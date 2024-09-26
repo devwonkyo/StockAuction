@@ -4,6 +4,7 @@ import 'package:auction/providers/post_provider.dart';
 import 'package:auction/providers/auth_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:auction/models/post_model.dart';
 
 class MyLikesScreen extends StatelessWidget {
   @override
@@ -17,47 +18,53 @@ class MyLikesScreen extends StatelessWidget {
 
         return Consumer<PostProvider>(
           builder: (context, postProvider, _) {
-            final likedPostTitles = postProvider.likedPostTitles;
+            final likedPostUids = postProvider.likedPostTitles; // 실제로는 postUids를 저장하고 있음
 
-            if (likedPostTitles.isEmpty) {
+            if (likedPostUids.isEmpty) {
               return Center(child: Text('좋아요한 게시물이 없습니다.'));
             }
 
             return ListView.builder(
-              itemCount: likedPostTitles.length,
+              itemCount: likedPostUids.length,
               itemBuilder: (context, index) {
-                return FutureBuilder<String?>(
-                  future: postProvider.getFirstImageUrlByTitle(likedPostTitles[index]),
+                return FutureBuilder<PostModel?>(
+                  future: postProvider.getPostByUid(likedPostUids[index]),
                   builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return ListTile(
+                        leading: CircularProgressIndicator(),
+                        title: Text('로딩 중...'),
+                      );
+                    }
+
+                    if (snapshot.hasError || !snapshot.hasData) {
+                      return ListTile(
+                        leading: Icon(Icons.error),
+                        title: Text('게시물을 불러올 수 없습니다.'),
+                      );
+                    }
+
+                    final post = snapshot.data!;
                     return ListTile(
                       leading: Container(
                         width: 50,
                         height: 50,
-                        child: snapshot.connectionState == ConnectionState.done
-                            ? snapshot.data != null
+                        child: post.postImageList.isNotEmpty
                             ? ClipRRect(
                           borderRadius: BorderRadius.circular(8),
                           child: CachedNetworkImage(
-                            imageUrl: snapshot.data!,
+                            imageUrl: post.postImageList[0],
                             fit: BoxFit.cover,
                             placeholder: (context, url) => CircularProgressIndicator(),
                             errorWidget: (context, url, error) => Icon(Icons.error),
                           ),
                         )
-                            : Icon(Icons.image_not_supported)
-                            : CircularProgressIndicator(),
+                            : Icon(Icons.image_not_supported),
                       ),
-                      title: Text(likedPostTitles[index]),
+                      title: Text(post.postTitle),
                       trailing: Icon(Icons.favorite, color: Colors.red),
-                      onTap: () async {
-                        final postId = await postProvider.getPostIdByTitle(likedPostTitles[index]);
-                        if (postId != null) {
-                          context.push('/post/detail', extra: postId);
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('게시물을 찾을 수 없습니다.')),
-                          );
-                        }
+                      onTap: () {
+                        context.push('/post/detail', extra: post.postUid);
                       },
                     );
                   },
