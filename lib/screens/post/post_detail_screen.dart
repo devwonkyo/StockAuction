@@ -18,14 +18,13 @@ import 'package:auction/providers/text_provider.dart';
 class PostDetailScreen extends StatefulWidget {
   final String postUid;
 
-  const PostDetailScreen({super.key, required this.postUid});
+  const PostDetailScreen({Key? key, required this.postUid}) : super(key: key);
 
   @override
   _PostDetailScreenState createState() => _PostDetailScreenState();
 }
 
 class _PostDetailScreenState extends State<PostDetailScreen> {
-  bool isFavorited = false;
   UserModel? loginedUser;
   bool isLoading = true;
 
@@ -38,7 +37,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   Future<void> _loadData() async {
     await _setUserData();
     await _fetchPostItem(widget.postUid);
-    await _loadFavoriteStatus();
     setState(() {
       isLoading = false;
     });
@@ -53,17 +51,17 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     }
   }
 
-  Future<void> _loadFavoriteStatus() async {
-    final postProvider = Provider.of<PostProvider>(context, listen: false);
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final currentUser = await authProvider.getCurrentUser();
-    if (currentUser != null) {
-      bool favorited = await postProvider.isPostFavorited(widget.postUid, currentUser.uid);
-      setState(() {
-        isFavorited = favorited;
-      });
-    }
-  }
+  // Future<void> _loadFavoriteStatus() async {
+  //   final postProvider = Provider.of<PostProvider>(context, listen: false);
+  //   final authProvider = Provider.of<AuthProvider>(context, listen: false);
+  //   final currentUser = await authProvider.getCurrentUser();
+  //   if (currentUser != null) {
+  //     bool favorited = await postProvider.isPostFavorited(widget.postUid, currentUser.uid);
+  //     setState(() {
+  //       isFavorited = favorited;
+  //     });
+  //   }
+  // }
 
   Future<void> _fetchPostItem(String postUid) async {
     final postProvider = Provider.of<PostProvider>(context, listen: false);
@@ -78,20 +76,9 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     }
   }
 
-  void _toggleFavorite() async {
-    final postProvider = Provider.of<PostProvider>(context, listen: false);
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final currentUser = await authProvider.getCurrentUser();
-    if (currentUser != null) {
-      await postProvider.toggleFavorite(widget.postUid, currentUser);
-      setState(() {
-        isFavorited = !isFavorited;
-      });
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('로그인이 필요합니다.')),
-      );
-    }
+  void _toggleFavorite(PostProvider postProvider, UserModel currentUser) async {
+    await postProvider.toggleFavorite(widget.postUid, currentUser);
+    setState(() {});
   }
 
   @override
@@ -227,20 +214,31 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   }
 
   Widget _buildPostTitle(PostProvider postProvider) {
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            postProvider.postModel?.postTitle ?? "Unknown Title",
-            style: const TextStyle(fontSize: 24),
-          ),
-        ),
-        FavoriteButtonWidget(
-          isFavorited: isFavorited,
-          padding: 8.0,
-          onPressed: _toggleFavorite,
-        ),
-      ],
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, _) {
+        final currentUser = authProvider.currentUserModel;
+        final postTitle = postProvider.postModel?.postTitle ?? "Unknown Title";
+        final isLiked = postProvider.isPostLiked(postTitle);
+
+        return Row(
+          children: [
+            Expanded(
+              child: Text(
+                postTitle,
+                style: const TextStyle(fontSize: 24),
+              ),
+            ),
+            if (currentUser != null)
+              IconButton(
+                icon: Icon(
+                  isLiked ? Icons.favorite : Icons.favorite_border,
+                  color: isLiked ? Colors.red : null,
+                ),
+                onPressed: () => _toggleFavorite(postProvider, currentUser),
+              ),
+          ],
+        );
+      },
     );
   }
 
