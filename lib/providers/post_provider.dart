@@ -46,6 +46,7 @@ class PostProvider with ChangeNotifier {
     }
   }
 
+
   Future<List<String>> _uploadImages(List<String> postImageList) async {
     FirebaseStorage storage = FirebaseStorage.instance;
     List<String> downloadPostImageList = [];
@@ -136,18 +137,28 @@ class PostProvider with ChangeNotifier {
 
         if (isCurrentlyFavorited) {
           post.removeFromFavorites(currentUser.uid);
-          _likedPostTitles.remove(post.postTitle);
+          _likedPostTitles.remove(post.postUid);
         } else {
           post.addToFavorites(currentUser);
-          _likedPostTitles.add(post.postTitle);
+          _likedPostTitles.add(post.postUid);
         }
 
         transaction.update(postDoc, {'favoriteList': post.favoriteList});
       });
 
-      // Update the local postModel if it's the currently viewed post
+      // Update postList if necessary
+      final index = postList.indexWhere((post) => post.postUid == postUid);
+      if (index != -1) {
+        postList[index].favoriteList = isPostLiked(postUid)
+            ? [...postList[index].favoriteList, currentUser.toMap()]
+            : postList[index].favoriteList.where((user) => user['uid'] != currentUser.uid).toList();
+      }
+
+      // Update postModel if it's the currently viewed post
       if (postModel?.postUid == postUid) {
-        await getPostItem(postUid);
+        postModel!.favoriteList = isPostLiked(postUid)
+            ? [...postModel!.favoriteList, currentUser.toMap()]
+            : postModel!.favoriteList.where((user) => user['uid'] != currentUser.uid).toList();
       }
 
       await _saveLikedPostTitles();
@@ -156,6 +167,7 @@ class PostProvider with ChangeNotifier {
       print("Error toggling favorite: $e");
     }
   }
+
 
   Future<Result> getPostItem(String postUid) async {
     isLoading = true;
@@ -215,15 +227,16 @@ class PostProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  bool isPostLiked(String postTitle) {
-    return _likedPostTitles.contains(postTitle);
+  bool isPostLiked(String postUid) {
+    final post = postList.firstWhere((post) => post.postUid == postUid, orElse: () => postModel!);
+    return _likedPostTitles.contains(post.postUid);
   }
 
   Future<String?> getPostIdByTitle(String title) async {
     try {
       final querySnapshot = await FirebaseFirestore.instance
           .collection('posts')
-          .where('postTitle', isEqualTo: title)
+          .where('postUid', isEqualTo: title)
           .limit(1)
           .get();
 
@@ -240,7 +253,7 @@ class PostProvider with ChangeNotifier {
     try {
       final querySnapshot = await FirebaseFirestore.instance
           .collection('posts')
-          .where('postTitle', isEqualTo: title)
+          .where('postUid', isEqualTo: title)
           .limit(1)
           .get();
 
