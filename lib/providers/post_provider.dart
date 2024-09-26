@@ -102,10 +102,10 @@ class PostProvider with ChangeNotifier {
 
         if (isCurrentlyFavorited) {
           post.removeFromFavorites(currentUser.uid);
-          _likedPostTitles.remove(post.postTitle);
+          _likedPostTitles.remove(post.postUid);
         } else {
           post.addToFavorites(currentUser);
-          _likedPostTitles.add(post.postTitle);
+          _likedPostTitles.add(post.postUid);
         }
 
         transaction.update(postDoc, {'favoriteList': post.favoriteList});
@@ -193,14 +193,14 @@ class PostProvider with ChangeNotifier {
 
   bool isPostLiked(String postUid) {
     final post = postList.firstWhere((post) => post.postUid == postUid, orElse: () => postModel!);
-    return _likedPostTitles.contains(post.postTitle);
+    return _likedPostTitles.contains(post.postUid);
   }
 
   Future<String?> getPostIdByTitle(String title) async {
     try {
       final querySnapshot = await FirebaseFirestore.instance
           .collection('posts')
-          .where('postTitle', isEqualTo: title)
+          .where('postUid', isEqualTo: title)
           .limit(1)
           .get();
 
@@ -217,7 +217,7 @@ class PostProvider with ChangeNotifier {
     try {
       final querySnapshot = await FirebaseFirestore.instance
           .collection('posts')
-          .where('postTitle', isEqualTo: title)
+          .where('postUid', isEqualTo: title)
           .limit(1)
           .get();
 
