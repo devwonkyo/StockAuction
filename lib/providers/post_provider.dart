@@ -356,4 +356,17 @@ class PostProvider with ChangeNotifier {
     return '${formatWithCommas(difference)}원 (+${percentage.toStringAsFixed(1)}%)';
   }
 
+  Future<PostModel?> getPostByUid(String postUid) async {
+    try {
+      final docSnapshot = await FirebaseFirestore.instance.collection('posts').doc(postUid).get();
+      if (docSnapshot.exists) {
+        return PostModel.fromMap(docSnapshot.data() as Map<String, dynamic>);
+      }
+      return null;
+    } catch (e) {
+      print("Error getting post by UID: $e");
+      return null;
+    }
+  }
+
 }
