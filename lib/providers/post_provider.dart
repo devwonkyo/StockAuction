@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:auction/models/bid_model.dart';
 import 'package:auction/models/post_model.dart';
 import 'package:auction/models/result_model.dart';
 import 'package:auction/models/user_model.dart';
@@ -283,11 +284,25 @@ class PostProvider with ChangeNotifier {
   }
 
 
+  //입찰 하기
+  Future<Result> addBidToPost(String postUid, BidModel bidData) async {
+    try {
+      await FirebaseFirestore.instance.collection('posts').doc(postUid).update({
+        'bidList': FieldValue.arrayUnion([bidData.toMap()])
+      });
+      return Result.success("입찰에 성공했습니다.");
+    } catch (e) {
+      return Result.failure("입찰에 실패했습니다. 실패 코드 : $e");
+    }
+  }
+
+
+
   void _calculateData() {
     //입찰가 가격차이 , 퍼센트
-    if ((postModel?.priceList.length ?? 0) > 1) {
-      final firstPrice = postModel!.priceList.first;
-      final lastPrice = postModel!.priceList.last;
+    if ((postModel?.bidList.length ?? 0) > 1) {
+      final firstPrice = postModel!.bidList.first.bidPrice;
+      final lastPrice = postModel!.bidList.last.bidPrice;
       _priceDifferenceAndPercentage = calculatePriceDifferenceAndPercentage(
         firstPriceString: firstPrice,
         lastPriceString: lastPrice,
@@ -296,10 +311,8 @@ class PostProvider with ChangeNotifier {
       _priceDifferenceAndPercentage = null;
     }
 
-    _postAuctionEndTime = calculateEndTimeSeconds(postModel?.endTime);
     //경매 남은 시간 계산
-
-
+    _postAuctionEndTime = calculateEndTimeSeconds(postModel?.endTime);
   }
 
 

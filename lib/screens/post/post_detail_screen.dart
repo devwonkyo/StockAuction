@@ -1,3 +1,4 @@
+import 'package:auction/models/bid_model.dart';
 import 'package:auction/utils/string_util.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -36,13 +37,15 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   void initState() {
     super.initState();
     _priceTextController = TextEditingController();
-    _priceFocusNode.addListener(() {
-      setState(() {
-        _isPriceFocused = _priceFocusNode.hasFocus;
-      });
-    });
+    _priceFocusNode.addListener(_onFocusChange);
 
     _loadData();
+  }
+
+  void _onFocusChange() {
+    setState(() {
+      _isPriceFocused = _priceFocusNode.hasFocus;
+    });
   }
 
   Future<void> _loadData() async {
@@ -327,7 +330,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
             children: [
               _buildPriceAndTimer(),
               const SizedBox(height: 16),
-              _buildBidInputAndButton(),
+              _buildBidInputAndButton(postProvider),
             ],
           ),
         ),
@@ -356,7 +359,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                     fit: BoxFit.scaleDown,
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      postProvider.postModel!.priceList.last,
+                      postProvider.postModel!.bidList.last.bidPrice,
                       style: const TextStyle(
                           fontSize: 24, fontWeight: FontWeight.bold),
                     ),
@@ -393,7 +396,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     );
   }
   //입찰 가격 버튼
-  Widget _buildBidInputAndButton() {
+  Widget _buildBidInputAndButton(PostProvider postProvider) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
@@ -401,6 +404,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
           child: TextField(
             controller: _priceTextController,
             keyboardType: TextInputType.number,
+            autofocus: false,
             focusNode: _priceFocusNode,
             onChanged: (value) {
               final formattedValue = formatPrice(value);
@@ -422,7 +426,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
             return ElevatedButton(
               onPressed: auctionTimerProvider.remainingTime != 0
                   ? () {
-                      // Bid logic here
+                bidStart(postProvider);
                     }
                   : null,
               style: ElevatedButton.styleFrom(
@@ -461,6 +465,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     );
   }
 
+  //댓글 입력 상세 화면
   Widget _buildCommentBottomSheetContent(
       BuildContext context, ScrollController scrollController) {
     final textColorProvider = Provider.of<TextProvider>(context);
@@ -598,5 +603,51 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       const SnackBar(content: Text('삭제 기능이 호출되었습니다.')),
     );
     context.go("/post/list");
+  }
+
+  //입찰 로직
+  void bidStart(PostProvider postProvider) {
+    if(_priceTextController.text.isEmpty){
+      showCustomAlertDialog(context: context, title: "알림", message: "가격을 입력해주세요.");
+      return;
+    }else if(parseIntPrice(_priceTextController.text) - parseIntPrice(postProvider.postModel!.bidList.last.bidPrice) <=0 ){
+      showCustomAlertDialog(context: context, title: "알림", message: "현재 입찰가보다 높은 금액을 입력해주세요.");
+      return;
+    }
+    showCustomAlertDialog(context: context, title: "알림", message: "입찰 하시겠습니까?",
+        positiveButtonText: "예" ,
+        onPositiveClick: () async {
+          context.pop();
+          final bidData = BidModel(bidUser: loginedUser!,
+              bidTime: DateTime.now.toString(),
+              bidPrice: "${_priceTextController.text}원");
+
+          final result = await postProvider.addBidToPost(postProvider.postModel!.postUid, bidData);
+
+
+          if(result.isSuccess){
+            print("isSuccess");
+            setState(() {
+              _priceTextController.clear(); // 텍스트 지우기
+              _priceFocusNode.unfocus();
+            });
+            showCustomAlertDialog(context: context, title: "알림", message: result.message ?? "입찰 되었습니다.",positiveButtonText: "확인");
+
+          }else{
+            showCustomAlertDialog(context: context, title: "알림", message: result.message ?? "입찰에 실패했습니다.");
+          }
+
+        },
+        negativeButtonText: "아니요",
+        onNegativeClick: null,
+    );
+  }
+
+  @override
+  void dispose() {
+    _priceTextController.dispose();
+    _priceFocusNode.removeListener(_onFocusChange);
+    _priceFocusNode.dispose();
+    super.dispose();
   }
 }
