@@ -257,7 +257,7 @@ class _PostAddScreenState extends State<PostAddScreen> {
                               final bid = BidModel(
                                   bidUser: loginUserData,
                                   bidTime: DateTime.now().toString(),
-                                  bidPrice: _priceController.text);
+                                  bidPrice: "${_priceController.text}원");
 
                               final postModel = PostModel(//Todo price 숫자 검증
                                   postUid: '',
