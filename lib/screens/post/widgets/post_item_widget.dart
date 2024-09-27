@@ -1,73 +1,98 @@
 import 'package:auction/config/color.dart';
 import 'package:auction/models/post_model.dart';
-import 'package:auction/screens/post/widgets/favorite_button_widget.dart';
+import 'package:auction/providers/post_provider.dart';
+import 'package:auction/providers/auth_provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 class PostItemWidget extends StatelessWidget {
   final PostModel postModel;
 
-  const PostItemWidget({super.key, required this.postModel});
+  const PostItemWidget({Key? key, required this.postModel}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: (){
-        print('postitemwidget postUid : ${postModel.postUid}');
-        context.push("/post/detail", extra: postModel.postUid);
-      },
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AspectRatio(
-            aspectRatio: 1,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8.0),
-              child: CachedNetworkImage(
-                  imageUrl: postModel.postImageList[0],
-                  errorWidget: (context, url, error) => const Icon(Icons.error),
-                  fit: BoxFit.cover),
+    return Consumer2<PostProvider, AuthProvider>(
+      builder: (context, postProvider, authProvider, _) {
+        final currentUser = authProvider.currentUserModel;
+        final isLiked = postProvider.isPostLiked(postModel.postUid);
+
+        return GestureDetector(
+          onTap: () {
+            print('postitemwidget postUid : ${postModel.postUid}');
+            context.push("/post/detail", extra: postModel.postUid);
+          },
+          child: Container(
+            height: 396,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AspectRatio(
+                  aspectRatio: 1,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8.0),
+                    child: CachedNetworkImage(
+                        imageUrl: postModel.postImageList[0],
+                        errorWidget: (context, url, error) => const Icon(Icons.error),
+                        fit: BoxFit.cover),
+                  ),
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          postModel.postTitle,
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          postModel.postContent,
+                          style: TextStyle(fontSize: 14),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const Spacer(),
+                        Text(
+                          postModel.priceList.last,
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                        const Text("현재 입찰가", style: TextStyle(fontSize: 12, color: AppsColor.darkGray)),
+                        const SizedBox(height: 4),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            IconButton(
+                              icon: Icon(
+                                isLiked ? Icons.favorite : Icons.favorite_border,
+                                color: isLiked ? Colors.red : null,
+                              ),
+                              onPressed: currentUser != null
+                                  ? () => postProvider.toggleFavorite(postModel.postUid, currentUser)
+                                  : null,
+                            ),
+                            Text(postModel.favoriteList.length.toString(), style: const TextStyle(fontSize: 16)),
+                            const SizedBox(width: 8),
+                            const Icon(Icons.article_outlined, size: 16),
+                            const SizedBox(width: 4),
+                            Text(postModel.commentList.length.toString(), style: const TextStyle(fontSize: 16)),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 10,),
-          Text(postModel.postTitle,style: const TextStyle(fontSize: 16,
-              fontWeight: FontWeight.bold),),
-          const SizedBox(height: 10),
-          Text(postModel.postContent,
-            style: TextStyle(fontSize: 14),
-            overflow: TextOverflow.ellipsis,
-            maxLines: 2,),
-          const SizedBox(height: 20,),
-          Text(postModel.priceList.last,style: const TextStyle(fontSize: 18 ,fontWeight: FontWeight.bold),),
-          const Text("현재 입찰가",style: TextStyle(fontSize: 12,color: AppsColor.darkGray),),
-          const SizedBox(height: 5,),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              GestureDetector(
-                onTap: (){
-                  print('click comment');
-                },
-                child: Row(
-                  children: [
-                    FavoriteButtonWidget(isFavorited: false,size: 16, onPressed: () {  },),
-                    Text(postModel.favoriteList.length.toString(),style: const TextStyle(fontSize: 16),)
-                  ],
-                ),
-              ),
-              const SizedBox(width: 5,),
-              Row(
-                children: [
-                  const Icon(Icons.article_outlined,size: 16,),
-                  Text(postModel.commentList.length.toString(),style: const TextStyle(fontSize: 16),)
-                ],
-              ),
-            ],
-          )
-        ],
-      ),
+        );
+      },
     );
   }
 }
