@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:auction/providers/theme_provider.dart';
 import 'package:auction/providers/post_provider.dart';
+import 'package:go_router/go_router.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -16,7 +17,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<String> _images = [
     'lib/assets/image/pic1.png',
     'lib/assets/image/pic2.png',
-    'lib/assets/image/pic3.jpeg',
+    'lib/assets/image/pic3.png',
   ];
 
   @override
@@ -38,7 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // 포스트 로드
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final postProvider = Provider.of<PostProvider>(context, listen: false);
-      postProvider.getAllPostList(); // 포스트 로드
+      postProvider.getAllPostList(); // 모든 포스트 로드
     });
   }
 
@@ -90,11 +91,17 @@ class _HomeScreenState extends State<HomeScreen> {
                   return Center(child: Text('포스트를 불러오는 데 오류가 발생했습니다.'));
                 }
 
+                // 전체 postList에서 최근 10개만 사용
+                final recentPosts = postProvider.postList.take(10).toList();
+
                 return SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
-                    children: postProvider.postList.map((post) {
-                      return auctionItem(theme, post);
+                    children: recentPosts.map((post) {
+                      return Container(
+                        width: 160, // 각 아이템의 너비 설정
+                        child: auctionItem(theme, post),
+                      );
                     }).toList(),
                   ),
                 );
@@ -107,47 +114,74 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget auctionItem(ThemeData theme, PostModel post) {
-    return Container(
-      margin: EdgeInsets.only(right: 10),
-      color: theme.cardColor,
-      width: 150, // 원하는 너비 설정
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 게시물 이미지 표시
-          Image.network(
-            post.postImageList.isNotEmpty ? post.postImageList[0] : '',
-            height: 100, // 이미지 높이 설정
-            width: double.infinity,
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) {
-              return Container(
-                color: Colors.grey[300], // 이미지 로딩 실패 시 회색 배경 표시
-                height: 100,
-                child: Center(child: Icon(Icons.error, color: Colors.red)),
-              );
-            },
-          ),
-          SizedBox(height: 5), // 이미지와 제목 간격
-          Text(
-            post.postTitle,
-            style: TextStyle(
-              fontSize: 18,
-              color: theme.textTheme.bodyLarge!.color,
+    // 기기의 세로 길이를 MediaQuery로 얻음
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    // 화면 높이에 따라 maxLines 값을 조정
+    int calculateMaxLines(double height) {
+      if (height > 800) {
+        return 3; // 큰 화면일 경우 더 많은 줄 수 허용
+      } else if (height > 600) {
+        return 2; // 중간 크기 화면
+      } else {
+        return 1; // 작은 화면일 경우 줄 수를 줄임
+      }
+    }
+
+    return GestureDetector(
+      onTap: () {
+        GoRouter.of(context).push('/post/detail', extra: post.postUid);
+      },
+      child: Container(
+        margin: EdgeInsets.only(right: 10),
+        color: theme.cardColor,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Image.network(
+              post.postImageList.isNotEmpty
+                  ? post.postImageList[0]
+                  : 'default_image_url',
+              fit: BoxFit.cover,
+              width: 120,
+              height: 100,
             ),
-            overflow: TextOverflow.ellipsis, // 넘칠 경우 ...로 표시
-            maxLines: 1, // 최대 줄 수
-          ),
-          SizedBox(height: 3), // 제목과 내용 간격
-          Text(
-            post.postContent,
-            style: TextStyle(
-              color: theme.textTheme.bodyMedium!.color,
+            SizedBox(height: 5),
+            Text(
+              post.postTitle,
+              style: TextStyle(
+                fontSize: 18,
+                color: theme.textTheme.bodyLarge!.color,
+              ),
             ),
-            overflow: TextOverflow.ellipsis, // 넘칠 경우 ...로 표시
-            maxLines: 2, // 최대 줄 수
-          ),
-        ],
+            SizedBox(height: 3),
+            // 본문 내용 길이를 제한하고 줄바꿈 처리
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: 140, // 너비 제한 설정 (줄바꿈이 될 지점)
+              ),
+              child: Text(
+                post.postContent,
+                maxLines: calculateMaxLines(screenHeight), // 화면 높이에 따른 줄 수 설정
+                overflow: TextOverflow.ellipsis, // 설정된 줄 수 이상일 경우 '...' 처리
+                softWrap: true, // 내용이 길면 줄바꿈 처리
+                style: TextStyle(
+                  color: theme.textTheme.bodyMedium!.color,
+                ),
+              ),
+            ),
+            SizedBox(height: 5),
+            // 가격 정보는 항상 보여야 함
+            Text(
+              post.bidList.isNotEmpty ? post.bidList.last.bidPrice : '가격 정보 없음',
+              style: TextStyle(
+                fontSize: 16, // 글씨 크기 조정
+                fontWeight: FontWeight.bold, // 글씨 두껍게
+                color: theme.textTheme.bodyMedium!.color,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
