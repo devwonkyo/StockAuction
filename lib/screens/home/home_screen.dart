@@ -19,28 +19,42 @@ class _HomeScreenState extends State<HomeScreen> {
     'lib/assets/image/pic2.png',
     'lib/assets/image/pic3.png',
   ];
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
-    Timer.periodic(Duration(seconds: 3), (Timer timer) {
-      if (_currentPage < _images.length - 1) {
-        _currentPage++;
-      } else {
-        _currentPage = 0;
-      }
-      _pageController.animateToPage(
-        _currentPage,
-        duration: Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
-    });
 
-    // 포스트 로드
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final postProvider = Provider.of<PostProvider>(context, listen: false);
-      postProvider.getAllPostList(); // 모든 포스트 로드
+      _startImageTimer();
+      _loadPosts();
     });
+  }
+
+  void _startImageTimer() {
+    _timer = Timer.periodic(Duration(seconds: 3), (Timer timer) {
+      if (mounted) {
+        setState(() {
+          if (_currentPage < _images.length - 1) {
+            _currentPage++;
+          } else {
+            _currentPage = 0;
+          }
+        });
+        if (_pageController.hasClients) {
+          _pageController.animateToPage(
+            _currentPage,
+            duration: Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+          );
+        }
+      }
+    });
+  }
+
+  void _loadPosts() {
+    final postProvider = Provider.of<PostProvider>(context, listen: false);
+    postProvider.getAllPostList(); // 모든 포스트 로드
   }
 
   @override
@@ -174,6 +188,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
+    _timer?.cancel();
     _pageController.dispose();
     super.dispose();
   }
