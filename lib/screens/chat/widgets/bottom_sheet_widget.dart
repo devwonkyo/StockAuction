@@ -1,8 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:auction/providers/chat_provider.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:auction/utils/permissions_util.dart';
+import 'package:auction/utils/custom_alert_dialog.dart';
 
 class BottomSheetWidget {
   final ImagePicker _picker = ImagePicker();
@@ -23,10 +25,11 @@ class BottomSheetWidget {
               },
             ),
             ListTile(
-              leading: Icon(Icons.photo),
-              title: Text('사진 보내기'),
+              leading: Icon(Icons.image),
+              title: Text('갤러리에서 사진 보내기'),
               onTap: () async {
                 Navigator.pop(context);
+
                 final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
                 if (image != null) {
                   _showConfirmationDialog(parentContext, image);
@@ -35,9 +38,21 @@ class BottomSheetWidget {
             ),
             ListTile(
               leading: Icon(Icons.camera_alt),
-              title: Text('사진 찍기'),
+              title: Text('카메라로 사진 찍고 보내기'),
               onTap: () async {
                 Navigator.pop(context);
+
+                bool hasPermission = await PermissionsUtil.requestCameraPermission();
+                if (!hasPermission) {
+                  showCustomAlertDialog(
+                    context: parentContext,
+                    title: "권한 필요",
+                    message: "이 작업을 위해서는 카메라 접근 권한이 필요합니다.",
+                    positiveButtonText: "확인",
+                  );
+                  return;
+                }
+
                 final XFile? image = await _picker.pickImage(source: ImageSource.camera);
                 if (image != null) {
                   _showConfirmationDialog(parentContext, image);
