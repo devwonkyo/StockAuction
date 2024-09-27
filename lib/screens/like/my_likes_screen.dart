@@ -45,6 +45,8 @@ class MyLikesScreen extends StatelessWidget {
                     }
 
                     final post = snapshot.data!;
+                    final latestBid = post.bidList.isNotEmpty ? post.bidList.last.bidPrice : '입찰 없음';
+
                     return ListTile(
                       leading: Container(
                         width: 50,
@@ -62,6 +64,7 @@ class MyLikesScreen extends StatelessWidget {
                             : Icon(Icons.image_not_supported),
                       ),
                       title: Text(post.postTitle),
+                      subtitle: Text('현재 입찰가: $latestBid'),
                       trailing: Icon(Icons.favorite, color: Colors.red),
                       onTap: () {
                         context.push('/post/detail', extra: post.postUid);
