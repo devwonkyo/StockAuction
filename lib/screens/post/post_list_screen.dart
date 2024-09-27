@@ -54,8 +54,8 @@ class _PostListScreenState extends State<PostListScreen> {
                 child: GridView.builder(
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2, // Number of columns
-                    mainAxisSpacing: 20, // Vertical spacing
-                    crossAxisSpacing: 10, // Horizontal spacing
+                    mainAxisSpacing: 10, // Vertical spacing
+                    crossAxisSpacing: 5, // Horizontal spacing
                     childAspectRatio: 1/2, // Adjust aspect ratio to fit your needs
                   ),
                   itemCount: postProvider.postList.length,
