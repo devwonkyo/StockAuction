@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:auction/models/bid_model.dart';
 import 'package:auction/utils/string_util.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +22,8 @@ import 'package:auction/providers/text_provider.dart';
 class PostDetailScreen extends StatefulWidget {
   final String postUid;
 
-  const PostDetailScreen({Key? key, required this.postUid}) : super(key: key);
+
+  const PostDetailScreen({Key? key, required this.postUid, req}) : super(key: key);
 
   @override
   _PostDetailScreenState createState() => _PostDetailScreenState();
@@ -32,6 +35,11 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   bool isLoading = true;
   bool _isPriceFocused = false;
   final _priceFocusNode = FocusNode();
+  bool _showAllComments = false;
+  static const int _initialCommentCount = 5;
+  static const int _incrementalCommentCount = 5;
+  int _displayedCommentCount = _initialCommentCount;
+
 
   @override
   void initState() {
@@ -267,6 +275,10 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   }
   //댓글 창
   Widget _buildCommentSection(PostProvider postProvider) {
+    final comments = postProvider.postModel?.commentList ?? [];
+    final commentCount = comments.length;
+    final displayedComments = comments.take(_displayedCommentCount).toList();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -276,7 +288,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '댓글 ${postProvider.postModel?.commentList.length}',
+                '댓글 $commentCount',
                 style: const TextStyle(fontSize: 14),
               ),
               GestureDetector(
@@ -290,30 +302,46 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
           ),
         ),
         const SizedBox(height: 20),
-        postProvider.postModel!.commentList.isEmpty
+        comments.isEmpty
             ? const Padding(
-                padding: EdgeInsets.symmetric(vertical: 20.0),
-                child: Center(
-                  child: Text(
-                    "아직 작성된 댓글이 없어요.\n제일 먼저 댓글을 작성해 보세요.",
-                    textAlign: TextAlign.center,
-                  ),
+          padding: EdgeInsets.symmetric(vertical: 20.0),
+          child: Center(
+            child: Text(
+              "아직 작성된 댓글이 없어요.\n제일 먼저 댓글을 작성해 보세요.",
+              textAlign: TextAlign.center,
+            ),
+          ),
+        )
+            : Column(
+          children: [
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: displayedComments.length,
+              itemBuilder: (context, index) {
+                return CommentWidget(
+                  commentModel: displayedComments[index],
+                  postUid: widget.postUid,
+                );
+              },
+            ),
+            if (_displayedCommentCount < commentCount)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _displayedCommentCount = min(
+                          _displayedCommentCount + _incrementalCommentCount,
+                          commentCount
+                      );
+                    });
+                  },
+                  child: Text('이전 댓글 ${min(_incrementalCommentCount, commentCount - _displayedCommentCount)}개 더보기'),
                 ),
-              )
-            : ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: postProvider.postModel?.commentList.length,
-                itemBuilder: (context, index) {
-                  return CommentWidget(
-                    commentModel: CommentModel(
-                      uId: "userId",
-                      comment: "comment",
-                      commentTime: "time",
-                    ),
-                  );
-                },
               ),
+          ],
+        ),
       ],
     );
   }
@@ -444,119 +472,79 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   }
 
   void _showCommentBottomSheet(BuildContext context) {
+    final commentController = TextEditingController();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       builder: (context) {
-        return ChangeNotifierProvider(
-          create: (context) => TextProvider(),
-          child: DraggableScrollableSheet(
-            expand: true,
-            snapAnimationDuration: const Duration(milliseconds: 400),
-            initialChildSize: 0.95,
-            minChildSize: 0.95,
-            maxChildSize: 0.95,
-            builder: (context, scrollController) {
-              return _buildCommentBottomSheetContent(context, scrollController);
-            },
-          ),
+        return DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: 0.4,
+          minChildSize: 0.2,
+          maxChildSize: 0.75,
+          builder: (context, scrollController) {
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  AppBar(
+                    title: const Text('댓글 작성'),
+                    actions: [
+                      TextButton(
+                        onPressed: () async {
+                          if (commentController.text.isNotEmpty) {
+                            final postProvider = Provider.of<PostProvider>(context, listen: false);
+                            final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                            final currentUser = authProvider.currentUserModel;
+                            if (currentUser != null) {
+                              final newComment = CommentModel(
+                                id: DateTime.now().millisecondsSinceEpoch.toString(), // 고유 id 생성
+                                uid: currentUser.uid,
+                                userProfileImage: currentUser.userProfileImage ?? '',
+                                userName: currentUser.nickname,
+                                comment: commentController.text,
+                                commentTime: DateTime.now(),
+                              );
+                              final result = await postProvider.addCommentToPost(widget.postUid, newComment);
+                              if (result.isSuccess) {
+                                Navigator.pop(context);
+                                setState(() {
+                                  _displayedCommentCount = _initialCommentCount;
+                                });
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(result.message ?? '댓글 작성에 실패했습니다.')),
+                                );
+                              }
+                            }
+                          }
+                        },
+                        child: const Text('작성'),
+                      ),
+                    ],
+                  ),
+                  Expanded(
+                    child: TextField(
+                      controller: commentController,
+                      maxLines: null,
+                      decoration: const InputDecoration(
+                        hintText: '댓글을 입력하세요',
+                        contentPadding: EdgeInsets.all(16),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
         );
       },
     );
   }
 
-  //댓글 입력 상세 화면
-  Widget _buildCommentBottomSheetContent(
-      BuildContext context, ScrollController scrollController) {
-    final textColorProvider = Provider.of<TextProvider>(context);
-    return Container(
-      decoration: const BoxDecoration(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Column(
-        children: [
-          Container(
-            width: 40,
-            height: 5,
-            decoration: BoxDecoration(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.white
-                  : Colors.grey[400],
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-          const SizedBox(height: 5),
-          const Text("댓글"),
-          Expanded(
-            child: SingleChildScrollView(
-              controller: scrollController,
-              child: Column(
-                children: [
-                  ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: 10,
-                    itemBuilder: (context, index) {
-                      return CommentWidget(
-                        commentModel: CommentModel(
-                          uId: "userId",
-                          comment: "comment",
-                          commentTime: "time",
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
-              top: 10.0,
-              left: 8.0,
-              right: 8.0,
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: textColorProvider.commentController,
-                    decoration: InputDecoration(
-                      hintText: '댓글 추가...',
-                      hintStyle: const TextStyle(color: Colors.grey),
-                      filled: true,
-                      fillColor: AppsColor.lightGray,
-                      contentPadding: const EdgeInsets.only(left: 20),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                  ),
-                ),
-                textColorProvider.isTextEmpty
-                    ? const IconButton(
-                        icon: Icon(Icons.send, color: Colors.grey),
-                        onPressed: null,
-                      )
-                    : IconButton(
-                        icon: const Icon(Icons.send,
-                            color: AppsColor.pastelGreen),
-                        onPressed: () {
-                          // 댓글 작성 로직
-                          print(textColorProvider.commentController.text);
-                        },
-                      ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   void _showOptionsBottomSheet(BuildContext context) {
     showModalBottomSheet(
