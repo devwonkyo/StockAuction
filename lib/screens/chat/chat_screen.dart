@@ -75,7 +75,14 @@ class _ChatScreenState extends State<ChatScreen> {
                 IconButton(
                   icon: Icon(Icons.add),
                   onPressed: () {
-                    bottomSheetWidget.showBottomSheetMenu(context);
+                    bottomSheetWidget.showBottomSheetMenu(
+                      parentContext: context,
+                      chatId: widget.chatId,
+                      userId: authProvider.currentUser?.uid ?? '',
+                      otherUserId: otherUserId!,
+                      currentUserProfileImage: authProvider.currentUserModel?.userProfileImage ?? '',
+                      username: authProvider.currentUserModel?.nickname ?? 'Unknown User',
+                    );
                   },
                 ),
                 // 메시지 입력 공간
