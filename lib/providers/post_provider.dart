@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:auction/models/bid_model.dart';
+import 'package:auction/models/comment_model.dart';
 import 'package:auction/models/post_model.dart';
 import 'package:auction/models/result_model.dart';
 import 'package:auction/models/user_model.dart';
@@ -89,6 +90,7 @@ class PostProvider with ChangeNotifier {
     _postStream!.listen((DocumentSnapshot snapshot) {
       if (snapshot.exists) {
         postModel = PostModel.fromMap(snapshot.data() as Map<String, dynamic>);
+        _sortComments(); // 댓글 정렬
         _calculateData();
         isLoading = false;
         notifyListeners();
@@ -188,12 +190,13 @@ class PostProvider with ChangeNotifier {
       final ref = await FirebaseFirestore.instance.collection('posts').doc(postUid).get();
       if (ref.exists) {
         postModel = PostModel.fromMap(ref.data() as Map<String, dynamic>);
+        _sortComments(); // 댓글 정렬
         return DataResult<PostModel>.success(postModel!, "post 가져오기 성공");
       } else {
         return Result.failure("해당 게시물을 찾을 수 없습니다.");
       }
     } catch (e) {
-      hasError = true; // 오류 발생 시 오류 상태 설정
+      hasError = true;
       return Result.failure("데이터를 불러오지 못했습니다. 에러메시지 : $e");
     } finally {
       isLoading = false;
@@ -371,6 +374,110 @@ class PostProvider with ChangeNotifier {
 
   List<PostModel> getMyBidPosts(String userId) {
     return postList.where((post) => post.bidList.any((bid) => bid.bidUser.uid == userId)).toList();
+  }
+
+  Future<Result> addCommentToPost(String postUid, CommentModel comment) async {
+    try {
+      final postRef = FirebaseFirestore.instance.collection('posts').doc(postUid);
+
+      return FirebaseFirestore.instance.runTransaction((transaction) async {
+        final snapshot = await transaction.get(postRef);
+        if (!snapshot.exists) {
+          return Result.failure("게시물을 찾을 수 없습니다.");
+        }
+
+        final post = PostModel.fromMap(snapshot.data()!);
+
+        // 중복 댓글 확인
+        if (post.commentList.any((c) => c.uid == comment.uid && c.commentTime == comment.commentTime)) {
+          return Result.failure("이미 추가된 댓글입니다.");
+        }
+
+        post.commentList.add(comment);
+        post.commentList.sort((a, b) => b.commentTime.compareTo(a.commentTime));
+
+        transaction.update(postRef, {'commentList': post.commentList.map((c) => c.toMap()).toList()});
+
+        // Update local postModel if it's the current post
+        if (postModel?.postUid == postUid) {
+          postModel = post;
+          notifyListeners();
+        }
+
+        return Result.success("댓글이 추가되었습니다.");
+      });
+    } catch (e) {
+      return Result.failure("댓글 추가에 실패했습니다. 오류: $e");
+    }
+  }
+
+  void _sortComments() {
+    if (postModel != null && postModel!.commentList.isNotEmpty) {
+      postModel!.commentList.sort((a, b) => b.commentTime.compareTo(a.commentTime));
+    }
+  }
+
+  Future<Result> editComment(String postUid, CommentModel updatedComment) async {
+    try {
+      final postDoc = FirebaseFirestore.instance.collection('posts').doc(postUid);
+      final postSnapshot = await postDoc.get();
+      if (!postSnapshot.exists) {
+        return Result.failure("게시물을 찾을 수 없습니다.");
+      }
+
+      final post = PostModel.fromMap(postSnapshot.data()!);
+      final commentIndex = post.commentList.indexWhere((c) => c.uid == updatedComment.uid);
+      if (commentIndex == -1) {
+        return Result.failure("댓글을 찾을 수 없습니다.");
+      }
+
+      post.commentList[commentIndex] = updatedComment;
+
+      await postDoc.update({'commentList': post.commentList.map((c) => c.toMap()).toList()});
+
+      // Update local postModel if it's the current post
+      if (postModel?.postUid == postUid) {
+        postModel!.commentList[commentIndex] = updatedComment;
+        notifyListeners();
+      }
+
+      return Result.success("댓글이 수정되었습니다.");
+    } catch (e) {
+      return Result.failure("댓글 수정에 실패했습니다. 오류: $e");
+    }
+  }
+
+  Future<Result> deleteComment(String postUid, String commentId) async {
+    try {
+      final postDoc = FirebaseFirestore.instance.collection('posts').doc(postUid);
+
+      return FirebaseFirestore.instance.runTransaction((transaction) async {
+        final snapshot = await transaction.get(postDoc);
+        if (!snapshot.exists) {
+          return Result.failure("게시물을 찾을 수 없습니다.");
+        }
+
+        final post = PostModel.fromMap(snapshot.data()!);
+        final initialCommentCount = post.commentList.length;
+        post.commentList.removeWhere((c) => c.id == commentId);
+
+        if (post.commentList.length == initialCommentCount) {
+          return Result.failure("해당 댓글을 찾을 수 없습니다.");
+        }
+
+        transaction.update(postDoc, {'commentList': post.commentList.map((c) => c.toMap()).toList()});
+
+        // Update local postModel if it's the current post
+        if (postModel?.postUid == postUid) {
+          postModel = post;
+          notifyListeners();
+        }
+
+        return Result.success("댓글이 삭제되었습니다.");
+      });
+    } catch (e) {
+      return Result.failure("댓글 삭제에 실패했습니다. 오류: $e");
+    }
   }
 
 }
