@@ -25,21 +25,10 @@ class BottomSheetWidget {
               },
             ),
             ListTile(
-              leading: Icon(Icons.photo),
-              title: Text('사진 보내기'),
+              leading: Icon(Icons.image),
+              title: Text('갤러리에서 사진 보내기'),
               onTap: () async {
                 Navigator.pop(context);
-
-                bool hasPermission = await PermissionsUtil.requestGalleryPermission();
-                if (!hasPermission) {
-                  showCustomAlertDialog(
-                    context: context,
-                    title: "권한 필요",
-                    message: "이 작업을 위해서는 갤러리 접근 권한이 필요합니다.",
-                    positiveButtonText: "확인",
-                  );
-                  return;
-                }
 
                 final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
                 if (image != null) {
@@ -49,14 +38,14 @@ class BottomSheetWidget {
             ),
             ListTile(
               leading: Icon(Icons.camera_alt),
-              title: Text('사진 찍기'),
+              title: Text('카메라로 사진 찍고 보내기'),
               onTap: () async {
                 Navigator.pop(context);
 
                 bool hasPermission = await PermissionsUtil.requestCameraPermission();
                 if (!hasPermission) {
                   showCustomAlertDialog(
-                    context: context,
+                    context: parentContext,
                     title: "권한 필요",
                     message: "이 작업을 위해서는 카메라 접근 권한이 필요합니다.",
                     positiveButtonText: "확인",
