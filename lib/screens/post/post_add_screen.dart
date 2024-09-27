@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:auction/config/color.dart';
+import 'package:auction/models/bid_model.dart';
 import 'package:auction/models/post_model.dart';
 import 'package:auction/models/user_model.dart';
 import 'package:auction/providers/post_provider.dart';
@@ -253,6 +254,10 @@ class _PostAddScreenState extends State<PostAddScreen> {
 
                               final userData = await SharedPrefsUtil.getUserData();
                               final loginUserData = UserModel.fromMap(userData);
+                              final bid = BidModel(
+                                  bidUser: loginUserData,
+                                  bidTime: DateTime.now().toString(),
+                                  bidPrice: _priceController.text);
 
                               final postModel = PostModel(//Todo price 숫자 검증
                                   postUid: '',
@@ -262,12 +267,12 @@ class _PostAddScreenState extends State<PostAddScreen> {
                                   createTime: DateTime.now(),
                                   endTime: _selectedDateTime ?? DateTime.now(),
                                   postImageList: postImageProvider.imageList,
-                                  priceList: List.of(["${_priceController.text}원"]),
+                                  bidList: List<BidModel>.of([bid]),
                               );
                               final result = await postProvider.addPostItem(postModel);
 
                               if(result.isSuccess){
-                                showCustomAlertDialog(context: context, title:  "알림", message: result.message ?? "게시물을 등록했습니다.", onClick: () => context.go('/main/post'));
+                                showCustomAlertDialog(context: context, title:  "알림", message: result.message ?? "게시물을 등록했습니다.", onPositiveClick: () => context.go('/main/post'));
                               }else{
                                 showCustomAlertDialog(context: context, title: "알림", message: result.message ?? "게시물 등록에 실패했습니다.");
                               }
