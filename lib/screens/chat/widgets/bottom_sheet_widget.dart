@@ -9,11 +9,17 @@ import 'package:auction/utils/custom_alert_dialog.dart';
 class BottomSheetWidget {
   final ImagePicker _picker = ImagePicker();
 
-  void showBottomSheetMenu(BuildContext context) {
-    final parentContext = context;
+  void showBottomSheetMenu({
+    required BuildContext parentContext,
+    required String chatId,
+    required String userId,
+    required String otherUserId,
+    required String currentUserProfileImage,
+    required String username,
+  }) {
 
     showModalBottomSheet(
-      context: context,
+      context: parentContext,
       builder: (BuildContext context) {
         return Wrap(
           children: [
@@ -32,7 +38,7 @@ class BottomSheetWidget {
 
                 final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
                 if (image != null) {
-                  _showConfirmationDialog(parentContext, image);
+                  _showConfirmationDialog(parentContext, image, chatId, userId, otherUserId, currentUserProfileImage, username);
                 }
               },
             ),
@@ -55,7 +61,7 @@ class BottomSheetWidget {
 
                 final XFile? image = await _picker.pickImage(source: ImageSource.camera);
                 if (image != null) {
-                  _showConfirmationDialog(parentContext, image);
+                  _showConfirmationDialog(parentContext, image, chatId, userId, otherUserId, currentUserProfileImage, username);
                 }
               },
             ),
@@ -65,7 +71,15 @@ class BottomSheetWidget {
     );
   }
 
-   void _showConfirmationDialog(BuildContext context, XFile image) {
+  void _showConfirmationDialog(
+    BuildContext context,
+    XFile image,
+    String chatId,
+    String userId,
+    String otherUserId,
+    String currentUserProfileImage,
+    String username,
+  ) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -82,15 +96,19 @@ class BottomSheetWidget {
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
-                
+
                 // 현재 사용자의 정보 가져오기
                 final chatProvider = Provider.of<ChatProvider>(context, listen: false);
 
-                final chatId = chatProvider.currentChatId;
-                final userId = chatProvider.currentUserId;
-                final username = chatProvider.currentUsername;
-
-                chatProvider.sendImageMessage(chatId, userId, image, username);
+                // 이미지를 전송하는 함수 호출
+                chatProvider.sendImageMessage(
+                  chatId,
+                  userId,
+                  image,
+                  username,
+                  otherUserId,
+                  currentUserProfileImage,
+                );
               },
               child: Text('예'),
             ),
