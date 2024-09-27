@@ -1,35 +1,28 @@
 import 'package:flutter/material.dart';
 
-class FavoriteButtonWidget extends StatefulWidget {
-  bool isFavorited;
-  double size;
-  double padding;
+class FavoriteButtonWidget extends StatelessWidget {
+  final String postUid;
+  final bool isFavorited;
+  final VoidCallback onPressed;
+  final double padding;
 
-  FavoriteButtonWidget(
-      {super.key, required this.isFavorited, this.size = 30.0, this.padding = 0, required void Function() onPressed});
-
-  @override
-  State createState() => _FavoriteButtonWidgetState();
-}
-class _FavoriteButtonWidgetState extends State<FavoriteButtonWidget> {
-
+  const FavoriteButtonWidget({
+    Key? key,
+    required this.postUid,
+    required this.isFavorited,
+    required this.onPressed,
+    this.padding = 8.0,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          widget.isFavorited = !widget.isFavorited; // 아이콘 상태 변경
-        });
-      },
-      child: Padding(
-        padding: EdgeInsets.all(widget.padding),
-        child: Icon(
-          widget.isFavorited ? Icons.favorite : Icons.favorite_border,
-          color: widget.isFavorited ? Colors.red : null,
-          size: widget.size,
-        ),
+    return IconButton(
+      icon: Icon(
+        isFavorited ? Icons.favorite : Icons.favorite_border,
+        color: isFavorited ? Colors.red : null,
       ),
+      padding: EdgeInsets.all(padding),
+      onPressed: onPressed,
     );
   }
 }

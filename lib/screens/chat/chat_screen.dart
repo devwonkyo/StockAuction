@@ -2,7 +2,8 @@ import 'package:provider/provider.dart';
 import 'package:auction/providers/chat_provider.dart';
 import 'package:auction/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:auction/screens/chat/widgets/bottom_sheet_widget.dart';
+import 'package:auction/screens/chat/widgets/message_bubble_widget.dart';
 
 class ChatScreen extends StatefulWidget {
   final String chatId;
@@ -15,6 +16,7 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController messageController = TextEditingController();
+  final BottomSheetWidget bottomSheetWidget = BottomSheetWidget();
   String? otherUserNickname;
   String? otherUserId;
 
@@ -38,8 +40,10 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final chatNotifier = Provider.of<ChatProvider>(context);
+    final chatProvider = Provider.of<ChatProvider>(context);
     final authProvider = Provider.of<AuthProvider>(context);
+
+    chatProvider.setCurrentChatInfo(widget.chatId, authProvider.currentUser?.uid ?? '', authProvider.currentUserModel?.nickname ?? 'Unknown User');
 
     return Scaffold(
       appBar: AppBar(
@@ -50,15 +54,15 @@ class _ChatScreenState extends State<ChatScreen> {
           // 메시지 올라오는 공간
           Expanded(
             child: ListView.builder(
-              // reverse 실행 UI 확인 후 수정해야될수도
               reverse: true,
-              itemCount: chatNotifier.messages.length,
+              itemCount: chatProvider.messages.length,
               itemBuilder: (ctx, index) {
-                final message = chatNotifier.messages[index];
+                final message = chatProvider.messages[index];
                 return MessageBubble(
                   message.text,
                   message.uId == authProvider.currentUser?.uid,
                   message.profileImageUrl,
+                  imageUrl: message.imageUrl,
                 );
               },
             ),
@@ -67,6 +71,13 @@ class _ChatScreenState extends State<ChatScreen> {
             padding: const EdgeInsets.all(8.0),
             child: Row(
               children: <Widget>[
+                // 더하기 버튼
+                IconButton(
+                  icon: Icon(Icons.add),
+                  onPressed: () {
+                    bottomSheetWidget.showBottomSheetMenu(context);
+                  },
+                ),
                 // 메시지 입력 공간
                 Expanded(
                   child: TextField(
@@ -96,47 +107,6 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
         ],
       ),
-    );
-  }
-}
-
-// 말풍선
-class MessageBubble extends StatelessWidget {
-  final String message;
-  final bool isMe;
-  final String? profileImageUrl;
-
-  MessageBubble(this.message, this.isMe, this.profileImageUrl);
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      // 나는 오른쪽부터 정렬, 내가 아니면 왼쪽부터 정렬
-      mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
-      children: <Widget>[
-        // 상대방은 이미지가 뜨도록 설정
-        if (!isMe && profileImageUrl != null)
-          CircleAvatar(
-            backgroundImage: CachedNetworkImageProvider(profileImageUrl!),
-            radius: 15,
-          ),
-        // 메시지 포함하는 말풍선
-        Container(
-          constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.6),
-          decoration: BoxDecoration(
-            color: isMe ? Colors.grey[300] : Colors.blue[300],
-            borderRadius: BorderRadius.circular(12),
-          ),
-          padding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-          margin: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-          child: Text(
-            message,
-            style: TextStyle(
-              color: isMe ? Colors.black : Colors.white,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }
