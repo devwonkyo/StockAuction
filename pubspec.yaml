@@ -83,7 +83,7 @@ flutter:
   assets:
     - lib/assets/image/pic1.png
     - lib/assets/image/pic2.png
-    - lib/assets/image/pic3.jpeg
+    - lib/assets/image/pic3.png
     - lib/assets/image/defaultUserProfile.png
     - lib/assets/image/loginimage.png
 
