@@ -28,24 +28,25 @@ class _MySoldScreenState extends State<MySoldScreen> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            if (GoRouter.of(context).canPop()) {
-              context.pop(); // 스택에 남아있는 페이지가 있을 때만 pop
-            } else {
-              context.go('/my'); // 스택에 더 이상 페이지가 없다면 메인 화면으로 이동
-            }
-          },
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              // 설정 페이지로 이동
-            },
-          ),
-        ],
+        title: Text('판매 목록'),
+        // leading: IconButton(
+        //   icon: const Icon(Icons.arrow_back),
+        //   onPressed: () {
+        //     if (GoRouter.of(context).canPop()) {
+        //       context.pop(); // 스택에 남아있는 페이지가 있을 때만 pop
+        //     } else {
+        //       context.go('/my'); // 스택에 더 이상 페이지가 없다면 메인 화면으로 이동
+        //     }
+        //   },
+        // ),
+        // actions: [
+        //   IconButton(
+        //     icon: const Icon(Icons.settings),
+        //     onPressed: () {
+        //       // 설정 페이지로 이동
+        //     },
+        //   ),
+        // ],
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
