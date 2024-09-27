@@ -104,16 +104,6 @@ class _MyPageState extends State<MyScreen> {
       appBar: AppBar(
         title: const Text('MY'),
         centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            if (GoRouter.of(context).canPop()) {
-              context.pop();
-            } else {
-              context.go('/my');
-            }
-          },
-        ),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -168,6 +158,13 @@ class _MyPageState extends State<MyScreen> {
               title: const Text('나의 구매'),
               onTap: () {
                 context.go('/bought');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.folder),
+              title: const Text('나의 입찰 목록'),
+              onTap: () {
+                context.push('/my-bids');
               },
             ),
             const Divider(),
