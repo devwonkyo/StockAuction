@@ -1,28 +1,57 @@
-class CommentModel{
-  String uId;
-  String? userProfileImage;
-  String comment;
-  String commentTime;
+class CommentModel {
+  final String id; // 새로운 고유 식별자
+  final String uid;
+  final String userProfileImage;
+  final String userName;
+  final String comment;
+  final DateTime commentTime;
 
-  CommentModel({required this.uId, required this.comment,required this.commentTime, this.userProfileImage = ""});
+  CommentModel({
+    required this.id,
+    required this.uid,
+    required this.userProfileImage,
+    required this.userName,
+    required this.comment,
+    required this.commentTime,
+  });
 
-  // CommentModel을 Map으로 변환
   Map<String, dynamic> toMap() {
     return {
-      'uId': uId,
-      'userProfileImage': userProfileImage, // Nullable 처리
+      'id': id,
+      'uid': uid,
+      'userProfileImage': userProfileImage,
+      'userName': userName,
       'comment': comment,
-      'commentTime': commentTime,
+      'commentTime': commentTime.toIso8601String(),
     };
   }
 
-  // Map을 CommentModel로 변환
   factory CommentModel.fromMap(Map<String, dynamic> map) {
     return CommentModel(
-      uId: map['uId'] ?? '', // userId가 없으면 빈 문자열
-      userProfileImage: map['userProfileImage'], // Nullable 처리
-      comment: map['comment'] ?? '', // comment가 없으면 빈 문자열
-      commentTime: map['commentTime'] ?? '', // commentTime이 없으면 빈 문자열
+      id: map['id'] ?? '',
+      uid: map['uid'] ?? '',
+      userProfileImage: map['userProfileImage'] ?? '',
+      userName: map['userName'] ?? '',
+      comment: map['comment'] ?? '',
+      commentTime: DateTime.parse(map['commentTime']),
+    );
+  }
+
+  CommentModel copyWith({
+    String? id,
+    String? uid,
+    String? userProfileImage,
+    String? userName,
+    String? comment,
+    DateTime? commentTime,
+  }) {
+    return CommentModel(
+      id: id ?? this.id,
+      uid: uid ?? this.uid,
+      userProfileImage: userProfileImage ?? this.userProfileImage,
+      userName: userName ?? this.userName,
+      comment: comment ?? this.comment,
+      commentTime: commentTime ?? this.commentTime,
     );
   }
 }
