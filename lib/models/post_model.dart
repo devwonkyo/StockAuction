@@ -3,6 +3,9 @@ import 'package:auction/models/comment_model.dart';
 import 'package:auction/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+enum AuctionStatus { bidding,  successBidding, failBidding } // 경매 진행 상태
+enum StockStatus { bidding, readySell, successSell, failedSell } // 물품의 상태
+
 class PostModel {
   String postUid;
   UserModel writeUser;
@@ -15,6 +18,8 @@ class PostModel {
   List<CommentModel> commentList;
   List<BidModel> bidList;
   bool isDone;
+  AuctionStatus auctionStatus;
+  StockStatus stockStatus;
 
   PostModel({
     required this.postUid,
@@ -28,6 +33,8 @@ class PostModel {
     List<CommentModel>? commentList,
     List<BidModel>? bidList,
     bool? isDone,
+    this.auctionStatus = AuctionStatus.bidding,
+    this.stockStatus = StockStatus.bidding,
   })
       : favoriteList = favoriteList ?? [],
         commentList = commentList ?? [],
@@ -48,6 +55,8 @@ class PostModel {
       'commentList': commentList.map((comment) => comment.toMap()).toList(),
       'bidList': bidList.map((bid) => bid.toMap()).toList(),
       'isDone': isDone,
+      'auctionStatus': auctionStatus.index,
+      'stockStatus': stockStatus.index,
     };
   }
 
@@ -71,6 +80,8 @@ class PostModel {
           .toList() ??
           [],
       isDone: map['isDone'] ?? false,
+      auctionStatus: AuctionStatus.values[map['auctionStatus'] ?? 0],
+      stockStatus: StockStatus.values[map['stockStatus'] ?? 0],
     );
   }
 
