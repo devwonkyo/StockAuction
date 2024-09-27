@@ -27,11 +27,10 @@ import 'package:auction/screens/other/other_profile_screen.dart';
 // GoRouter.of(context).go('/example');
 // GoRouter.of(context).push('/example');
 
-
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 
 final GoRouter router = GoRouter(
-  initialLocation: '/main',
+  initialLocation: '/login',
   navigatorKey: rootNavigatorKey,
   routes: [
     GoRoute(
