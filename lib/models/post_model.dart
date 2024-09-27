@@ -11,7 +11,6 @@ class PostModel {
   DateTime createTime;
   DateTime endTime;
   List<String> postImageList;
-  List<String> priceList;
   List<Map<String, dynamic>> favoriteList;
   List<CommentModel> commentList;
   List<BidModel> bidList;
@@ -25,7 +24,6 @@ class PostModel {
     required this.createTime,
     required this.endTime,
     required this.postImageList,
-    required this.priceList,
     List<Map<String, dynamic>>? favoriteList,
     List<CommentModel>? commentList,
     List<BidModel>? bidList,
@@ -46,7 +44,6 @@ class PostModel {
       'createTime': Timestamp.fromDate(createTime),
       'endTime': Timestamp.fromDate(endTime),
       'postImageList': postImageList,
-      'priceList': priceList,
       'favoriteList': favoriteList,
       'commentList': commentList.map((comment) => comment.toMap()).toList(),
       'bidList': bidList.map((bid) => bid.toMap()).toList(),
@@ -64,7 +61,6 @@ class PostModel {
       createTime: (map['createTime'] as Timestamp).toDate(),
       endTime: (map['endTime'] as Timestamp).toDate(),
       postImageList: List<String>.from(map['postImageList'] ?? []),
-      priceList: List<String>.from(map['priceList'] ?? []),
       favoriteList: List<Map<String, dynamic>>.from(map['favoriteList'] ?? []),
       commentList: (map['commentList'] as List<dynamic>?)
           ?.map((commentMap) => CommentModel.fromMap(commentMap))
