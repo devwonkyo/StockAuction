@@ -173,7 +173,7 @@ class _HomeScreenState extends State<HomeScreen> {
             SizedBox(height: 5),
             // 가격 정보는 항상 보여야 함
             Text(
-              '${post.priceList.isNotEmpty ? post.priceList.last : '가격 정보 없음'}',
+              post.bidList.isNotEmpty ? post.bidList.last.bidPrice : '가격 정보 없음',
               style: TextStyle(
                 fontSize: 16, // 글씨 크기 조정
                 fontWeight: FontWeight.bold, // 글씨 두껍게
