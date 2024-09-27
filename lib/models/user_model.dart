@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:auction/models/post_model.dart';
 
 class UserModel {
   final String uid;
@@ -8,7 +9,9 @@ class UserModel {
   final String? pushToken;
   final String? userProfileImage;
   final DateTime? birthDate;
-  final List<String> likeList; // New field for liked post UIDs
+  final List<String> likeList;
+  final List<PostModel> sellList;
+  final List<PostModel> buyList;
 
   UserModel({
     required this.uid,
@@ -18,8 +21,12 @@ class UserModel {
     this.pushToken,
     this.userProfileImage,
     this.birthDate,
-    List<String>? likeList, // Optional parameter
-  }) : likeList = likeList ?? []; // Initialize with empty list if not provided
+    List<String>? likeList,
+    List<PostModel>? sellList,
+    List<PostModel>? buyList,
+  }) : likeList = likeList ?? [],
+        sellList = sellList ?? [],
+        buyList = buyList ?? [];
 
   Map<String, dynamic> toMap() {
     return {
@@ -30,7 +37,9 @@ class UserModel {
       'pushToken': pushToken,
       'userProfileImage': userProfileImage,
       'birthDate': birthDate,
-      'likeList': likeList, // Include likeList in the map
+      'likeList': likeList,
+      'sellList': sellList.map((post) => post.toMap()).toList(),
+      'buyList': buyList.map((post) => post.toMap()).toList(),
     };
   }
 
@@ -43,7 +52,15 @@ class UserModel {
       pushToken: map['pushToken'],
       userProfileImage: map['userProfileImage'],
       birthDate: map['birthDate'] != null ? (map['birthDate'] as Timestamp).toDate() : null,
-      likeList: List<String>.from(map['likeList'] ?? []), // Convert to List<String>
+      likeList: List<String>.from(map['likeList'] ?? []),
+      sellList: (map['sellList'] as List<dynamic>?)
+              ?.map((postMap) => PostModel.fromMap(postMap))
+              .toList() ??
+          [],
+      buyList: (map['buyList'] as List<dynamic>?)
+              ?.map((postMap) => PostModel.fromMap(postMap))
+              .toList() ??
+          [],
     );
   }
 }
