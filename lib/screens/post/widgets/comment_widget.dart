@@ -27,7 +27,7 @@ class CommentWidget extends StatelessWidget {
           CircleAvatar(
             backgroundImage: commentModel.userProfileImage.isNotEmpty
                 ? NetworkImage(commentModel.userProfileImage)
-                : const AssetImage('assets/default_profile.png') as ImageProvider,
+                : const AssetImage('lib/assets/image/defaultUserProfile.png') as ImageProvider,
             radius: 20,
           ),
           const SizedBox(width: 12),
