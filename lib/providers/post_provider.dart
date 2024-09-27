@@ -369,4 +369,8 @@ class PostProvider with ChangeNotifier {
     }
   }
 
+  List<PostModel> getMyBidPosts(String userId) {
+    return postList.where((post) => post.bidList.any((bid) => bid.bidUser.uid == userId)).toList();
+  }
+
 }

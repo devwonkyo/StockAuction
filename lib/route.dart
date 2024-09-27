@@ -1,3 +1,4 @@
+import 'package:auction/screens/my/my_bid_screen.dart';
 import 'package:auction/screens/post/post_modify_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -123,6 +124,10 @@ final GoRouter router = GoRouter(
         final uId = state.pathParameters['uId']!;
         return OtherProfileScreen(uId: uId); // userId 전달
       },
+    ),
+    GoRoute(
+      path: '/my-bids',
+      builder: (context, state) => MyBidsScreen(),
     ),
   ],
 );
