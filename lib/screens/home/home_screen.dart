@@ -138,13 +138,15 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Image.network(
-              post.postImageList.isNotEmpty
-                  ? post.postImageList[0]
-                  : 'default_image_url',
-              fit: BoxFit.cover,
-              width: 120,
-              height: 100,
+            Expanded(
+              child: Image.network(
+                post.postImageList.isNotEmpty
+                    ? post.postImageList[0]
+                    : 'default_image_url',
+                fit: BoxFit.cover,
+                width: 120,
+                height: 100,
+              ),
             ),
             SizedBox(height: 5),
             Text(
@@ -155,22 +157,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             SizedBox(height: 3),
-            // 본문 내용 길이를 제한하고 줄바꿈 처리
-            ConstrainedBox(
-              constraints: BoxConstraints(
-                maxWidth: 140, // 너비 제한 설정 (줄바꿈이 될 지점)
-              ),
-              child: Text(
-                post.postContent,
-                maxLines: calculateMaxLines(screenHeight), // 화면 높이에 따른 줄 수 설정
-                overflow: TextOverflow.ellipsis, // 설정된 줄 수 이상일 경우 '...' 처리
-                softWrap: true, // 내용이 길면 줄바꿈 처리
-                style: TextStyle(
-                  color: theme.textTheme.bodyMedium!.color,
-                ),
-              ),
-            ),
-            SizedBox(height: 5),
             // 가격 정보는 항상 보여야 함
             Text(
               post.bidList.isNotEmpty ? post.bidList.last.bidPrice : '가격 정보 없음',
