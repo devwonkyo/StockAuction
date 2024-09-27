@@ -451,20 +451,37 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         const SizedBox(width: 20),
         Consumer<AuctionTimerProvider>(
           builder: (context, auctionTimerProvider, child) {
-            return ElevatedButton(
-              onPressed: auctionTimerProvider.remainingTime != 0
-                  ? () {
-                bidStart(postProvider);
-                    }
-                  : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: auctionTimerProvider.remainingTime != 0
-                    ? AppsColor.pastelGreen
-                    : Colors.grey,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              ),
-              child: const Text('입찰하기', style: TextStyle(color: Colors.white)),
-            );
+            if(loginedUser!.uid == postProvider.postModel!.writeUser.uid){
+              return ElevatedButton( //내가 판매자 인 경우
+                onPressed: auctionTimerProvider.remainingTime != 0
+                    ? () {
+                  // successbidStart(postProvider); -> 마지막 입찰자를 낙찰자로 선정, state를 selling ->  bidSuccess로 -> soldOut
+                }
+                    : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: auctionTimerProvider.remainingTime != 0
+                      ? AppsColor.pastelGreen
+                      : Colors.grey,
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                ),
+                child: const Text('낙찰하기', style: TextStyle(color: Colors.white)),
+              );
+            }else{
+              return ElevatedButton( // 내가 입찰자 인 경우
+                onPressed: auctionTimerProvider.remainingTime != 0
+                    ? () {
+                  bidStart(postProvider);
+                }
+                    : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: auctionTimerProvider.remainingTime != 0
+                      ? AppsColor.pastelGreen
+                      : Colors.grey,
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                ),
+                child: const Text('입찰하기', style: TextStyle(color: Colors.white)),
+              );
+            }
           },
         ),
       ],

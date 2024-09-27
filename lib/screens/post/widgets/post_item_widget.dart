@@ -25,21 +25,24 @@ class PostItemWidget extends StatelessWidget {
             context.push("/post/detail", extra: postModel.postUid);
           },
           child: Container(
-            height: 396,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                AspectRatio(
-                  aspectRatio: 1,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8.0),
-                    child: CachedNetworkImage(
-                        imageUrl: postModel.postImageList[0],
-                        errorWidget: (context, url, error) => const Icon(Icons.error),
-                        fit: BoxFit.cover),
+                Expanded(
+                  flex: 4,
+                  child: AspectRatio(
+                    aspectRatio: 1,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8.0),
+                      child: CachedNetworkImage(
+                          imageUrl: postModel.postImageList[0],
+                          errorWidget: (context, url, error) => const Icon(Icons.error),
+                          fit: BoxFit.cover),
+                    ),
                   ),
                 ),
                 Expanded(
+                  flex:5,
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Column(
