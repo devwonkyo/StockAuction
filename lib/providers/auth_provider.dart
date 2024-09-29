@@ -1,3 +1,4 @@
+import 'package:auction/models/result_model.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -20,6 +21,7 @@ class AuthProvider extends ChangeNotifier {
   bool _stayLoggedIn = false;
   bool _resetEmailSent = false;
   bool _isEmailVerified = false;
+  bool _isLoading = false;
   UserModel? _currentUserModel;
 
   AuthProvider() {
@@ -39,6 +41,7 @@ class AuthProvider extends ChangeNotifier {
   bool get stayLoggedIn => _stayLoggedIn;
   bool get resetEmailSent => _resetEmailSent;
   bool get isEmailVerified => _isEmailVerified;
+  bool get isLoading => _isLoading;
   User? get currentUser => _auth.currentUser;
   UserModel? get currentUserModel => _currentUserModel;
 
@@ -276,6 +279,40 @@ class AuthProvider extends ChangeNotifier {
     await _auth.sendPasswordResetEmail(email: _email);
     setResetEmailSent(true);
     print("Password reset email sent");
+  }
+
+  //판매 물품 추가시 selList에 목록 추가
+  Future<Result> addPostIntoSellList(String userUid, String postUid) async {
+    _isLoading = true;
+    notifyListeners;
+    try {
+      await FirebaseFirestore.instance.collection('users').doc(userUid).update({
+        'sellList': FieldValue.arrayUnion([postUid])
+      });
+      return Result.success("판매리스트에 등록되었습니다.");
+    } catch (e) {
+      return Result.failure("판매리스트에 등록 실패했습니다. 실패 코드 : $e");
+    }finally{
+      _isLoading = false;
+      notifyListeners;
+    }
+  }
+
+
+  //판매 물품 삭제시 selList 에서 목록 삭제
+  Future<Result> deletePostInSellList(String userUid, String postUid) async{
+    _isLoading = true;
+    try {
+      print("userUid : $userUid, postUid : $postUid");
+      await FirebaseFirestore.instance.collection('users').doc(userUid).update({
+        'sellList': FieldValue.arrayRemove([postUid])
+      });
+      return Result.success("판매리스트에서 삭제되었습니다.");
+    } catch (e) {
+      return Result.failure("판매리스트에서 삭제 실패했습니다. 실패 코드 : $e");
+    }finally{
+      _isLoading = false;
+    }
   }
 
   /////////////////////////////////////////////
