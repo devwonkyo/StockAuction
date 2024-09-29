@@ -4,6 +4,7 @@ import 'package:auction/config/color.dart';
 import 'package:auction/models/bid_model.dart';
 import 'package:auction/models/post_model.dart';
 import 'package:auction/models/user_model.dart';
+import 'package:auction/providers/auth_provider.dart';
 import 'package:auction/providers/post_provider.dart';
 import 'package:auction/route.dart';
 import 'package:auction/screens/post/widgets/post_Image_item.dart';
@@ -53,6 +54,7 @@ class _PostAddScreenState extends State<PostAddScreen> {
   @override
   Widget build(BuildContext context) {
     final postProvider = Provider.of<PostProvider>(context);
+    final authProvider = Provider.of<AuthProvider>(context);
 
     return ChangeNotifierProvider(
       create: (context) => PostImageProvider(),
@@ -247,7 +249,7 @@ class _PostAddScreenState extends State<PostAddScreen> {
                         child: Padding(
                             padding: const EdgeInsets.all(10.0),
                             child: ElevatedButton(
-                                onPressed: postProvider.isLoading
+                                onPressed: postProvider.isLoading || authProvider.isLoading
                                     ? null
                                     : () async {
                                   //빈 항목 검증
@@ -273,12 +275,13 @@ class _PostAddScreenState extends State<PostAddScreen> {
                                       postImageList: postImageProvider.imageList,
                                       bidList: List<BidModel>.of([bid]),
                                   );
-                                  final result = await postProvider.addPostItem(postModel);
+                                  final postResult = await postProvider.addPostItem(postModel);
+                                  final addPostIntoSellListResult = await authProvider.addPostIntoSellList(loginUserData.uid,postModel.postUid);
 
-                                  if(result.isSuccess){
-                                    showCustomAlertDialog(context: context, title:  "알림", message: result.message ?? "게시물을 등록했습니다.", onPositiveClick: () => context.go('/main/post'));
+                                  if(postResult.isSuccess && addPostIntoSellListResult.isSuccess){
+                                    showCustomAlertDialog(context: context, title:  "알림", message: postResult.message ?? "게시물을 등록했습니다.", onPositiveClick: () => context.go('/main/post'));
                                   }else{
-                                    showCustomAlertDialog(context: context, title: "알림", message: result.message ?? "게시물 등록에 실패했습니다.");
+                                    showCustomAlertDialog(context: context, title: "알림", message: "게시물 등록중 오류가 발생했습니다. 오류메시지 : ${postResult.message} , ${addPostIntoSellListResult.message}");
                                   }
                                 },
                                 style: ElevatedButton.styleFrom(
@@ -286,7 +289,7 @@ class _PostAddScreenState extends State<PostAddScreen> {
                                     foregroundColor: Colors.white,
                                     shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(10.0))),
-                                child: postProvider.isLoading
+                                child: postProvider.isLoading || authProvider.isLoading
                                     ? const SizedBox(
                                   width: 20,
                                   height: 20,
@@ -303,7 +306,7 @@ class _PostAddScreenState extends State<PostAddScreen> {
                     ),
                   ],
                 ),
-                if (postProvider.isLoading)
+                if (postProvider.isLoading || authProvider.isLoading)
                   Container(
                     color: Colors.black.withOpacity(0.5),
                     child: const Center(
