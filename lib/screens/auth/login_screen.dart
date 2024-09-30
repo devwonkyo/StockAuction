@@ -1,4 +1,6 @@
 import 'package:auction/utils/SharedPrefsUtil.dart';
+import 'package:auction/utils/notification_handler.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -32,6 +34,14 @@ class LoginScreen extends StatelessWidget {
       _formKey.currentState!.save();
       try {
         await authProvider.login();
+
+        // 로그인 성공 시 알림 표시
+        final notificationHandler = Provider.of<NotificationHandler>(context, listen: false);
+        await notificationHandler.showCustomNotification(
+          title: "로그인 성공",
+          body: "환영합니다! 성공적으로 로그인되었습니다.",
+        );
+
         context.go('/main');
       } catch (e) {
         _showErrorDialog(context, '아이디 또는 비밀번호를 확인해주세요');
