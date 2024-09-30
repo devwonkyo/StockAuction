@@ -39,6 +39,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
 
+  /*String? fcmToken = await FirebaseMessaging.instance.getToken();
+  print('fcmToken : $fcmToken');*/
 
   // Firebase Messaging 설정
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
@@ -71,16 +73,6 @@ void main() async {
       child: MyApp(),
     ),
   );
-}
-
-Future<void> _callHelloWorldFunction() async {
-  try {
-    HttpsCallable callable = FirebaseFunctions.instanceFor(region: 'asia-northeast3').httpsCallable('helloWorld');
-    final result = await callable.call();
-    print("success : ${result.data}");
-  } catch (e) {
-    print("error : $e");
-  }
 }
 
 class MyApp extends StatefulWidget {
