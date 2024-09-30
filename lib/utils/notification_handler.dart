@@ -104,4 +104,24 @@ class NotificationHandler {
   Future<String?> getToken() async {
     return await _firebaseMessaging.getToken();
   }
+
+  Future<void> showCustomNotification({required String title, required String body}) async {
+    final AndroidNotificationDetails androidPlatformChannelSpecifics =
+    AndroidNotificationDetails(
+      'general_channel',
+      'General Notifications',
+      importance: Importance.defaultImportance,
+      priority: Priority.defaultPriority,
+    );
+    final NotificationDetails platformChannelSpecifics =
+    NotificationDetails(android: androidPlatformChannelSpecifics);
+
+    await _flutterLocalNotificationsPlugin.show(
+      0,
+      title,
+      body,
+      platformChannelSpecifics,
+    );
+  }
+
 }
