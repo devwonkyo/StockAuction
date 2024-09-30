@@ -1,6 +1,7 @@
 import 'package:auction/config/theme.dart';
 import 'package:auction/models/user_model.dart';
 import 'package:auction/utils/notification_handler.dart';
+import 'package:auction/firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:auction/route.dart';
@@ -51,6 +52,9 @@ void main() async {
 
   final notificationHandler = NotificationHandler();
   await notificationHandler.initialize();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );// Firebase 초기화
 
   runApp(
     MultiProvider(
