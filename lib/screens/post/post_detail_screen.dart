@@ -216,37 +216,40 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     );
   }
 
+  void _navigateToUserProfile(String userId) {
+    context.push('/other/profile/$userId');
+  }
+
   Widget _buildUserInfo(PostProvider postProvider) {
+    final user = postProvider.postModel?.writeUser;
     return GestureDetector(
-      onTap: () => GoRouter.of(context).push(
-        '/other/profile/${postProvider.postModel?.writeUser.uid}',
-      ),
+      onTap: () => _navigateToUserProfile(user?.uid ?? ''),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           ClipOval(
-            child: postProvider.postModel?.writeUser.userProfileImage == "" ||
-                    postProvider.postModel?.writeUser.userProfileImage == null
+            child: user?.userProfileImage == null || user?.userProfileImage == ""
                 ? Image.asset(
-                    "lib/assets/image/defaultUserProfile.png",
-                    width: 45,
-                    height: 45,
-                    fit: BoxFit.cover,
-                  )
+              "lib/assets/image/defaultUserProfile.png",
+              width: 45,
+              height: 45,
+              fit: BoxFit.cover,
+            )
                 : Image.network(
-                    postProvider.postModel!.writeUser.userProfileImage!,
-                    width: 45,
-                    height: 45,
-                    fit: BoxFit.cover,
-                  ),
+              user!.userProfileImage!,
+              width: 45,
+              height: 45,
+              fit: BoxFit.cover,
+            ),
           ),
           const SizedBox(width: 10),
-          Text(postProvider.postModel?.writeUser.nickname ?? "Unknown User"),
+          Text(user?.nickname ?? "Unknown User"),
         ],
       ),
     );
   }
+
   //포스트 상세화면 제목 내용
   Widget _buildPostTitle(PostProvider postProvider) {
     return Consumer<AuthProvider>(
