@@ -70,7 +70,9 @@ class ChatProvider extends ChangeNotifier {
           'title': post.postTitle,
           'status': '확정 대기 중',
           'buttons': ['확인', '취소']
-        }
+        },
+        'messageType': 'purchaseConfirmation',
+        'status': 'ready',
       });
 
       notifyListeners();
