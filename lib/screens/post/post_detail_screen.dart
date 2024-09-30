@@ -651,17 +651,17 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
           context: context, title: "알림", message: "현재 입찰가보다 높은 금액을 입력해주세요.");
       return;
     }
-    showCustomAlertDialog(
-      context: context,
-      title: "알림",
-      message: "입찰 하시겠습니까?",
-      positiveButtonText: "예",
-      onPositiveClick: () async {
-        context.pop();
-        final bidData = BidModel(
-            bidUser: loginedUser!,
-            bidTime: DateTime.now.toString(),
-            bidPrice: "${_priceTextController.text}원");
+
+    showCustomAlertDialog(context: context, title: "알림", message: "입찰 하시겠습니까?",
+        positiveButtonText: "예" ,
+        onPositiveClick: () async {
+          context.pop();
+          final bidData = BidModel(
+              bidUser: loginedUser!,
+              bidTime: DateTime.now(), // DateTime 객체로 직접 전달
+              bidPrice: "${_priceTextController.text}원"
+          );
+
 
         final result = await postProvider.addBidToPost(
             postProvider.postModel!.postUid, bidData);
