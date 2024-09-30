@@ -3,14 +3,18 @@ import 'package:intl/intl.dart';
 
 class BidItemWidget extends StatelessWidget {
   final String bidUserName;
+  final String bidUserId;
   final String bidPrice;
   final DateTime bidTime;
+  final Function(String) onUserTap;
 
   const BidItemWidget({
     Key? key,
     required this.bidUserName,
+    required this.bidUserId,
     required this.bidPrice,
     required this.bidTime,
+    required this.onUserTap,
   }) : super(key: key);
 
   @override
@@ -22,7 +26,16 @@ class BidItemWidget extends StatelessWidget {
         children: [
           Expanded(
             flex: 3,
-            child: Text(bidUserName, style: const TextStyle(fontSize: 14)),
+            child: GestureDetector(
+              onTap: () => onUserTap(bidUserId),
+              child: Text(
+                bidUserName,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.black,
+                ),
+              ),
+            ),
           ),
           Expanded(
             flex: 1,
