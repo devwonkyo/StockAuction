@@ -68,7 +68,9 @@ class _OtherProfileScreenState extends State<OtherProfileScreen> {
                       color: Colors.blue,
                       onPressed: () {
                         // 채팅 화면으로 이동
-                        final chatId = [widget.uId, authProvider.currentUser?.uid].join('_');
+                        final ids = [widget.uId, authProvider.currentUser?.uid];
+                        ids.sort();
+                        final chatId = ids.join('_');
                         GoRouter.of(context).push('/chat/$chatId');
                       },
                     ),
