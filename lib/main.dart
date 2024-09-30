@@ -1,7 +1,10 @@
 import 'package:auction/config/theme.dart';
+import 'package:auction/firebase_options.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:auction/route.dart';
+
 // provider 패키지 및 파일
 import 'package:provider/provider.dart';
 import 'package:auction/providers/post_provider.dart';
@@ -10,13 +13,17 @@ import 'package:auction/providers/chat_provider.dart';
 import 'package:auction/providers/auth_provider.dart';
 import 'package:auction/providers/my_provider.dart';
 import 'package:auction/providers/user_provider.dart';
+
 // firebase 패키지
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(); // Firebase 초기화
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );// Firebase 초기화
+  await _callHelloWorldFunction();
 
   runApp(
     MultiProvider(
@@ -36,17 +43,29 @@ void main() async {
   );
 }
 
+Future<void> _callHelloWorldFunction() async {
+  try {
+    HttpsCallable callable = FirebaseFunctions.instanceFor(region: 'asia-northeast3').httpsCallable('helloWorld');
+    final result = await callable.call();
+    print("success : ${result.data}");
+  } catch (e) {
+    print("error : $e");
+  }
+}
+
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<ThemeProvider>(
       builder: (context, themeProvider, child) {
         return MaterialApp.router(
-          theme: themeProvider.currentTheme, // 라이트 모드 테마
-          darkTheme: darkThemeData(), // 다크 모드 테마
-          themeMode: themeProvider.isDarkTheme
-              ? ThemeMode.dark
-              : ThemeMode.light, // 테마 모드 설정
+          theme: themeProvider.currentTheme,
+          // 라이트 모드 테마
+          darkTheme: darkThemeData(),
+          // 다크 모드 테마
+          themeMode:
+              themeProvider.isDarkTheme ? ThemeMode.dark : ThemeMode.light,
+          // 테마 모드 설정
           routerDelegate: router.routerDelegate,
           routeInformationParser: router.routeInformationParser,
           routeInformationProvider: router.routeInformationProvider,
