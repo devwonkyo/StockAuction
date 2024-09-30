@@ -1,12 +1,11 @@
 import 'package:auction/config/theme.dart';
-import 'package:auction/firebase_options.dart';
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:auction/models/user_model.dart';
 import 'package:auction/utils/notification_handler.dart';
+import 'package:auction/firebase_options.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:auction/route.dart';
-
 // provider 패키지 및 파일
 import 'package:provider/provider.dart';
 import 'package:auction/providers/post_provider.dart';
@@ -15,7 +14,6 @@ import 'package:auction/providers/chat_provider.dart';
 import 'package:auction/providers/auth_provider.dart';
 import 'package:auction/providers/my_provider.dart';
 import 'package:auction/providers/user_provider.dart';
-
 // firebase 패키지
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -39,10 +37,6 @@ const AndroidNotificationChannel channel = AndroidNotificationChannel(
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );// Firebase 초기화
-  await _callHelloWorldFunction();
   await Firebase.initializeApp();
 
 
@@ -59,6 +53,9 @@ void main() async {
 
   final notificationHandler = NotificationHandler();
   await notificationHandler.initialize();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );// Firebase 초기화
 
   runApp(
     MultiProvider(
@@ -134,8 +131,12 @@ class _MyAppState extends State<MyApp> {
       builder: (context, themeProvider, child) {
         return MaterialApp.router(
           theme: themeProvider.currentTheme,
+          // 라이트 모드 테마
           darkTheme: darkThemeData(),
-          themeMode: themeProvider.isDarkTheme ? ThemeMode.dark : ThemeMode.light,
+          // 다크 모드 테마
+          themeMode:
+              themeProvider.isDarkTheme ? ThemeMode.dark : ThemeMode.light,
+          // 테마 모드 설정
           routerDelegate: router.routerDelegate,
           routeInformationParser: router.routeInformationParser,
           routeInformationProvider: router.routeInformationProvider,

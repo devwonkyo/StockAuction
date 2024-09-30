@@ -1,6 +1,5 @@
 import 'package:auction/utils/SharedPrefsUtil.dart';
 import 'package:auction/utils/notification_handler.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
