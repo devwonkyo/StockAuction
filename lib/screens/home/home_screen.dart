@@ -52,9 +52,12 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+
+
+
   void _loadPosts() {
     final postProvider = Provider.of<PostProvider>(context, listen: false);
-    postProvider.getAllPostList(); // 모든 포스트 로드
+    postProvider.getAllPostList(); // 모든 포스트 로드!
   }
 
   @override
