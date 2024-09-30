@@ -25,17 +25,20 @@ class _ChatScreenState extends State<ChatScreen> {
     super.initState();
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
-    final ids = widget.chatId.split('_');
-    otherUserId = ids[0] == authProvider.currentUser?.uid ? ids[1] : ids[0];
+    final userId = authProvider.currentUser?.uid ?? '';
+    final ids = [userId, widget.chatId.replaceFirst(userId, '')];
+    ids.sort();
+    otherUserId = ids.first == userId ? ids.last : ids.first;
 
-    // 상대방의 닉네임을 가져오기
+    final orderedChatId = '${ids[0]}_${ids[1]}';
+
+    Provider.of<ChatProvider>(context, listen: false).listenToMessages(orderedChatId);
+
     authProvider.getUserNickname(otherUserId!).then((thisUserName) {
       setState(() {
         otherUserNickname = thisUserName ?? 'Unknown User';
       });
     });
-
-    Provider.of<ChatProvider>(context, listen: false).listenToMessages(widget.chatId);
   }
 
   @override
