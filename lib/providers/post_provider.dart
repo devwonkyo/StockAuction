@@ -181,13 +181,14 @@ class PostProvider with ChangeNotifier {
     }
   }
 
-  Future<Result> biddingPostItem(String postUid, String biddingUserUid, AuctionStatus auctionStatus) async {
+  Future<Result> biddingPostItem(String postUid, String biddingUserUid, AuctionStatus auctionStatus, StockStatus stockStatus) async {
     isLoading = true;
     notifyListeners();
 
     try {
       Map<String, dynamic> data = {
         'auctionStatus': auctionStatus.index,
+        'stockStatus': stockStatus.index,
         'successBiddingUser': biddingUserUid
       };
 

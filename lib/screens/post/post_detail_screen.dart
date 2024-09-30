@@ -693,7 +693,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     final result = await postProvider.biddingPostItem(
         postProvider.postModel!.postUid,
         loginedUser!.uid,
-        AuctionStatus.successBidding);
+        AuctionStatus.successBidding,
+        StockStatus.readySell);
     if (result.isSuccess) {
       showCustomAlertDialog(
           context: context,
