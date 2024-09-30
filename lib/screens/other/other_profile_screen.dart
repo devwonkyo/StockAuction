@@ -59,12 +59,6 @@ class _OtherProfileScreenState extends State<OtherProfileScreen> {
                     userProvider.user!.nickname,
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(height: 8),
-                  // 해당 유저 아이디 표시
-                  Text(
-                    'ID: ${userProvider.user!.uid}',
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
                   SizedBox(height: 16),
                   // 본인이 아닌 다른 사람 프로필 눌렀을때만 뜨는 아이콘 버튼 ↓↓↓
                   if (!isCurrentUser)
