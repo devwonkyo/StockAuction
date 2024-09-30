@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:auction/models/bid_model.dart';
 import 'package:auction/models/post_model.dart';
+import 'package:auction/utils/function_method.dart';
 import 'package:auction/utils/string_util.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -670,11 +671,16 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
             postProvider.postModel!.postUid, bidData);
 
         if (result.isSuccess) {
-          print("isSuccess");
           setState(() {
             _priceTextController.clear(); // 텍스트 지우기
             _priceFocusNode.unfocus();
           });
+
+          //입찰 push 보내기
+          sendNotification(title: "입찰 알림",
+              body: "${postProvider.postModel!.bidList.last.bidUser.nickname}님이 입찰하셨습니다. 확인해보세요!",
+              pushToken: postProvider.postModel!.bidList.last.bidUser.pushToken ?? "", screen: "/post/detail?${postProvider.postModel!.postUid}");
+
           showCustomAlertDialog(
               context: context,
               title: "알림",
@@ -699,6 +705,12 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         AuctionStatus.successBidding,
         StockStatus.readySell);
     if (result.isSuccess) {
+
+      //낙찰 push 알림
+      sendNotification(title: "낙찰 알림",
+          body: "${postProvider.postModel!.postTitle}이 낙찰되었습니다. 확인해보세요!",
+          pushToken: postProvider.postModel!.bidList.last.bidUser.pushToken ?? "", screen: "/post/detail?${postProvider.postModel!.postUid}");
+
       showCustomAlertDialog(
           context: context,
           title: "알림",
@@ -718,4 +730,5 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     _priceFocusNode.dispose();
     super.dispose();
   }
+
 }
