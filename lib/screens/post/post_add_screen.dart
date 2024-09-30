@@ -256,12 +256,13 @@ class _PostAddScreenState extends State<PostAddScreen> {
                                     return;
                                   }
 
-                                  final userData = await SharedPrefsUtil.getUserData();
-                                  final loginUserData = UserModel.fromMap(userData);
-                                  final bid = BidModel(
-                                      bidUser: loginUserData,
-                                      bidTime: DateTime.now().toString(),
-                                      bidPrice: "${_priceController.text}원");
+                              final userData = await SharedPrefsUtil.getUserData();
+                              final loginUserData = UserModel.fromMap(userData);
+                              final bid = BidModel(
+                                  bidUser: loginUserData,
+                                  bidTime: DateTime.now(), // DateTime 객체로 직접 전달
+                                  bidPrice: "${_priceController.text}원"
+                              );
 
                                   final postModel = PostModel(//Todo price 숫자 검증
                                       postUid: '',
