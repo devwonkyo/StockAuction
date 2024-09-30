@@ -2,6 +2,7 @@ import 'package:auction/models/comment_model.dart';
 import 'package:auction/providers/auth_provider.dart';
 import 'package:auction/providers/post_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 class CommentWidget extends StatelessWidget {
@@ -24,11 +25,17 @@ class CommentWidget extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(
-            backgroundImage: commentModel.userProfileImage.isNotEmpty
-                ? NetworkImage(commentModel.userProfileImage)
-                : const AssetImage('lib/assets/image/defaultUserProfile.png') as ImageProvider,
-            radius: 20,
+          GestureDetector(
+            onTap: (){
+              //profile 화면이동
+              GoRouter.of(context).push('/other/profile/${commentModel.uid}');
+            },
+            child: CircleAvatar(
+              backgroundImage: commentModel.userProfileImage.isNotEmpty
+                  ? NetworkImage(commentModel.userProfileImage)
+                  : const AssetImage('lib/assets/image/defaultUserProfile.png') as ImageProvider,
+              radius: 20,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(

@@ -10,8 +10,8 @@ class UserModel {
   final String? userProfileImage;
   final DateTime? birthDate;
   final List<String> likeList;
-  final List<PostModel> sellList;
-  final List<PostModel> buyList;
+  final List<String> sellList;
+  final List<String> buyList;
 
   UserModel({
     required this.uid,
@@ -22,8 +22,8 @@ class UserModel {
     this.userProfileImage,
     this.birthDate,
     List<String>? likeList,
-    List<PostModel>? sellList,
-    List<PostModel>? buyList,
+    List<String>? sellList,
+    List<String>? buyList,
   }) : likeList = likeList ?? [],
         sellList = sellList ?? [],
         buyList = buyList ?? [];
@@ -38,8 +38,8 @@ class UserModel {
       'userProfileImage': userProfileImage,
       'birthDate': birthDate,
       'likeList': likeList,
-      'sellList': sellList.map((post) => post.toMap()).toList(),
-      'buyList': buyList.map((post) => post.toMap()).toList(),
+      'sellList': sellList,
+      'buyList': buyList,
     };
   }
 
@@ -53,14 +53,8 @@ class UserModel {
       userProfileImage: map['userProfileImage'],
       birthDate: map['birthDate'] != null ? (map['birthDate'] as Timestamp).toDate() : null,
       likeList: List<String>.from(map['likeList'] ?? []),
-      sellList: (map['sellList'] as List<dynamic>?)
-              ?.map((postMap) => PostModel.fromMap(postMap))
-              .toList() ??
-          [],
-      buyList: (map['buyList'] as List<dynamic>?)
-              ?.map((postMap) => PostModel.fromMap(postMap))
-              .toList() ??
-          [],
+      sellList: List<String>.from(map['sellList'] ?? []),
+      buyList: List<String>.from(map['buyList'] ?? []),
     );
   }
 }

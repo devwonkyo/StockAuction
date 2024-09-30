@@ -20,6 +20,7 @@ class PostModel {
   bool isDone;
   AuctionStatus auctionStatus;
   StockStatus stockStatus;
+  String successBiddingUser;
 
   PostModel({
     required this.postUid,
@@ -35,6 +36,7 @@ class PostModel {
     bool? isDone,
     this.auctionStatus = AuctionStatus.bidding,
     this.stockStatus = StockStatus.bidding,
+    this.successBiddingUser = "",
   })
       : favoriteList = favoriteList ?? [],
         commentList = commentList ?? [],
@@ -57,6 +59,7 @@ class PostModel {
       'isDone': isDone,
       'auctionStatus': auctionStatus.index,
       'stockStatus': stockStatus.index,
+      'successBiddingUser': successBiddingUser,
     };
   }
 
@@ -82,6 +85,7 @@ class PostModel {
       isDone: map['isDone'] ?? false,
       auctionStatus: AuctionStatus.values[map['auctionStatus'] ?? 0],
       stockStatus: StockStatus.values[map['stockStatus'] ?? 0],
+      successBiddingUser: map['successBiddingUser'] ?? '',
     );
   }
 
