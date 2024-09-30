@@ -81,7 +81,7 @@ final GoRouter router = GoRouter(
     ),
     GoRoute(
       path: '/post/bidList',
-      builder: (context, state) => BidListScreen(),
+      builder: (context, state) => BidListScreen(postUid: '',),
     ),
     GoRoute(
       path: '/chat/:chatId',

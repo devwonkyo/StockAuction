@@ -623,9 +623,12 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         positiveButtonText: "예" ,
         onPositiveClick: () async {
           context.pop();
-          final bidData = BidModel(bidUser: loginedUser!,
-              bidTime: DateTime.now.toString(),
-              bidPrice: "${_priceTextController.text}원");
+          final bidData = BidModel(
+              bidUser: loginedUser!,
+              bidTime: DateTime.now(), // DateTime 객체로 직접 전달
+              bidPrice: "${_priceTextController.text}원"
+          );
+
 
           final result = await postProvider.addBidToPost(postProvider.postModel!.postUid, bidData);
 
