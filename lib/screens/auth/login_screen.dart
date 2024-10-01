@@ -34,13 +34,7 @@ class LoginScreen extends StatelessWidget {
       try {
         await authProvider.login();
 
-        // 로그인 성공 시 알림 표시
-        final notificationHandler = Provider.of<NotificationHandler>(context, listen: false);
-        await notificationHandler.showCustomNotification(
-          title: "로그인 성공",
-          body: "환영합니다! 성공적으로 로그인되었습니다.", screen: '',
-        );
-
+        // 로그인 성공 시 바로 메인 페이지로 이동
         context.go('/main');
       } catch (e) {
         _showErrorDialog(context, '아이디 또는 비밀번호를 확인해주세요');
