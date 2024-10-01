@@ -99,6 +99,13 @@ class ChatProvider extends ChangeNotifier {
         'messageType': 'purchaseConfirmation',
         'status': currentStatus,
       });
+
+      DocumentReference chatRef = _firestore.collection('chats').doc(chatId);
+      await chatRef.update({
+        'lastActivityTime': Timestamp.now(),
+        'lastMessage': '[거래를 완료해주세요]',
+      });
+
       sendNotification(title: "알림", body: "${post.postTitle} 거래 확정 메시지가 도착했습니다.", pushToken: post.bidList.last.bidUser.pushToken ?? ""); //todo 화면이동
       notifyListeners();
     } catch (e) {
