@@ -50,7 +50,25 @@ class AuthProvider extends ChangeNotifier {
   Future<void> _initializeAuthState() async {
     print("Initializing auth state");
     await _loadStayLoggedIn();
-    await _loadUserFromLocalStorage();
+
+    // Firestore에서 현재 사용자 정보 가져오기
+    User? firebaseUser = _auth.currentUser;
+    if (firebaseUser != null) {
+      DocumentSnapshot userDoc = await _firestore.collection('users').doc(firebaseUser.uid).get();
+      if (userDoc.exists) {
+        _currentUserModel = UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
+        
+        // 가져온 데이터를 로컬 스토리지에 저장
+        await saveUserToLocalStorage(_currentUserModel!);
+        
+        notifyListeners();
+        print("UserModel fetched from Firestore: ${_currentUserModel!.buyList}");
+      }
+    } else {
+      // 로컬에서 사용자 정보 불러오기
+      await _loadUserFromLocalStorage();
+    }
+
     notifyListeners();
     print("Auth state initialized");
   }
@@ -61,6 +79,12 @@ class AuthProvider extends ChangeNotifier {
       DocumentSnapshot userDoc = await _firestore.collection('users').doc(firebaseUser.uid).get();
       if (userDoc.exists) {
         _currentUserModel = UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
+
+        // 로컬에 저장
+        await saveUserToLocalStorage(_currentUserModel!);
+        notifyListeners();
+        
+        print("Updated UserModel from Firestore: ${_currentUserModel!.buyList}");
         return _currentUserModel;
       }
     }
@@ -233,7 +257,7 @@ class AuthProvider extends ChangeNotifier {
     await prefs.setString('user_data', userJson);
     _currentUserModel = user;
     notifyListeners();
-    print("User saved to local storage");
+    print("User saved to local storage ${user.buyList}");
   }
 
   Future<void> login() async {
