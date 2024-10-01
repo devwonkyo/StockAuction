@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:auction/models/user_model.dart';
+import 'package:provider/provider.dart';
+import 'package:auction/providers/auth_provider.dart';
+import 'package:auction/providers/post_provider.dart';
 import 'package:auction/models/post_model.dart';
 
 class MySoldScreen extends StatefulWidget {
@@ -13,100 +13,95 @@ class MySoldScreen extends StatefulWidget {
 
 class _MySoldScreenState extends State<MySoldScreen> {
   bool _isSelling = true;
-  UserModel? _currentUser;
-  List<PostModel> _postList = [];
-  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadUserData();
+    fetchPostsBasedOnStatus();
   }
 
-  Future<void> _loadUserData() async {
-    setState(() {
-      _isLoading = true;
-    });
+  // 판매중 판매완료 Post 갱신하기
+  void fetchPostsBasedOnStatus() {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final postProvider = Provider.of<PostProvider>(context, listen: false);
 
-    final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (uid == null) {
-      print('Error: User not logged in');
-      setState(() {
-        _isLoading = false;
-      });
-      return;
-    }
-
-    final userDoc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(uid)
-        .get(); // 'users'로 수정
-
-    if (!userDoc.exists) {
-      print('Error: User document not found in Firestore');
-      setState(() {
-        _isLoading = false;
-      });
-      return;
-    }
-
-    setState(() {
-      _currentUser = UserModel.fromMap(userDoc.data()!);
-    });
-
-    await _loadPosts(); // 판매 목록 로드
-
-    setState(() {
-      _isLoading = false;
-    });
-  }
-
-  Future<void> _loadPosts() async {
-    if (_currentUser != null) {
-      final List<String> postIds =
-          _isSelling ? _currentUser!.sellList : _currentUser!.buyList;
-
-      final List<PostModel> loadedPosts = [];
-      for (String postId in postIds) {
-        print('Loading post: $postId');
-        final postDoc = await FirebaseFirestore.instance
-            .collection('posts') // 포스트 정보를 가져오는 컬렉션은 여전히 'posts'
-            .doc(postId)
-            .get();
-
-        if (postDoc.exists) {
-          print('Post data: ${postDoc.data()}');
-          loadedPosts.add(PostModel.fromMap(postDoc.data()!));
-        } else {
-          print('Post not found: $postId');
-        }
+    if (_isSelling) {
+      postProvider.fetchUserSellingPosts(authProvider.currentUserModel?.uid ?? '');
+    } else {
+      final sellList = authProvider.currentUserModel?.sellList ?? [];
+      if (sellList.isNotEmpty) {
+        final test = postProvider.fetchUserSoldPosts(sellList);
       }
-
-      setState(() {
-        _postList = loadedPosts;
-      });
     }
   }
+
+
 
   @override
   Widget build(BuildContext context) {
+    final postProvider = Provider.of<PostProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isSelling ? '내 판매 목록' : '내 구매 목록'),
+        title: const Text('나의 판매 내역'),
       ),
-      body: _isLoading
-          ? Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              itemCount: _postList.length,
-              itemBuilder: (context, index) {
-                final post = _postList[index];
-                return ListTile(
-                  title: Text(post.postTitle),
-                  subtitle: Text(post.postContent),
-                  trailing: Image.network(post.postImageList[0]),
-                );
-              },
-            ),
+      body: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _isSelling = true;
+                    });
+                    fetchPostsBasedOnStatus();
+                  },
+                  style: TextButton.styleFrom(
+                    backgroundColor: _isSelling ? Colors.grey : Colors.white,
+                  ),
+                  child: const Text('판매중'),
+                ),
+              ),
+              Expanded(
+                child: TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _isSelling = false;
+                    });
+                    fetchPostsBasedOnStatus();
+                  },
+                  style: TextButton.styleFrom(
+                    backgroundColor: !_isSelling ? Colors.grey : Colors.white,
+                  ),
+                  child: const Text('판매완료'),
+                ),
+              ),
+            ],
+          ),
+          Expanded(
+            child: postProvider.isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : ListView.builder(
+                    itemCount: postProvider.postList.length,
+                    itemBuilder: (context, index) {
+                      final post = postProvider.postList[index];
+                      return ListTile(
+                        leading: post.postImageList.isNotEmpty
+                            ? Image.network(post.postImageList[0], width: 50, height: 50, fit: BoxFit.cover)
+                            : const Icon(Icons.image),
+                        title: Text(post.postTitle.length > 15 
+                            ? '${post.postTitle.substring(0, 15)}...' 
+                            : post.postTitle),
+                        subtitle: Text(post.postContent.length > 30
+                            ? '${post.postContent.substring(0, 30)}...'
+                            : post.postContent),
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
     );
   }
 }
