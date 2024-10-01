@@ -1,7 +1,10 @@
-import 'package:flutter/foundation.dart';
+import 'package:auction/utils/function_method.dart';
+import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:auction/models/message_model.dart';
+import 'package:auction/models/post_model.dart';
+import 'package:auction/models/bid_model.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
@@ -25,6 +28,215 @@ class ChatProvider extends ChangeNotifier {
     _currentUserId = userId;
     _currentUsername = username;
   }
+
+  // 거래확정 버튼 관련 함수 분류
+  //////////////////////////////////////////////////////////////////////////////////////////////
+
+  // 특정 조건을 만족하는 Post들을 가져오는 함수
+  Future<List<PostModel>> fetchConfirmablePosts(String userId, String otherUserId) async {
+    try {
+      final querySnapshot = await _firestore
+          .collection('posts')
+          .where('writeUser.uid', isEqualTo: userId)
+          .where('auctionStatus', isEqualTo: AuctionStatus.successBidding.index)
+          .where('stockStatus', isEqualTo: StockStatus.readySell.index)
+          .get();
+
+      List<PostModel> confirmablePosts = querySnapshot.docs.map((doc) {
+        return PostModel.fromMap(doc.data() as Map<String, dynamic>);
+      }).where((post) {
+        return post.bidList.any((bid) => bid.bidUser.uid == otherUserId);
+      }).toList();
+
+      return confirmablePosts;
+    } catch (e) {
+      print("조건에 맞는 포스트를 불러오지 못함: $e");
+      return [];
+    }
+  }
+
+  // 거래 확정 메시지 보내기
+  Future<void> sendConfirmationMessage(PostModel post, String chatId, String userId, String otherUserId, String username) async {
+    try {
+      await _ensureChatRoomExists(chatId, userId, otherUserId, username, '');
+
+      final querySnapshot = await _firestore.collection('chats').doc(chatId).collection('messages')
+      .where('messageType', isEqualTo: 'purchaseConfirmation')
+      .where('status', whereIn: ['ready', 'deposit', 'shipping'])
+      .orderBy('createdAt', descending: true)
+      .limit(1)
+      .get();
+
+      String currentStatus = 'ready';
+      if (querySnapshot.docs.isNotEmpty) {
+        currentStatus = querySnapshot.docs.first.data()['status'];
+      }
+
+      if(currentStatus == 'canceled') currentStatus = 'ready';
+
+      BidModel? highestBid = post.bidList
+          .where((bid) => bid.bidUser.uid == otherUserId)
+          .reduce((current, next) => current.bidTime.isAfter(next.bidTime) ? current : next);
+
+      String bidPrice = highestBid != null ? highestBid.bidPrice : '0';
+
+      await _firestore.collection('chats').doc(chatId).collection('messages').add({
+        'text': '[거래를 완료해주세요]',
+        'uId': userId,
+        'username': username,
+        'createdAt': Timestamp.now(),
+        'imageUrl': post.postImageList.isNotEmpty ? post.postImageList[0] : null,
+        'confirmationMessage': {
+          'postUid': post.postUid,
+          'title': post.postTitle,
+          'bidPrice': bidPrice,
+          'postContent': post.postContent.length > 50 
+              ? '${post.postContent.substring(0, 50)}...' 
+              : post.postContent,
+          'status': currentStatus,
+          'buttons': ['확인', '취소']
+        },
+        'messageType': 'purchaseConfirmation',
+        'status': currentStatus,
+      });
+      sendNotification(title: "알림", body: "${post.postTitle} 거래 확정 메시지가 도착했습니다.", pushToken: post.bidList.last.bidUser.pushToken ?? ""); //todo 화면이동
+      notifyListeners();
+    } catch (e) {
+      print("확정 메시지 보내기에서 에러가 떴음: $e, chatId: $chatId, postUid: ${post.postUid}");
+    }
+  }
+
+  // 거래 확정 과정 메소드
+  Future<void> handlePositiveButton(BuildContext context, Message message, String chatId) async {
+    final chatRef = _firestore.collection('chats').doc(chatId).collection('messages').doc(message.id);
+
+    bool? confirmed;
+    switch (message.status) {
+      case "ready":
+        await chatRef.update({
+          'status': 'deposit',
+          'confirmationMessage.status': '입금 대기 중',
+        });
+        break;
+      case "deposit":
+        // '입금 확인 완료' 확인
+        confirmed = await showDialog<bool>(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Text('입금을 확인하셨습니까?'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: Text('예'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: Text('아니오'),
+                ),
+              ],
+            );
+          },
+        );
+        if (confirmed == true) {
+          await chatRef.update({
+            'status': 'shipping',
+            'confirmationMessage.status': '배송 확인 중',
+          });
+        }
+        break;
+      case "shipping":
+        // '배송 확인 완료' 확인
+        confirmed = await showDialog<bool>(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Text('배송을 확인하셨습니까?'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: Text('예'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: Text('아니오'),
+                ),
+              ],
+            );
+          },
+        );
+        if (confirmed == true) {
+          await chatRef.update({
+            'status': 'dealed',
+            'confirmationMessage.status': '거래 완료',
+          });
+          await _updateUserListsOnDealCompletion(message);
+        }
+        break;
+    }
+    notifyListeners();
+  }
+
+  // 거래 취소 메서드
+  Future<void> handleNegativeButton(Message message, String chatId, BuildContext context) async {
+    bool? confirmation = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('거래를 취소하시겠습니까?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text('예'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text('아니오'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmation != true) return;
+
+    final chatRef = _firestore.collection('chats').doc(chatId).collection('messages').doc(message.id);
+
+    await chatRef.update({
+      'status': 'canceled',
+      'confirmationMessage.status': '거래가 취소되었습니다.',
+    });
+    
+    notifyListeners();
+  }
+
+  // 각자 sellList, buyList에 추가하는 메소드
+  Future<void> _updateUserListsOnDealCompletion(Message message) async {
+    final buyerId = message.uId;
+    final sellerId = currentUserId == buyerId ? message.otherUserId : currentUserId;
+    final postUid = message.confirmationMessage?['postUid'];
+
+    if (postUid == null) {
+      print('postUid가 null입니다.');
+      return;
+    }
+
+    await _firestore.collection('users').doc(buyerId).update({
+      'buyList': FieldValue.arrayUnion([postUid])
+    });
+
+    await _firestore.collection('users').doc(sellerId).update({
+      'sellList': FieldValue.arrayUnion([postUid])
+    });
+
+    await _firestore.collection('posts').doc(postUid).update({
+      'stockStatus': StockStatus.successSell.index
+    });
+  }
+
+  // 구매확정 버튼 관련 함수 분류 종료
+  //////////////////////////////////////////////////////////////////////////////////////////////
+  
 
   // Firestore 실시간 구독 함수
   void listenToMessages(String chatId) {

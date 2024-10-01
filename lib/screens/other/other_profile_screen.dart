@@ -59,12 +59,6 @@ class _OtherProfileScreenState extends State<OtherProfileScreen> {
                     userProvider.user!.nickname,
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(height: 8),
-                  // 해당 유저 아이디 표시
-                  Text(
-                    'ID: ${userProvider.user!.uid}',
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
                   SizedBox(height: 16),
                   // 본인이 아닌 다른 사람 프로필 눌렀을때만 뜨는 아이콘 버튼 ↓↓↓
                   if (!isCurrentUser)
@@ -74,7 +68,9 @@ class _OtherProfileScreenState extends State<OtherProfileScreen> {
                       color: Colors.blue,
                       onPressed: () {
                         // 채팅 화면으로 이동
-                        final chatId = [widget.uId, authProvider.currentUser?.uid].join('_');
+                        final ids = [widget.uId, authProvider.currentUser?.uid];
+                        ids.sort();
+                        final chatId = ids.join('_');
                         GoRouter.of(context).push('/chat/$chatId');
                       },
                     ),

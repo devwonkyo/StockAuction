@@ -62,6 +62,10 @@ class PostProvider with ChangeNotifier {
     List<String> downloadPostImageList = [];
 
     for (String imagePath in postImageList) {
+      if(imagePath.startsWith("http")){
+        downloadPostImageList.add(imagePath);
+        continue;
+      }
       String fileName = DateTime.now().toIso8601String();
       Reference ref = storage.ref().child('post/$fileName');
 
@@ -129,6 +133,69 @@ class PostProvider with ChangeNotifier {
     } catch (e) {
       hasError = true; // 오류 발생 시 오류 상태 설정
       return Result.failure("게시물 등록에 실패했습니다. 오류메시지 : $e");
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<Result> modifyPostItem(PostModel modifidPost) async {
+    isLoading = true;
+    notifyListeners();
+
+    try {
+    final downloadImageList = await _uploadImages(modifidPost.postImageList);
+
+    Map<String, dynamic> updatedFields = {
+      'postTitle': modifidPost.postTitle,
+      'postContent': modifidPost.postContent,
+      'endTime': Timestamp.fromDate(modifidPost.endTime),
+      'postImageList': downloadImageList
+    };
+      await FirebaseFirestore.instance
+          .collection('posts')
+          .doc(modifidPost.postUid)
+          .update(updatedFields);
+
+      return Result.success("게시물을 수정했습니다.");
+    } catch (e) {
+      return Result.failure("게시물 수정에 실패했습니다. 오류메시지 : $e");
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<Result> deletePostItem(String postUid) async {
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      await FirebaseFirestore.instance.collection('posts').doc(postUid).delete();
+      return Result.success("게시물을 삭제했습니다.");
+    } catch (e) {
+      return Result.failure("게시물 삭제에 실패했습니다. 오류메시지 : $e");
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<Result> biddingPostItem(String postUid, String biddingUserUid, AuctionStatus auctionStatus, StockStatus stockStatus) async {
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      Map<String, dynamic> data = {
+        'auctionStatus': auctionStatus.index,
+        'stockStatus': stockStatus.index,
+        'successBiddingUser': biddingUserUid
+      };
+
+      await FirebaseFirestore.instance.collection('posts').doc(postUid).update(data);
+      return Result.success("낙찰 완료되었습니다.");
+    } catch (e) {
+      return Result.failure("낙찰에 실패했습니다. 오류메시지 : $e");
     } finally {
       isLoading = false;
       notifyListeners();

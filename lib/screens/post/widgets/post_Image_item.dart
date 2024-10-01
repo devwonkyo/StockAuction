@@ -27,7 +27,9 @@ class PostImageItem extends StatelessWidget {
                 child: Container(
                     width: 70,
                     height: 70,
-                    child: Image.file(File(imageUrl), fit: BoxFit.cover,)),
+                    child: imageUrl.startsWith("http") ?
+                        Image.network(imageUrl,fit: BoxFit.cover,) :
+                    Image.file(File(imageUrl), fit: BoxFit.cover,)),
               ),
               Positioned(
                 top: -10,
