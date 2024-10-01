@@ -70,8 +70,8 @@ final GoRouter router = GoRouter(
       path: '/post/detail/:postUid',
       builder: (context, state) {
         final postUid = state.pathParameters['postUid'];
-        if (postUid == null) {
-          return ErrorScreen('Post ID is missing');
+        if (postUid == null || postUid == 'null') {
+          return ErrorScreen('Invalid Post ID');
         }
         return PostDetailScreen(postUid: postUid);
       },

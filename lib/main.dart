@@ -115,14 +115,27 @@ class _MyAppState extends State<MyApp> {
     if (message.data['screen'] != null) {
       final String screen = message.data['screen'];
       final String? postUid = message.data['postUid'];
-      final String? chatId = message.data['chatId'];
 
-      if (screen == '/chat' && chatId != null) {
-        router.push('/chat/$chatId');
-      } else if (screen == '/post/detail' && postUid != null) {
+      if (screen == '/post/detail' && postUid != null && postUid != 'null') {
         router.push('/post/detail/$postUid');
+      } else if (screen == '/chat' && message.data['chatId'] != null) {
+        router.push('/chat/${message.data['chatId']}');
       } else {
         print('Invalid push notification data');
+        // Optionally navigate to a default screen or show an error message
+      }
+    }
+  }
+
+  void handleDeepLink(String? deepLink) {
+    if (deepLink != null) {
+      final uri = Uri.parse(deepLink);
+      if (uri.path == '/post/detail' && uri.queryParameters['postUid'] != null) {
+        final postUid = uri.queryParameters['postUid']!;
+        router.push('/post/detail/$postUid');
+      } else {
+        print('Invalid deep link');
+        // Handle other deep link scenarios or show an error
       }
     }
   }
