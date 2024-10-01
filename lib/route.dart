@@ -24,10 +24,6 @@ import 'package:auction/screens/my/my_infoupdate_screen.dart';
 // import other
 import 'package:auction/screens/other/other_profile_screen.dart';
 
-// 보통 아래와 같은 방식으로 이동 가능합니다
-// GoRouter.of(context).go('/example');
-// GoRouter.of(context).push('/example');
-
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 
 final GoRouter router = GoRouter(
@@ -52,15 +48,15 @@ final GoRouter router = GoRouter(
     ),
     GoRoute(
       path: '/main/post',
-      builder: (context, state) => MainScreen(pageIndex: 1,),
+      builder: (context, state) => MainScreen(pageIndex: 1),
     ),
     GoRoute(
       path: '/main/chat',
-      builder: (context, state) => MainScreen(pageIndex: 2,),
+      builder: (context, state) => MainScreen(pageIndex: 2),
     ),
     GoRoute(
       path: '/main/like',
-      builder: (context, state) => MainScreen(pageIndex: 3,),
+      builder: (context, state) => MainScreen(pageIndex: 3),
     ),
     GoRoute(
       path: '/post/add',
@@ -71,22 +67,33 @@ final GoRouter router = GoRouter(
       builder: (context, state) => PostModifyScreen(),
     ),
     GoRoute(
-      path: '/post/detail',
-      builder: (context, state) => PostDetailScreen(
-        postUid: state.extra as String),
+      path: '/post/detail/:postUid',
+      builder: (context, state) {
+        final postUid = state.pathParameters['postUid'];
+        if (postUid == null) {
+          return ErrorScreen('Post ID is missing');
+        }
+        return PostDetailScreen(postUid: postUid);
+      },
     ),
     GoRoute(
       path: '/post/list',
       builder: (context, state) => PostListScreen(),
     ),
     GoRoute(
-      path: '/post/bidList',
-      builder: (context, state) => BidListScreen(postUid: '',),
+      path: '/post/bidList/:postUid',
+      builder: (context, state) {
+        final postUid = state.pathParameters['postUid'] ?? '';
+        return BidListScreen(postUid: postUid);
+      },
     ),
     GoRoute(
       path: '/chat/:chatId',
-      builder: (BuildContext context, GoRouterState state) {
-        final chatId = state.pathParameters['chatId']!;
+      builder: (context, state) {
+        final chatId = state.pathParameters['chatId'];
+        if (chatId == null) {
+          return ErrorScreen('Chat ID is missing');
+        }
         return ChatScreen(chatId: chatId);
       },
     ),
@@ -120,9 +127,12 @@ final GoRouter router = GoRouter(
     ),
     GoRoute(
       path: '/other/profile/:uId',
-      builder: (BuildContext context, GoRouterState state) {
-        final uId = state.pathParameters['uId']!;
-        return OtherProfileScreen(uId: uId); // userId 전달
+      builder: (context, state) {
+        final uId = state.pathParameters['uId'];
+        if (uId == null) {
+          return ErrorScreen('User ID is missing');
+        }
+        return OtherProfileScreen(uId: uId);
       },
     ),
     GoRoute(
@@ -131,3 +141,18 @@ final GoRouter router = GoRouter(
     ),
   ],
 );
+
+class ErrorScreen extends StatelessWidget {
+  final String message;
+
+  const ErrorScreen(this.message);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Text(message),
+      ),
+    );
+  }
+}
