@@ -1,3 +1,4 @@
+import 'package:auction/utils/function_method.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -98,7 +99,7 @@ class ChatProvider extends ChangeNotifier {
         'messageType': 'purchaseConfirmation',
         'status': currentStatus,
       });
-
+      sendNotification(title: "알림", body: "${post.postTitle} 거래 확정 메시지가 도착했습니다.", pushToken: post.bidList.last.bidUser.pushToken ?? ""); //todo 화면이동
       notifyListeners();
     } catch (e) {
       print("확정 메시지 보내기에서 에러가 떴음: $e, chatId: $chatId, postUid: ${post.postUid}");
