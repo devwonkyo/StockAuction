@@ -67,15 +67,16 @@ final GoRouter router = GoRouter(
       builder: (context, state) => PostModifyScreen(),
     ),
     GoRoute(
-      path: '/post/detail/:postUid',
+      path: '/post/detail',
       builder: (context, state) {
-        final postUid = state.pathParameters['postUid'];
-        if (postUid == null || postUid == 'null') {
+        final postUid = state.extra as String?;
+        if (postUid == null) {
           return ErrorScreen('Invalid Post ID');
         }
         return PostDetailScreen(postUid: postUid);
       },
     ),
+
     GoRoute(
       path: '/post/list',
       builder: (context, state) => PostListScreen(),
