@@ -76,17 +76,17 @@ class _MainScreenState extends State<MainScreen> {
             themeProvider.isDarkTheme ? Colors.amber : Colors.red,
         unselectedItemColor: Colors.grey,
         showSelectedLabels: true,
-        showUnselectedLabels: false,
+        showUnselectedLabels: true,
         backgroundColor:
             themeProvider.isDarkTheme ? Colors.black : Colors.white,
         onTap: _onItemTapped,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: '홈'),
           BottomNavigationBarItem(
-              icon: Icon(Icons.menu_book_sharp), label: 'Selllist'),
+              icon: Icon(Icons.gavel), label: '경매'),
           BottomNavigationBarItem(
-              icon: Icon(Icons.people_rounded), label: 'Chatlist'),
-          BottomNavigationBarItem(icon: Icon(Icons.star), label: 'likelist'),
+              icon: Icon(Icons.chat_bubble_rounded), label: '채팅'),
+          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: '찜 목록'),
         ],
       ),
     );

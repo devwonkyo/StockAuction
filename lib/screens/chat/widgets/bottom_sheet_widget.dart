@@ -57,12 +57,26 @@ class BottomSheetWidget {
                       itemCount: posts.length,
                       itemBuilder: (context, index) {
                         PostModel post = posts[index];
+                        int maxTitleLength = 15;
+                        int maxContentLength = 65;
+
+                        // 제목과 내용에 최대 글자 수 적용
+                        String displayTitle = post.postTitle.length > maxTitleLength
+                            ? post.postTitle.substring(0, maxTitleLength) + '...'
+                            : post.postTitle;
+                        
+                        String displayContent = post.postContent.length > maxContentLength
+                            ? post.postContent.substring(0, maxContentLength) + '...'
+                            : post.postContent;
                         return ListTile(
                           leading: post.postImageList.isNotEmpty
                               ? Image.network(post.postImageList[0], width: 50, height: 50, fit: BoxFit.cover)
                               : Icon(Icons.image_not_supported),
-                          title: Text(post.postTitle),
-                          subtitle: Text(post.postContent),
+                          title: Text(displayTitle,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold
+                          )),
+                          subtitle: Text(displayContent),
                           onTap: () {
                             Navigator.pop(context);
                             chatProvider.sendConfirmationMessage(post, chatId, userId, otherUserId, username);
