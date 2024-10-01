@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:auction/providers/theme_provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 // 말풍선
@@ -31,14 +33,16 @@ class MessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     // 구매 확정 메시지 타입인 경우
     if (messageType == 'purchaseConfirmation') {
       return Container(
         margin: EdgeInsets.symmetric(vertical: 10, horizontal: 8),
         padding: EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(color: Colors.black, width: 2.0,),
+          color: themeProvider.isDarkTheme ? Colors.black : Colors.white,
+          border: Border.all(color: themeProvider.isDarkTheme ? Colors.white :Colors.black, width: 2.0,),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(
@@ -46,11 +50,11 @@ class MessageBubble extends StatelessWidget {
           children: [
             Center(
               child: Container(
-                color: Colors.grey[100],                     
+                color: themeProvider.isDarkTheme ? Colors.black : Colors.grey[100],                     
                 padding: EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
                 child: Text(
                   status == 'canceled' || status == 'dealed' ? '거래가 종료되었습니다' : '거래가 진행 중입니다',
-                  style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -81,8 +85,8 @@ class MessageBubble extends StatelessWidget {
                         ),
                       if (bidPrice != null)
                         Text(
-                          '낙찰 가격: $bidPrice',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                          '낙찰가: $bidPrice',
+                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
                         ),
                       if (postContent != null)
                         Text(
@@ -125,6 +129,16 @@ class MessageBubble extends StatelessWidget {
               Text('상대방의 응답을 대기중입니다.'),
               ElevatedButton(
                 onPressed: onNegativePressed,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: themeProvider.isDarkTheme ? Colors.black : Colors.white,
+                  side: BorderSide(
+                    color: themeProvider.isDarkTheme ? Colors.white : Colors.black, 
+                    width: 1.2,          
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
                 child: Text('판매 취소'),
               ),
             ] else if (status == "ready" && !isMe) ...[
@@ -133,10 +147,30 @@ class MessageBubble extends StatelessWidget {
                 children: [
                   ElevatedButton(
                     onPressed: onPositivePressed,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: themeProvider.isDarkTheme ? Colors.black : Colors.white,
+                      side: BorderSide(
+                        color: themeProvider.isDarkTheme ? Colors.white : Colors.black, 
+                        width: 1.2,          
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                    ),
                     child: Text('예'),
                   ),
                   ElevatedButton(
                     onPressed: onNegativePressed,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: themeProvider.isDarkTheme ? Colors.black : Colors.white,
+                      side: BorderSide(
+                        color: themeProvider.isDarkTheme ? Colors.white : Colors.black, 
+                        width: 1.2,          
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                    ),
                     child: Text('아니오'),
                   ),
                 ],
@@ -147,10 +181,30 @@ class MessageBubble extends StatelessWidget {
                 children: [
                   ElevatedButton(
                     onPressed: onPositivePressed,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: themeProvider.isDarkTheme ? Colors.black : Colors.white,
+                      side: BorderSide(
+                        color: themeProvider.isDarkTheme ? Colors.white : Colors.black, 
+                        width: 1.2,          
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                    ),
                     child: Text('입금 확인 완료'),
                   ),
                   ElevatedButton(
                     onPressed: onNegativePressed,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: themeProvider.isDarkTheme ? Colors.black : Colors.white,
+                      side: BorderSide(
+                        color: themeProvider.isDarkTheme ? Colors.white : Colors.black, 
+                        width: 1.2,          
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                    ),
                     child: Text('판매 취소'),
                   ),
                 ],
@@ -159,12 +213,32 @@ class MessageBubble extends StatelessWidget {
               Text('입금을 하십시오.'),
               ElevatedButton(
                 onPressed: onNegativePressed,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: themeProvider.isDarkTheme ? Colors.black : Colors.white,
+                  side: BorderSide(
+                    color: themeProvider.isDarkTheme ? Colors.white : Colors.black, 
+                    width: 1.2,          
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
                 child: Text('구매 취소'),
               ),
             ] else if (status == "shipping" && isMe) ...[
               Text('배송 해주십시오.'),
               ElevatedButton(
                 onPressed: onNegativePressed,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: themeProvider.isDarkTheme ? Colors.black : Colors.white,
+                  side: BorderSide(
+                    color: themeProvider.isDarkTheme ? Colors.white : Colors.black, 
+                    width: 1.2,          
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
                 child: Text('판매 취소'),
               ),
             ] else if (status == "shipping" && !isMe) ...[
@@ -173,17 +247,35 @@ class MessageBubble extends StatelessWidget {
                 children: [
                   ElevatedButton(
                     onPressed: onPositivePressed,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: themeProvider.isDarkTheme ? Colors.black : Colors.white,
+                      side: BorderSide(
+                        color: themeProvider.isDarkTheme ? Colors.white : Colors.black, 
+                        width: 1.2,          
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                    ),
                     child: Text('배송 확인 완료'),
                   ),
                   ElevatedButton(
                     onPressed: onNegativePressed,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: themeProvider.isDarkTheme ? Colors.black : Colors.white,
+                      side: BorderSide(
+                        color: themeProvider.isDarkTheme ? Colors.white : Colors.black, 
+                        width: 1.2,          
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                    ),
                     child: Text('구매 취소'),
                   ),
                 ],
               ),
-            ] else if (status == "dealed") ...[
-              Text('거래가 완료되었습니다.'),
-            ],
+            ]
           ],
         ),
       );
