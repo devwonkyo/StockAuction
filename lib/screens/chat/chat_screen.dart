@@ -65,6 +65,9 @@ class _ChatScreenState extends State<ChatScreen> {
                   imageUrl: message.imageUrl,
                   status: message.status,
                   messageType: message.messageType,
+                  postTitle: message.confirmationMessage?['title'],
+                  bidPrice: message.confirmationMessage?['bidPrice'],
+                  postContent: message.confirmationMessage?['postContent'],
                   onPositivePressed: () {
                     chatProvider.handlePositiveButton(context, message, widget.chatId);
                   },

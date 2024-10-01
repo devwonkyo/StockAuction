@@ -30,7 +30,6 @@ class BottomSheetWidget {
               title: Text('거래 확정 버튼 보내기'),
               onTap: () async {
                 Navigator.pop(context);
-                // 조건에 맞는 포스트들 불러오기
                 List<PostModel> posts = await chatProvider.fetchConfirmablePosts(userId, otherUserId);
 
                 if (posts.isEmpty) {

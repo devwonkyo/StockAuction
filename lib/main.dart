@@ -2,11 +2,9 @@ import 'package:auction/config/theme.dart';
 import 'package:auction/models/user_model.dart';
 import 'package:auction/utils/notification_handler.dart';
 import 'package:auction/firebase_options.dart';
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:auction/route.dart';
-// provider 패키지 및 파일
 import 'package:provider/provider.dart';
 import 'package:auction/providers/post_provider.dart';
 import 'package:auction/providers/theme_provider.dart';
@@ -14,14 +12,14 @@ import 'package:auction/providers/chat_provider.dart';
 import 'package:auction/providers/auth_provider.dart';
 import 'package:auction/providers/my_provider.dart';
 import 'package:auction/providers/user_provider.dart';
-// firebase 패키지
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
+@pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   print("Handling a background message: ${message.messageId}");
 }
 
@@ -37,12 +35,8 @@ const AndroidNotificationChannel channel = AndroidNotificationChannel(
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  /*String? fcmToken = await FirebaseMessaging.instance.getToken();
-  print('fcmToken : $fcmToken');*/
-
-  // Firebase Messaging 설정
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   await flutterLocalNotificationsPlugin
       .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
@@ -55,9 +49,6 @@ void main() async {
 
   final notificationHandler = NotificationHandler();
   await notificationHandler.initialize();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );// Firebase 초기화
 
   runApp(
     MultiProvider(
@@ -92,25 +83,16 @@ class _MyAppState extends State<MyApp> {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final notificationHandler = Provider.of<NotificationHandler>(context, listen: false);
 
-    // AuthProvider가 이미 초기화되어 있으므로 추가 초기화는 필요 없음
-
-    // 현재 사용자 확인
     UserModel? currentUser = authProvider.currentUserModel;
 
     if (currentUser != null) {
-      // 사용자가 로그인한 상태
       print("User is logged in: ${currentUser.nickname}");
-
-      // UserProvider를 사용하여 최신 사용자 정보 가져오기
       await userProvider.fetchUser(currentUser.uid);
-
-      // FCM 토큰 가져오기 및 등록
       final token = await notificationHandler.getToken();
       if (token != null) {
         print('FCM Token: $token');
-        // FCM 토큰을 서버에 등록하는 로직 짜야합니다
-        // 예: await authProvider.updateFCMToken(token);
-
+        await authProvider.updatePushToken(token);
+        await userProvider.updatePushToken(currentUser.uid, token);
       }
     } else {
       print("No user is currently logged in");
@@ -123,12 +105,8 @@ class _MyAppState extends State<MyApp> {
       builder: (context, themeProvider, child) {
         return MaterialApp.router(
           theme: themeProvider.currentTheme,
-          // 라이트 모드 테마
           darkTheme: darkThemeData(),
-          // 다크 모드 테마
-          themeMode:
-              themeProvider.isDarkTheme ? ThemeMode.dark : ThemeMode.light,
-          // 테마 모드 설정
+          themeMode: themeProvider.isDarkTheme ? ThemeMode.dark : ThemeMode.light,
           routerDelegate: router.routerDelegate,
           routeInformationParser: router.routeInformationParser,
           routeInformationProvider: router.routeInformationProvider,
