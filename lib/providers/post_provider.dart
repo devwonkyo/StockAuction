@@ -546,5 +546,94 @@ class PostProvider with ChangeNotifier {
       return Result.failure("댓글 삭제에 실패했습니다. 오류: $e");
     }
   }
+  /////////////////////////////////////////////////////////////////////////////////
+  /// sold_screen, bought_screen 관련 메서드
 
+  // PostUid 리스트 받으면 안에 있는 애들 정보 갖고 오기
+  Future<void> fetchPostsByUids(List<String> postUids) async {
+    isLoading = true;
+    notifyListeners();
+
+    postList = [];
+    try {
+      for (int i = 0; i < postUids.length; i += 10) {
+        final sublist = postUids.sublist(i, i + 10 > postUids.length ? postUids.length : i + 10);
+        
+        final querySnapshot = await FirebaseFirestore.instance
+            .collection('posts')
+            .where('postUid', whereIn: sublist)
+            .where('auctionStatus', isEqualTo: AuctionStatus.successBidding.index)
+            .where('stockStatus', isEqualTo: StockStatus.successSell.index)
+            .get();
+
+        final fetchedPosts = querySnapshot.docs
+            .map((snapshot) => PostModel.fromMap(snapshot.data() as Map<String, dynamic>))
+            .toList();
+
+        postList.addAll(fetchedPosts);
+        print('포스트 유아이디 리스트 불러오기');
+      }
+    } catch (e) {
+      print("PostUid 리스트 불러오기 실패: $e");
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // selling posts 불러오기 successBidding, readySell 상태여야 함
+  Future<void> fetchUserSellingPosts(String userId) async {
+    isLoading = true;
+    try {
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('posts')
+          .where('writeUser.uid', isEqualTo: userId)
+          .where('auctionStatus', isEqualTo: AuctionStatus.successBidding.index)
+          .where('stockStatus', isEqualTo: StockStatus.readySell.index)
+          .get();
+
+      postList = querySnapshot.docs
+          .map((snapshot) => PostModel.fromMap(snapshot.data() as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      print("판매중인 포스트 불러오기 실패: $e");
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // sold posts 불러오기 successBidding, successSell 상태여야 함
+  Future<void> fetchUserSoldPosts(List<String> postUids) async {
+    isLoading = true;
+    notifyListeners();
+
+    postList = [];
+    try {
+      for (int i = 0; i < postUids.length; i += 10) {
+        final sublist = postUids.sublist(i, i + 10 > postUids.length ? postUids.length : i + 10);
+        
+        final querySnapshot = await FirebaseFirestore.instance
+            .collection('posts')
+            .where('postUid', whereIn: sublist)
+            .where('auctionStatus', isEqualTo: AuctionStatus.successBidding.index)
+            .where('stockStatus', isEqualTo: StockStatus.successSell.index)
+            .get();
+
+        final fetchedPosts = querySnapshot.docs
+            .map((snapshot) => PostModel.fromMap(snapshot.data() as Map<String, dynamic>))
+            .toList();
+
+        postList.addAll(fetchedPosts);
+      }
+    } catch (e) {
+      print("판매된 포스트 불러오기 실패: $e");
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+  
+  /// sold_screen, bought_screen 관련 메서드 종료
+  ////////////////////////////////////////////////////////////////////////////////////
 }
