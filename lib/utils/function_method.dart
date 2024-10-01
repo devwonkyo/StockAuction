@@ -7,7 +7,7 @@ Future<void> sendNotification({required String title, required String body, requ
       'title': title,
       'body': body,
       'token': pushToken,
-      'screen': screen,
+      'screen': screen
     });
     print("success : ${result.data}");
   } catch (e) {
