@@ -63,6 +63,7 @@ class ChatProvider extends ChangeNotifier {
       final querySnapshot = await _firestore.collection('chats').doc(chatId).collection('messages')
       .where('messageType', isEqualTo: 'purchaseConfirmation')
       .where('status', whereIn: ['ready', 'deposit', 'shipping'])
+      .where('confirmationMessage.postUid', isEqualTo: post.postUid)
       .orderBy('createdAt', descending: true)
       .limit(1)
       .get();

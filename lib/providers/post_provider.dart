@@ -11,6 +11,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class PostProvider with ChangeNotifier {
   bool isLoading = false;
+  List<PostModel> sellingPosts = [];
+  List<PostModel> soldPosts = [];
   bool hasError = false; // 오류 상태 추가
   List<PostModel> postList = [];
   PostModel? postModel;
@@ -583,6 +585,7 @@ class PostProvider with ChangeNotifier {
   // selling posts 불러오기 successBidding, readySell 상태여야 함
   Future<void> fetchUserSellingPosts(String userId) async {
     isLoading = true;
+    notifyListeners();
     try {
       final querySnapshot = await FirebaseFirestore.instance
           .collection('posts')
@@ -591,7 +594,7 @@ class PostProvider with ChangeNotifier {
           .where('stockStatus', isEqualTo: StockStatus.readySell.index)
           .get();
 
-      postList = querySnapshot.docs
+      sellingPosts = querySnapshot.docs
           .map((snapshot) => PostModel.fromMap(snapshot.data() as Map<String, dynamic>))
           .toList();
     } catch (e) {
@@ -606,8 +609,8 @@ class PostProvider with ChangeNotifier {
   Future<void> fetchUserSoldPosts(List<String> postUids) async {
     isLoading = true;
     notifyListeners();
+    soldPosts = [];
 
-    postList = [];
     try {
       for (int i = 0; i < postUids.length; i += 10) {
         final sublist = postUids.sublist(i, i + 10 > postUids.length ? postUids.length : i + 10);
@@ -623,7 +626,7 @@ class PostProvider with ChangeNotifier {
             .map((snapshot) => PostModel.fromMap(snapshot.data() as Map<String, dynamic>))
             .toList();
 
-        postList.addAll(fetchedPosts);
+        soldPosts.addAll(fetchedPosts);
       }
     } catch (e) {
       print("판매된 포스트 불러오기 실패: $e");
