@@ -11,6 +11,9 @@ class MessageBubble extends StatelessWidget {
   final String? messageType;
   final VoidCallback? onPositivePressed;
   final VoidCallback? onNegativePressed;
+  final String? postTitle;
+  final String? bidPrice;
+  final String? postContent;
 
   MessageBubble(
     this.message,
@@ -21,6 +24,9 @@ class MessageBubble extends StatelessWidget {
     this.messageType,
     this.onPositivePressed,
     this.onNegativePressed,
+    this.postTitle,
+    this.bidPrice,
+    this.postContent,
   });
 
   @override
@@ -37,16 +43,56 @@ class MessageBubble extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            imageUrl != null
-                ? CachedNetworkImage(
-                    imageUrl: imageUrl!,
-                    placeholder: (context, url) => CircularProgressIndicator(),
-                    errorWidget: (context, url, error) => Icon(Icons.error),
-                    height: 150,
-                    fit: BoxFit.cover,
-                  )
-                : SizedBox(),
-            Text(message, style: TextStyle(fontWeight: FontWeight.bold)),
+            Center(
+              child: Container(
+                color: isMe ? Colors.grey[400] : Colors.blue[400],
+                padding: EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+                child: Text(
+                  status == 'canceled' || status == 'dealed' ? '거래가 종료되었습니다' : '거래가 진행 중입니다',
+                  style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+            SizedBox(height: 10),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (imageUrl != null)
+                  Container(
+                    width: 100,
+                    height: 100,
+                    child: CachedNetworkImage(
+                      imageUrl: imageUrl!,
+                      placeholder: (context, url) => CircularProgressIndicator(),
+                      errorWidget: (context, url, error) => Icon(Icons.error),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (postTitle != null)
+                        Text(
+                          postTitle!,
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                      if (bidPrice != null)
+                        Text(
+                          '낙찰 가격: $bidPrice',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                        ),
+                      if (postContent != null)
+                        Text(
+                          postContent!.length > 50 ? '${postContent!.substring(0, 50)}...' : postContent!,
+                          style: TextStyle(fontSize: 14),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
             SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -142,6 +188,9 @@ class MessageBubble extends StatelessWidget {
       );
     }
 
+  if (messageType != 'purchaseConfirmation') {
+    
+  }
     // 일반 채팅
     return Row(
       // 나는 오른쪽부터 정렬, 내가 아니면 왼쪽부터 정렬
