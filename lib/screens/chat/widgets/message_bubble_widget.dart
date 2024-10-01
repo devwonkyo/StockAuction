@@ -37,7 +37,8 @@ class MessageBubble extends StatelessWidget {
         margin: EdgeInsets.symmetric(vertical: 10, horizontal: 8),
         padding: EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: Colors.grey[300],
+          color: Colors.white,
+          border: Border.all(color: Colors.black, width: 2.0,),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(
@@ -45,7 +46,7 @@ class MessageBubble extends StatelessWidget {
           children: [
             Center(
               child: Container(
-                color: isMe ? Colors.grey[400] : Colors.blue[400],
+                color: Colors.grey[100],                     
                 padding: EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
                 child: Text(
                   status == 'canceled' || status == 'dealed' ? '거래가 종료되었습니다' : '거래가 진행 중입니다',
