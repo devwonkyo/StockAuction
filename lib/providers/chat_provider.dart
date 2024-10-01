@@ -99,6 +99,13 @@ class ChatProvider extends ChangeNotifier {
         'messageType': 'purchaseConfirmation',
         'status': currentStatus,
       });
+
+      DocumentReference chatRef = _firestore.collection('chats').doc(chatId);
+      await chatRef.update({
+        'lastActivityTime': Timestamp.now(),
+        'lastMessage': '[거래를 완료해주세요]',
+      });
+
       notifyListeners();
       //채팅방 아이디와 같이 푸시알림
       final ids = [userId, otherUserId];
