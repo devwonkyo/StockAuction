@@ -362,6 +362,21 @@ class AuthProvider extends ChangeNotifier {
     return 'Unknown User';
   }
 
+  Future<String?> getUserProfileImage(String uId) async {
+    try {
+      final userDoc = await FirebaseFirestore.instance.collection('users').doc(uId).get();
+      if (userDoc.exists) {
+        return userDoc['userProfileImage'];
+      }
+    } catch (e) {
+      print("Error fetching user profile image: $e");
+    }
+    return null;
+  }
+  
+  // 채팅방 관련 함수 종료
+  /////////////////////////////////////////////
+  
   UserModel _convertToUserModel(User firebaseUser) {
     return UserModel(
       uid: firebaseUser.uid,

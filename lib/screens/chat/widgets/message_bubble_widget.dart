@@ -73,7 +73,7 @@ class MessageBubble extends StatelessWidget {
                     fit: BoxFit.cover,
                   )
                 : Image.asset(
-                    'assets/images/defaultUserProfile.png',
+                    'lib/assets/images/defaultUserProfile.png',
                     fit: BoxFit.cover,
                   ),
                 ),

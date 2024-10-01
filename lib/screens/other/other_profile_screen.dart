@@ -82,14 +82,24 @@ class _OtherProfileScreenState extends State<OtherProfileScreen> {
                         GoRouter.of(context).push('/chat/$chatId');
                       },
                     ),
-                  Divider(),
+                  Divider(
+                    indent: 16,
+                    endIndent: 16,
+                    thickness: 0.5,
+                  ),
 
                   Text("판매중인 상품", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 8),
                   PostListWidget(posts: postProvider.sellingPosts, route: '/other/selling/${widget.uId}'),
 
-                  Divider(height: 20),
+                  Divider(
+                    indent: 16,
+                    endIndent: 16,
+                    thickness: 0.5,
+                  ),
 
                   Text("판매완료 상품", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 8),
                   PostListWidget(posts: postProvider.soldPosts, route: '/other/sold/${widget.uId}'),
                 ],
               ),
