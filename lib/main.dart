@@ -119,10 +119,10 @@ class _MyAppState extends State<MyApp> {
 
       if (screen == '/chat' && chatId != null) {
         router.push('/chat/$chatId');
-      } else if (postUid != null) {
-        router.push('$screen/$postUid');
+      } else if (screen == '/post/detail' && postUid != null) {
+        router.push('/post/detail/$postUid');
       } else {
-        router.push(screen);
+        print('Invalid push notification data');
       }
     }
   }
