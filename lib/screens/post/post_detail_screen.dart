@@ -223,29 +223,88 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
   Widget _buildUserInfo(PostProvider postProvider) {
     final user = postProvider.postModel?.writeUser;
+    final latestBidder = postProvider.postModel?.bidList.isNotEmpty == true
+        ? postProvider.postModel!.bidList.last.bidUser
+        : null;
+    final auctionStatus = postProvider.postModel?.auctionStatus;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        _buildUserInfoItem(user?.uid, user?.userProfileImage, user?.nickname ?? "Unknown User", auctionStatus: auctionStatus),
+        if (latestBidder != null && latestBidder.uid != user?.uid)
+          _buildUserInfoItem(latestBidder.uid, latestBidder.userProfileImage, latestBidder.nickname, isBidder: true, auctionStatus: auctionStatus),
+      ],
+    );
+  }
+
+  Widget _buildUserInfoItem(String? uid, String? imageUrl, String name, {bool isBidder = false, AuctionStatus? auctionStatus}) {
     return GestureDetector(
-      onTap: () => _navigateToUserProfile(user?.uid ?? ''),
+      onTap: () => _navigateToUserProfile(uid ?? ''),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          ClipOval(
-            child: user?.userProfileImage == null || user?.userProfileImage == ""
-                ? Image.asset(
-              "lib/assets/image/defaultUserProfile.png",
-              width: 45,
-              height: 45,
-              fit: BoxFit.cover,
-            )
-                : Image.network(
-              user!.userProfileImage!,
-              width: 45,
-              height: 45,
-              fit: BoxFit.cover,
+          if (!isBidder) ...[
+            ClipOval(
+              child: imageUrl == null || imageUrl.isEmpty
+                  ? Image.asset(
+                "lib/assets/image/defaultUserProfile.png",
+                width: 40,
+                height: 40,
+                fit: BoxFit.cover,
+              )
+                  : Image.network(
+                imageUrl,
+                width: 40,
+                height: 40,
+                fit: BoxFit.cover,
+              ),
             ),
-          ),
-          const SizedBox(width: 10),
-          Text(user?.nickname ?? "Unknown User"),
+            const SizedBox(width: 10),
+            Text(
+              name,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+          if (isBidder) ...[
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  auctionStatus != AuctionStatus.bidding
+                      ? "낙찰자"
+                      : "현재 입찰자",
+                  style: const TextStyle(fontSize: 12, color: Colors.black),
+                ),
+                Text(
+                  name,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(width: 10),
+            ClipOval(
+              child: imageUrl == null || imageUrl.isEmpty
+                  ? Image.asset(
+                "lib/assets/image/defaultUserProfile.png",
+                width: 40,
+                height: 40,
+                fit: BoxFit.cover,
+              )
+                  : Image.network(
+                imageUrl,
+                width: 40,
+                height: 40,
+                fit: BoxFit.cover,
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -285,6 +344,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     final comments = postProvider.postModel?.commentList ?? [];
     final commentCount = comments.length;
     final displayedComments = comments.take(_displayedCommentCount).toList();
+    final authorUid = postProvider.postModel?.writeUser.uid; // 게시물 작성자의 UID
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -311,44 +371,45 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         const SizedBox(height: 20),
         comments.isEmpty
             ? const Padding(
-                padding: EdgeInsets.symmetric(vertical: 20.0),
-                child: Center(
-                  child: Text(
-                    "아직 작성된 댓글이 없어요.\n제일 먼저 댓글을 작성해 보세요.",
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              )
+          padding: EdgeInsets.symmetric(vertical: 20.0),
+          child: Center(
+            child: Text(
+              "아직 작성된 댓글이 없어요.\n제일 먼저 댓글을 작성해 보세요.",
+              textAlign: TextAlign.center,
+            ),
+          ),
+        )
             : Column(
-                children: [
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: displayedComments.length,
-                    itemBuilder: (context, index) {
-                      return CommentWidget(
-                        commentModel: displayedComments[index],
-                        postUid: widget.postUid,
+          children: [
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: displayedComments.length,
+              itemBuilder: (context, index) {
+                return CommentWidget(
+                  commentModel: displayedComments[index],
+                  postUid: widget.postUid,
+                  isAuthor: displayedComments[index].uid == authorUid, // 작성자 여부 전달
+                );
+              },
+            ),
+            if (_displayedCommentCount < commentCount)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _displayedCommentCount = min(
+                          _displayedCommentCount + _incrementalCommentCount,
+                          commentCount
                       );
-                    },
-                  ),
-                  if (_displayedCommentCount < commentCount)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: TextButton(
-                        onPressed: () {
-                          setState(() {
-                            _displayedCommentCount = min(
-                                _displayedCommentCount + _incrementalCommentCount,
-                                commentCount
-                            );
-                          });
-                        },
-                        child: Text('이전 댓글 ${min(_incrementalCommentCount, commentCount - _displayedCommentCount)}개 더보기'),
-                      ),
-                    ),
-                ],
+                    });
+                  },
+                  child: Text('이전 댓글 ${min(_incrementalCommentCount, commentCount - _displayedCommentCount)}개 더보기'),
+                ),
               ),
+          ],
+        ),
       ],
     );
   }
