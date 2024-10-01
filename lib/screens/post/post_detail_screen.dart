@@ -679,7 +679,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
           //입찰 push 보내기
           sendNotification(title: "입찰 알림",
               body: "${postProvider.postModel!.bidList.last.bidUser.nickname}님이 입찰하셨습니다. 확인해보세요!",
-              pushToken: postProvider.postModel!.bidList.last.bidUser.pushToken ?? "", screen: "/post/detail?${postProvider.postModel!.postUid}");
+              pushToken: postProvider.postModel!.writeUser.pushToken ?? "",
+          screen: "/post/detail?${postProvider.postModel!.postUid}");
 
           showCustomAlertDialog(
               context: context,
@@ -708,7 +709,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
       //낙찰 push 알림
       sendNotification(title: "낙찰 알림",
-          body: "${postProvider.postModel!.postTitle}이 낙찰되었습니다. 확인해보세요!",
+          body: "${postProvider.postModel!.postTitle} 상품이 낙찰되었습니다. 확인해보세요!",
           pushToken: postProvider.postModel!.bidList.last.bidUser.pushToken ?? "", screen: "/post/detail?${postProvider.postModel!.postUid}");
 
       showCustomAlertDialog(
