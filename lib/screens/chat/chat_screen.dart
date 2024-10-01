@@ -1,6 +1,7 @@
 import 'package:provider/provider.dart';
 import 'package:auction/providers/chat_provider.dart';
 import 'package:auction/providers/auth_provider.dart';
+import 'package:auction/providers/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:auction/screens/chat/widgets/bottom_sheet_widget.dart';
 import 'package:auction/screens/chat/widgets/message_bubble_widget.dart';
@@ -36,12 +37,17 @@ class _ChatScreenState extends State<ChatScreen> {
     });
 
     Provider.of<ChatProvider>(context, listen: false).listenToMessages(widget.chatId);
+
+    messageController.addListener(() {
+      setState(() {});
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final chatProvider = Provider.of<ChatProvider>(context);
     final authProvider = Provider.of<AuthProvider>(context);
+    final themeProvider = Provider.of<ThemeProvider>(context);
 
     chatProvider.setCurrentChatInfo(widget.chatId, authProvider.currentUser?.uid ?? '', authProvider.currentUserModel?.nickname ?? 'Unknown User');
 
@@ -106,6 +112,19 @@ class _ChatScreenState extends State<ChatScreen> {
                 // 메시지 보내기 버튼
                 IconButton(
                   icon: Icon(Icons.send),
+                  style: ElevatedButton.styleFrom(
+                  backgroundColor: messageController.text.isNotEmpty ? Colors.blue[200] : const Color.fromARGB(0, 255, 255, 255),
+                  textStyle: TextStyle(
+                    color: Colors.black,
+                  ),
+                  side: BorderSide(
+                    color: Colors.black,
+                    width: 1.2,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
                   onPressed: () {
                     if (messageController.text.isNotEmpty) {
                       Provider.of<ChatProvider>(context, listen: false).sendMessage(

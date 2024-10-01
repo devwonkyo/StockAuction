@@ -13,7 +13,6 @@ import 'package:auction/providers/auth_provider.dart';
 import 'package:auction/providers/my_provider.dart';
 import 'package:auction/providers/user_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
@@ -37,6 +36,10 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
+  String? fcmToken = await FirebaseMessaging.instance.getToken();
+  print('fcmToken : $fcmToken');
+
+  // Firebase Messaging 설정
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   await flutterLocalNotificationsPlugin
       .resolvePlatformSpecificImplementation<
@@ -48,7 +51,7 @@ void main() async {
     sound: true,
   );
 
-  final notificationHandler = NotificationHandler();
+  final notificationHandler = NotificationHandler(router: router);
   await notificationHandler.initialize();
 
   runApp(
@@ -99,6 +102,7 @@ class _MyAppState extends State<MyApp> {
     } else {
       print("No user is currently logged in");
     }
+
   }
 
   @override
@@ -108,11 +112,8 @@ class _MyAppState extends State<MyApp> {
         return MaterialApp.router(
           theme: themeProvider.currentTheme,
           darkTheme: darkThemeData(),
-          themeMode:
-              themeProvider.isDarkTheme ? ThemeMode.dark : ThemeMode.light,
-          routerDelegate: router.routerDelegate,
-          routeInformationParser: router.routeInformationParser,
-          routeInformationProvider: router.routeInformationProvider,
+          themeMode: themeProvider.isDarkTheme ? ThemeMode.dark : ThemeMode.light,
+          routerConfig: router,
         );
       },
     );
