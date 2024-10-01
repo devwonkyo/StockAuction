@@ -558,7 +558,7 @@ class PostProvider with ChangeNotifier {
     try {
       for (int i = 0; i < postUids.length; i += 10) {
         final sublist = postUids.sublist(i, i + 10 > postUids.length ? postUids.length : i + 10);
-        
+
         final querySnapshot = await FirebaseFirestore.instance
             .collection('posts')
             .where('postUid', whereIn: sublist)
@@ -571,7 +571,6 @@ class PostProvider with ChangeNotifier {
             .toList();
 
         postList.addAll(fetchedPosts);
-        print('포스트 유아이디 리스트 불러오기');
       }
     } catch (e) {
       print("PostUid 리스트 불러오기 실패: $e");
@@ -612,7 +611,7 @@ class PostProvider with ChangeNotifier {
     try {
       for (int i = 0; i < postUids.length; i += 10) {
         final sublist = postUids.sublist(i, i + 10 > postUids.length ? postUids.length : i + 10);
-        
+
         final querySnapshot = await FirebaseFirestore.instance
             .collection('posts')
             .where('postUid', whereIn: sublist)

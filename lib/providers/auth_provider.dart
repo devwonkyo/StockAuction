@@ -62,7 +62,6 @@ class AuthProvider extends ChangeNotifier {
         await saveUserToLocalStorage(_currentUserModel!);
         
         notifyListeners();
-        print("UserModel fetched from Firestore: ${_currentUserModel!.buyList}");
       }
     } else {
       // 로컬에서 사용자 정보 불러오기
@@ -257,7 +256,6 @@ class AuthProvider extends ChangeNotifier {
     await prefs.setString('user_data', userJson);
     _currentUserModel = user;
     notifyListeners();
-    print("User saved to local storage ${user.buyList}");
   }
 
   Future<void> login() async {

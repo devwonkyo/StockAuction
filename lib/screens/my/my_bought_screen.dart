@@ -11,6 +11,8 @@ class MyBoughtScreen extends StatefulWidget {
 }
 
 class _MyBoughtScreenState extends State<MyBoughtScreen> {
+  bool _hasFetchedPosts = false;
+
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
@@ -18,13 +20,11 @@ class _MyBoughtScreenState extends State<MyBoughtScreen> {
 
     final buyList = authProvider.currentUserModel?.buyList ?? [];
 
-    print("Current User Model: ${authProvider.currentUserModel}");
-    print("BuyList: ${authProvider.currentUserModel?.buyList}");
-
-    
-    if (buyList.isNotEmpty && postProvider.postList.isEmpty && !postProvider.isLoading) {
-      postProvider.fetchPostsByUids(buyList);
-      print('fetchPostsByUids called with BuyList: $buyList');
+    if (buyList.isNotEmpty && !_hasFetchedPosts && !postProvider.isLoading) {
+      _hasFetchedPosts = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        postProvider.fetchPostsByUids(buyList);
+      });
     }
   
     return Scaffold(

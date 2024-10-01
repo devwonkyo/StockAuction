@@ -17,7 +17,9 @@ class _MySoldScreenState extends State<MySoldScreen> {
   @override
   void initState() {
     super.initState();
-    fetchPostsBasedOnStatus();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      fetchPostsBasedOnStatus();
+    });
   }
 
   // 판매중 판매완료 Post 갱신하기
