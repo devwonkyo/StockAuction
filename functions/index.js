@@ -10,6 +10,7 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 
+
 admin.initializeApp();
 
 exports.sendPushNotification = functions.region("asia-northeast3").https.onCall(async (data, context) => {
@@ -38,10 +39,77 @@ exports.sendPushNotification = functions.region("asia-northeast3").https.onCall(
         throw new functions.https.HttpsError("internal", "Error sending push notification");
     }
 });
-// Create and deploy your first functions
-// https://firebase.google.com/docs/functions/get-started
 
-// exports.helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+exports.checkEndTimeAndSendFCM = functions.pubsub.schedule("every 1 minutes").onRun(async (context) => {
+  const db = admin.firestore();
+  const now = admin.firestore.Timestamp.now();
+  const oneMinuteAgo = admin.firestore.Timestamp.fromMillis(now.toMillis() - 60 * 1000);
+
+  try {
+    const snapshot = await db.collection("posts")
+      .where("auctionStatus", "==", 0)
+      .where("endTime", ">", oneMinuteAgo)
+      .where("endTime", "<=", now)
+      .get();
+
+    const batch = db.batch();
+
+    for (const doc of snapshot.docs) {
+      const postData = doc.data();
+      const postRef = db.collection("posts").doc(doc.id);
+      const bidList = postData.bidList || [];
+
+      if (bidList.length === 1) {
+        batch.update(postRef, {
+          auctionStatus: 2,
+          stockStatus: 3,
+          isDone: true,
+        });
+
+        // 시간 지나서 유찰 -> 판매자에게 fcm보내기
+        await sendFCM(postData.writeUser.pushToken, "경매 종료", `${postData.postTitle} 상품의 경매가 종료되었습니다. 낙찰자가 없습니다.`, `/post/detail?${postData.postUid}`);
+      } else if (bidList.length >= 2) {
+        batch.update(postRef, {
+          auctionStatus: 1,
+          stockStatus: 1,
+        });
+
+        // 시간지나서 판매자에게 fcm보내기
+        await sendFCM(postData.writeUser.pushToken, "경매 종료", `${postData.postTitle} 상품의 경매가 종료되었습니다. 낙찰자가 결정되었습니다.`, `/post/detail?${postData.postUid}`);
+
+        // 시간지나서 낙찰자에게 fcm보내기
+        const lastBid = bidList[bidList.length - 1];
+        await sendFCM(lastBid.bidUser.pushToken, "낙찰 알림", `${postData.postTitle} 상품이 낙찰되었습니다. 확인해보세요!`, `/post/detail?${postData.postUid}`);
+      }
+    }
+
+    // 배치 커밋
+    await batch.commit();
+
+    console.log("Batch operation completed");
+    return null;
+  } catch (error) {
+    console.error("Error in checkEndTimeAndSendFCM:", error);
+    return null;
+  }
+});
+
+async function sendFCM(token, title, body, screen) {
+  const message = {
+          notification: {
+              title: title,
+              body: body,
+          },
+          data: {
+              screen: screen,
+          },
+          token: token,
+      };
+
+  try {
+    await admin.messaging().send(message);
+    console.log("Successfully sent message:", title);
+  } catch (error) {
+    console.log("Error sending message:", error);
+  }
+}
