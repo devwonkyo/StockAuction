@@ -47,7 +47,7 @@ void main() async {
     sound: true,
   );
 
-  final notificationHandler = NotificationHandler();
+  final notificationHandler = NotificationHandler(router: router);
   await notificationHandler.initialize();
 
   runApp(
@@ -97,6 +97,30 @@ class _MyAppState extends State<MyApp> {
     } else {
       print("No user is currently logged in");
     }
+
+    FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) {
+      if (message != null) {
+        _handleMessage(message);
+      }
+    });
+
+    FirebaseMessaging.onMessageOpenedApp.listen(_handleMessage);
+  }
+
+  void _handleMessage(RemoteMessage message) {
+    if (message.data['screen'] != null) {
+      final String screen = message.data['screen'];
+      final String? postUid = message.data['postUid'];
+      final String? chatId = message.data['chatId'];
+
+      if (screen == '/chat' && chatId != null) {
+        router.push('/chat/$chatId');
+      } else if (postUid != null) {
+        router.push('$screen/$postUid');
+      } else {
+        router.push(screen);
+      }
+    }
   }
 
   @override
@@ -107,9 +131,7 @@ class _MyAppState extends State<MyApp> {
           theme: themeProvider.currentTheme,
           darkTheme: darkThemeData(),
           themeMode: themeProvider.isDarkTheme ? ThemeMode.dark : ThemeMode.light,
-          routerDelegate: router.routerDelegate,
-          routeInformationParser: router.routeInformationParser,
-          routeInformationProvider: router.routeInformationProvider,
+          routerConfig: router,
         );
       },
     );
