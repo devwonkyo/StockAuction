@@ -24,10 +24,6 @@ import 'package:auction/screens/my/my_infoupdate_screen.dart';
 // import other
 import 'package:auction/screens/other/other_profile_screen.dart';
 
-// 보통 아래와 같은 방식으로 이동 가능합니다
-// GoRouter.of(context).go('/example');
-// GoRouter.of(context).push('/example');
-
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 
 final GoRouter router = GoRouter(
@@ -52,15 +48,15 @@ final GoRouter router = GoRouter(
     ),
     GoRoute(
       path: '/main/post',
-      builder: (context, state) => MainScreen(pageIndex: 1,),
+      builder: (context, state) => MainScreen(pageIndex: 1),
     ),
     GoRoute(
       path: '/main/chat',
-      builder: (context, state) => MainScreen(pageIndex: 2,),
+      builder: (context, state) => MainScreen(pageIndex: 2),
     ),
     GoRoute(
       path: '/main/like',
-      builder: (context, state) => MainScreen(pageIndex: 3,),
+      builder: (context, state) => MainScreen(pageIndex: 3),
     ),
     GoRoute(
       path: '/post/add',
@@ -81,7 +77,7 @@ final GoRouter router = GoRouter(
     ),
     GoRoute(
       path: '/post/bidList',
-      builder: (context, state) => BidListScreen(postUid: '',),
+      builder: (context, state) => BidListScreen(postUid: ""),
     ),
     GoRoute(
       path: '/chat/:chatId',
