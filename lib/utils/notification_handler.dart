@@ -93,6 +93,8 @@ class NotificationHandler {
     final NotificationDetails platformChannelSpecifics =
     NotificationDetails(android: androidPlatformChannelSpecifics);
 
+    print("recived push title : ${message.notification?.title ?? "알림"},data : ${message.data}");
+
     await _flutterLocalNotificationsPlugin.show(
       0,
       message.notification?.title ?? "알림",
