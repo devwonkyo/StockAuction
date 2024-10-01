@@ -37,46 +37,23 @@ class NotificationHandler {
     );
     await _flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
-      onDidReceiveNotificationResponse: _onDidReceiveNotificationResponse,
+      onDidReceiveNotificationResponse: (NotificationResponse response){
+        _onDidReceiveNotificationResponse(response.payload);
+      },
     );
   }
 
-  void _onDidReceiveNotificationResponse(NotificationResponse response) {
-    if (response.payload != null) {
-      Map<String, dynamic> payloadData;
-      try {
-        // JSON으로 파싱 시도
-        payloadData = json.decode(response.payload!);
-      } catch (e) {
-        // JSON 파싱 실패 시 수동 파싱
-        payloadData = _manualParsePayload(response.payload!);
+  void _onDidReceiveNotificationResponse(String? payload) {
+    if (payload != null) {
+      final screenAndParameter = splitScreenParameter(payload);
+
+      if(screenAndParameter[1].isEmpty){
+        router.push(screenAndParameter[0]);
+      }else{
+        router.push(screenAndParameter[0],extra: screenAndParameter[1]);
       }
 
-      final screen = payloadData['screen'] as String?;
-      final postUid = payloadData['postUid'] as String?;
-      final chatId = payloadData['chatId'] as String?;
-
-      if (screen == '/chat' && chatId != null) {
-        router.push('/chat/$chatId');
-      } else if (screen != null && postUid != null) {
-        router.push('$screen/$postUid');
-      }
     }
-  }
-
-  Map<String, String> _manualParsePayload(String payload) {
-    // 중괄호 제거 및 쉼표로 분리
-    final pairs = payload.substring(1, payload.length - 1).split(', ');
-
-    // 각 키-값 쌍을 파싱
-    return Map.fromEntries(pairs.map((pair) {
-      final parts = pair.split(': ');
-      if (parts.length != 2) throw FormatException('Invalid payload format');
-      return MapEntry(
-          parts[0].trim().replaceAll("'", ""),
-          parts[1].trim().replaceAll("'", "")
-      );
-    }));
   }
 
   Future<void> _configureFCM() async {
@@ -110,17 +87,16 @@ class NotificationHandler {
   }
 
   void _handleMessageOpenedApp(RemoteMessage message) {
+    print('call _handleMessageOpenedApp');
     final String? screen = message.data['screen'];
-    final String? postUid = message.data['postUid'];
-    final String? chatId = message.data['chatId'];
+    final screenAndParameter = splitScreenParameter(screen ?? "");
 
-    if (screen == '/chat' && chatId != null) {
-      router.push('/chat/$chatId');
-    } else if (screen != null && postUid != null) {
-      router.push('$screen/$postUid');
-    } else if (screen != null) {
-      router.push(screen);
+    if(screenAndParameter[1].isEmpty){
+      router.push(screenAndParameter[0]);
+    }else{
+      router.push(screenAndParameter[0],extra: screenAndParameter[1]);
     }
+
   }
 
   Future<void> _showNotification(RemoteMessage message) async {
@@ -134,12 +110,6 @@ class NotificationHandler {
     final NotificationDetails platformChannelSpecifics =
     NotificationDetails(android: androidPlatformChannelSpecifics);
 
-    final payload = {
-      'screen': message.data['screen'],
-      'postUid': message.data['postUid'],
-      'chatId': message.data['chatId'],
-    };
-
     print("recived push title : ${message.notification?.title ?? "알림"},data : ${message.data}");
 
     await _flutterLocalNotificationsPlugin.show(
@@ -147,7 +117,7 @@ class NotificationHandler {
       message.notification?.title ?? "알림",
       message.notification?.body ?? "",
       platformChannelSpecifics,
-      payload: payload.toString(),
+      payload: message.data['screen'],
     );
   }
 
@@ -181,6 +151,24 @@ class NotificationHandler {
       platformChannelSpecifics,
       payload: payload.toString(),
     );
+  }
+
+  List<String> splitScreenParameter(String data) {
+    String screen;
+    String parameter;
+
+    int questionMarkIndex = data.indexOf('?');
+
+    if (questionMarkIndex != -1) {
+      // '?'가 존재하는 경우
+      screen = data.substring(0, questionMarkIndex);
+      parameter = data.substring(questionMarkIndex + 1);
+    } else {
+      // '?'가 없는 경우
+      screen = data;
+      parameter = '';
+    }
+    return [screen, parameter];
   }
 
   Future<String?> getToken() async {

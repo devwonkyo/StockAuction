@@ -67,33 +67,22 @@ final GoRouter router = GoRouter(
       builder: (context, state) => PostModifyScreen(),
     ),
     GoRoute(
-      path: '/post/detail/:postUid',
-      builder: (context, state) {
-        final postUid = state.pathParameters['postUid'];
-        if (postUid == null) {
-          return ErrorScreen('Post ID is missing');
-        }
-        return PostDetailScreen(postUid: postUid);
-      },
+      path: '/post/detail',
+      builder: (context, state) => PostDetailScreen(
+        postUid: state.extra as String),
     ),
     GoRoute(
       path: '/post/list',
       builder: (context, state) => PostListScreen(),
     ),
     GoRoute(
-      path: '/post/bidList/:postUid',
-      builder: (context, state) {
-        final postUid = state.pathParameters['postUid'] ?? '';
-        return BidListScreen(postUid: postUid);
-      },
+      path: '/post/bidList',
+      builder: (context, state) => BidListScreen(postUid: ""),
     ),
     GoRoute(
       path: '/chat/:chatId',
-      builder: (context, state) {
-        final chatId = state.pathParameters['chatId'];
-        if (chatId == null) {
-          return ErrorScreen('Chat ID is missing');
-        }
+      builder: (BuildContext context, GoRouterState state) {
+        final chatId = state.pathParameters['chatId']!;
         return ChatScreen(chatId: chatId);
       },
     ),
@@ -127,12 +116,9 @@ final GoRouter router = GoRouter(
     ),
     GoRoute(
       path: '/other/profile/:uId',
-      builder: (context, state) {
-        final uId = state.pathParameters['uId'];
-        if (uId == null) {
-          return ErrorScreen('User ID is missing');
-        }
-        return OtherProfileScreen(uId: uId);
+      builder: (BuildContext context, GoRouterState state) {
+        final uId = state.pathParameters['uId']!;
+        return OtherProfileScreen(uId: uId); // userId 전달
       },
     ),
     GoRoute(
@@ -141,18 +127,3 @@ final GoRouter router = GoRouter(
     ),
   ],
 );
-
-class ErrorScreen extends StatelessWidget {
-  final String message;
-
-  const ErrorScreen(this.message);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Text(message),
-      ),
-    );
-  }
-}

@@ -13,7 +13,6 @@ import 'package:auction/providers/auth_provider.dart';
 import 'package:auction/providers/my_provider.dart';
 import 'package:auction/providers/user_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
@@ -102,29 +101,6 @@ class _MyAppState extends State<MyApp> {
       print("No user is currently logged in");
     }
 
-    FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) {
-      if (message != null) {
-        _handleMessage(message);
-      }
-    });
-
-    FirebaseMessaging.onMessageOpenedApp.listen(_handleMessage);
-  }
-
-  void _handleMessage(RemoteMessage message) {
-    if (message.data['screen'] != null) {
-      final String screen = message.data['screen'];
-      final String? postUid = message.data['postUid'];
-      final String? chatId = message.data['chatId'];
-
-      if (screen == '/chat' && chatId != null) {
-        router.push('/chat/$chatId');
-      } else if (screen == '/post/detail' && postUid != null) {
-        router.push('/post/detail/$postUid');
-      } else {
-        print('Invalid push notification data');
-      }
-    }
   }
 
   @override
