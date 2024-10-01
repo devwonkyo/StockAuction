@@ -66,7 +66,34 @@ class PostItemWidget extends StatelessWidget {
                           postModel.bidList.last.bidPrice,
                           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                         ),
-                        const Text("현재 입찰가", style: TextStyle(fontSize: 12, color: AppsColor.darkGray)),
+                        postModel.stockStatus == StockStatus.bidding ?
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: const Text("현재 입찰가", style: TextStyle(fontSize: 12)),
+                        )
+                        : Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.white  // 다크 모드에서의 테두리 색상
+                                  : AppsColor.darkGray, // 라이트 모드에서의 테두리 색상
+                            ),
+                            borderRadius: BorderRadius.circular(5),
+                            color: Theme.of(context).brightness == Brightness.dark
+                                ? AppsColor.darkGray // 다크 모드에서의 배경색
+                                : Colors.white, // 라이트 모드에서의 배경색
+                          ),
+                          child: Text(
+                            "경매 종료",
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.white  // 다크 모드에서의 텍스트 색상
+                                  : AppsColor.darkGray, // 라이트 모드에서의 텍스트 색상
+                            ),
+                          ),
+                        ),
                         const SizedBox(height: 4),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.start,

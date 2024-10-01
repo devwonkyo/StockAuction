@@ -85,4 +85,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'auctionproject-cea5a.appspot.com',
     measurementId: 'G-H5PPBZBZNZ',
   );
+
 }

@@ -1,27 +1,62 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class BidItemWidget extends StatelessWidget {
-  const BidItemWidget({super.key});
+  final String bidUserName;
+  final String bidUserId;
+  final String bidPrice;
+  final DateTime bidTime;
+  final Function(String) onUserTap;
+
+  const BidItemWidget({
+    Key? key,
+    required this.bidUserName,
+    required this.bidUserId,
+    required this.bidPrice,
+    required this.bidTime,
+    required this.onUserTap,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.symmetric(vertical: 10),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Expanded(
-              flex: 3,
-              child: Text("userId")),
+            flex: 3,
+            child: GestureDetector(
+              onTap: () => onUserTap(bidUserId),
+              child: Text(
+                bidUserName,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.black,
+                ),
+              ),
+            ),
+          ),
           Expanded(
-              flex: 1,
-              child: Center(child: Text("999,999"))),
-          SizedBox(width: 20,),
+            flex: 1,
+            child: Center(child: Text(bidPrice, style: const TextStyle(fontSize: 14))),
+          ),
+          const SizedBox(width: 20),
           Expanded(
-              flex: 1,
-              child: Center(child: Text("2024/09/22")))
+            flex: 1,
+            child: Center(
+              child: Text(
+                _formatDate(bidTime),
+                style: const TextStyle(fontSize: 14),
+              ),
+            ),
+          ),
         ],
       ),
     );
+  }
+
+  String _formatDate(DateTime date) {
+    return DateFormat('MM/dd HH:mm').format(date);
   }
 }
