@@ -1176,7 +1176,7 @@ PODS:
   - Firebase/Storage (11.2.0):
     - Firebase/CoreOnly
     - FirebaseStorage (~> 11.2.0)
-  - firebase_auth (5.3.0):
+  - firebase_auth (5.3.1):
     - Firebase/Auth (= 11.2.0)
     - firebase_core
     - Flutter
@@ -1487,7 +1487,7 @@ SPEC CHECKSUMS:
   cloud_firestore: 85b71ddbbeda32758a10fc0e34f7eefc90fb3346
   cloud_functions: 071fdf2c9ae0932ea9eb8b7d8aef4b014112a8ab
   Firebase: 98e6bf5278170668a7983e12971a66b2cd57fc8c
-  firebase_auth: fa0a64faed1efd32905446de54e398fe3b180dc8
+  firebase_auth: 0c77e299a8f2d1c74d1b1f6b78b3d4d802c19f47
   firebase_core: 2bedc3136ec7c7b8561c6123ed0239387b53f2af
   firebase_messaging: 15d114e1a41fc31e4fbabcd48d765a19eec94a38
   firebase_storage: 61d62709bb4eda114cf68172f0dfde7ec23779ad
@@ -1506,7 +1506,7 @@ SPEC CHECKSUMS:
   FirebaseSharedSwift: 7a0d78d155ede78407f0fdc89fbc914014c7c540
   FirebaseStorage: 9353f926690b2329957860abfcbc8b4074fe45e8
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  flutter_local_notifications: 4cde75091f6327eb8517fa068a0a5950212d2086
+  flutter_local_notifications: 0c0b1ae97e741e1521e4c1629a459d04b9aec743
   flutter_native_splash: edf599c81f74d093a4daf8e17bd7a018854bc778
   GoogleDataTransport: aae35b7ea0c09004c3797d53c8c41f66f219d6a7
   GoogleUtilities: 26a3abef001b6533cf678d3eb38fd3f614b7872d
