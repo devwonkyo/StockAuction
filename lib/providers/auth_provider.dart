@@ -1,4 +1,5 @@
 import 'package:auction/models/result_model.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -202,20 +203,23 @@ class AuthProvider extends ChangeNotifier {
     print("Creating user in Firestore");
     User? user = _auth.currentUser;
     if (user != null && user.emailVerified) {
+      // Get the FCM token
+      String? pushToken = await FirebaseMessaging.instance.getToken();
+
       UserModel newUser = UserModel(
         uid: user.uid,
         email: _email,
         nickname: _nickname,
         phoneNumber: _phoneNumber,
-        pushToken: null,
+        pushToken: pushToken,
         userProfileImage: null,
         birthDate: null,
       );
 
       await _firestore.collection('users').doc(user.uid).set(newUser.toMap());
       await saveUserToLocalStorage(newUser);
-      await setStayLoggedIn(true);  // 회원가입 후 stayLoggedIn을 true로 설정
-      print("User created in Firestore, saved locally, and stay logged in set to true");
+      await setStayLoggedIn(true);
+      print("User created in Firestore with push token, saved locally, and stay logged in set to true");
     } else {
       print("Failed to create user: email not verified");
       throw Exception('이메일이 인증되지 않았습니다.');
@@ -245,7 +249,7 @@ class AuthProvider extends ChangeNotifier {
         UserModel user = UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
         await saveUserToLocalStorage(user);
         await setStayLoggedIn(true);
-        _currentUserModel = user;  // 현재 사용자 모델 업데이트
+        _currentUserModel = user;
         print("Login successful, user saved locally and stay logged in set to true");
       } else {
         print("User document not found in Firestore");
@@ -257,6 +261,7 @@ class AuthProvider extends ChangeNotifier {
       throw e;
     }
   }
+
 
   Future<void> logout() async {
     print("Logging out");
@@ -337,4 +342,34 @@ class AuthProvider extends ChangeNotifier {
       birthDate: null,
     );
   }
+
+  Future<void> updatePushToken(String token) async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      try {
+        await _firestore.collection('users').doc(user.uid).update({
+          'pushToken': token,
+        });
+        if (_currentUserModel != null) {
+          _currentUserModel = UserModel(
+            uid: _currentUserModel!.uid,
+            email: _currentUserModel!.email,
+            nickname: _currentUserModel!.nickname,
+            phoneNumber: _currentUserModel!.phoneNumber,
+            pushToken: token,
+            userProfileImage: _currentUserModel!.userProfileImage,
+            birthDate: _currentUserModel!.birthDate,
+            likeList: _currentUserModel!.likeList,
+            sellList: _currentUserModel!.sellList,
+            buyList: _currentUserModel!.buyList,
+          );
+          await saveUserToLocalStorage(_currentUserModel!);
+        }
+        print("Push token updated successfully");
+      } catch (e) {
+        print("Error updating push token: $e");
+      }
+    }
+  }
+
 }
