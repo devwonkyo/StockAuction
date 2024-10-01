@@ -247,10 +247,19 @@ class AuthProvider extends ChangeNotifier {
       DocumentSnapshot userDoc = await _firestore.collection('users').doc(userCredential.user!.uid).get();
       if (userDoc.exists) {
         UserModel user = UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
+
+        // FCM 토큰 가져오기 및 업데이트
+        String? fcmToken = await FirebaseMessaging.instance.getToken();
+        if (fcmToken != null) {
+          print('로그인 시 FCM 토큰: $fcmToken');
+          user = user.copyWith(pushToken: fcmToken);
+          await _firestore.collection('users').doc(user.uid).update({'pushToken': fcmToken});
+        }
+
         await saveUserToLocalStorage(user);
         await setStayLoggedIn(true);
         _currentUserModel = user;
-        print("Login successful, user saved locally and stay logged in set to true");
+        print("Login successful, user saved locally, FCM token updated, and stay logged in set to true");
       } else {
         print("User document not found in Firestore");
       }
@@ -351,21 +360,10 @@ class AuthProvider extends ChangeNotifier {
           'pushToken': token,
         });
         if (_currentUserModel != null) {
-          _currentUserModel = UserModel(
-            uid: _currentUserModel!.uid,
-            email: _currentUserModel!.email,
-            nickname: _currentUserModel!.nickname,
-            phoneNumber: _currentUserModel!.phoneNumber,
-            pushToken: token,
-            userProfileImage: _currentUserModel!.userProfileImage,
-            birthDate: _currentUserModel!.birthDate,
-            likeList: _currentUserModel!.likeList,
-            sellList: _currentUserModel!.sellList,
-            buyList: _currentUserModel!.buyList,
-          );
+          _currentUserModel = _currentUserModel!.copyWith(pushToken: token);
           await saveUserToLocalStorage(_currentUserModel!);
         }
-        print("Push token updated successfully");
+        print("Push token updated successfully: $token");
       } catch (e) {
         print("Error updating push token: $e");
       }

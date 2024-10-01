@@ -38,7 +38,7 @@ class LoginScreen extends StatelessWidget {
         final notificationHandler = Provider.of<NotificationHandler>(context, listen: false);
         await notificationHandler.showCustomNotification(
           title: "로그인 성공",
-          body: "환영합니다! 성공적으로 로그인되었습니다.",
+          body: "환영합니다! 성공적으로 로그인되었습니다.", screen: '',
         );
 
         context.go('/main');
