@@ -227,8 +227,8 @@ class ChatProvider extends ChangeNotifier {
 
   // 각자 sellList, buyList에 추가하는 메소드
   Future<void> _updateUserListsOnDealCompletion(Message message) async {
-    final buyerId = message.uId;
-    final sellerId = currentUserId == buyerId ? message.otherUserId : currentUserId;
+    final sellerId = message.uId;
+    final buyerId = currentUserId == sellerId ? message.otherUserId : currentUserId;
     final postUid = message.confirmationMessage?['postUid'];
 
     if (postUid == null) {
@@ -238,10 +238,6 @@ class ChatProvider extends ChangeNotifier {
 
     await _firestore.collection('users').doc(buyerId).update({
       'buyList': FieldValue.arrayUnion([postUid])
-    });
-
-    await _firestore.collection('users').doc(sellerId).update({
-      'sellList': FieldValue.arrayUnion([postUid])
     });
 
     await _firestore.collection('posts').doc(postUid).update({

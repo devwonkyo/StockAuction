@@ -13,7 +13,6 @@ class MyInfoUpdateScreen extends StatefulWidget {
 
 class _MyInfoUpdateScreenState extends State<MyInfoUpdateScreen> {
   final _formKey = GlobalKey<FormState>();
-  String _gender = '남성';
   String _currentDate = '';
   late TextEditingController _nameController;
   late TextEditingController _phoneController;
@@ -46,7 +45,6 @@ class _MyInfoUpdateScreenState extends State<MyInfoUpdateScreen> {
           _phoneController.text = userDoc['phoneNumber'] ?? '전화번호가 없습니다';
           _emailController.text = userDoc['email'] ?? '이메일이 없습니다';
           _birthController.text = userDoc['birthDate'] ?? '생년월일이 없습니다';
-          _gender = userDoc['gender'] ?? '남성';
         });
       } else {
         print('사용자 문서가 존재하지 않습니다.');
@@ -62,16 +60,6 @@ class _MyInfoUpdateScreenState extends State<MyInfoUpdateScreen> {
       appBar: AppBar(
         title: const Text('회원정보수정'),
         centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            if (GoRouter.of(context).canPop()) {
-              context.pop();
-            } else {
-              context.go('/my');
-            }
-          },
-        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -92,35 +80,6 @@ class _MyInfoUpdateScreenState extends State<MyInfoUpdateScreen> {
               _buildTextField('이메일', _emailController),
               _buildTextField('생년월일', _birthController),
               const SizedBox(height: 20),
-              const Text(
-                '성별',
-                style: TextStyle(fontSize: 16),
-              ),
-              Row(
-                children: [
-                  Radio<String>(
-                    value: '남성',
-                    groupValue: _gender,
-                    onChanged: (value) {
-                      setState(() {
-                        _gender = value!;
-                      });
-                    },
-                  ),
-                  const Text('남성'),
-                  Radio<String>(
-                    value: '여성',
-                    groupValue: _gender,
-                    onChanged: (value) {
-                      setState(() {
-                        _gender = value!;
-                      });
-                    },
-                  ),
-                  const Text('여성'),
-                ],
-              ),
-              const SizedBox(height: 20),
               _buildInfoTile('본인인증', '$_currentDate 본인인증이 완료되었습니다',
                   readOnly: true),
               const SizedBox(height: 20),
@@ -132,7 +91,6 @@ class _MyInfoUpdateScreenState extends State<MyInfoUpdateScreen> {
                       'phoneNumber': _phoneController.text,
                       'email': _emailController.text,
                       'birthDate': _birthController.text,
-                      'gender': _gender,
                     };
                     context.read<MyProvider>().updateUserInfo(updatedInfo);
                     FirebaseFirestore.instance
