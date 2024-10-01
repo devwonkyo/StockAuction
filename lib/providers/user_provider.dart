@@ -34,4 +34,30 @@ class UserProvider extends ChangeNotifier {
 
     notifyListeners();
   }
+
+  Future<void> updatePushToken(String uId, String token) async {
+    try {
+      await _firestore.collection('users').doc(uId).update({
+        'pushToken': token,
+      });
+      if (_user != null && _user!.uid == uId) {
+        _user = UserModel(
+          uid: _user!.uid,
+          email: _user!.email,
+          nickname: _user!.nickname,
+          phoneNumber: _user!.phoneNumber,
+          pushToken: token,
+          userProfileImage: _user!.userProfileImage,
+          birthDate: _user!.birthDate,
+          likeList: _user!.likeList,
+          sellList: _user!.sellList,
+          buyList: _user!.buyList,
+        );
+        notifyListeners();
+      }
+      print("Push token updated successfully in UserProvider");
+    } catch (e) {
+      print("Error updating push token in UserProvider: $e");
+    }
+  }
 }

@@ -60,8 +60,28 @@ class ChatProvider extends ChangeNotifier {
     try {
       await _ensureChatRoomExists(chatId, userId, otherUserId, username, '');
 
+      final querySnapshot = await _firestore.collection('chats').doc(chatId).collection('messages')
+      .where('messageType', isEqualTo: 'purchaseConfirmation')
+      .where('status', whereIn: ['ready', 'deposit', 'shipping'])
+      .orderBy('createdAt', descending: true)
+      .limit(1)
+      .get();
+
+      String currentStatus = 'ready';
+      if (querySnapshot.docs.isNotEmpty) {
+        currentStatus = querySnapshot.docs.first.data()['status'];
+      }
+
+      if(currentStatus == 'canceled') currentStatus = 'ready';
+
+      BidModel? highestBid = post.bidList
+          .where((bid) => bid.bidUser.uid == otherUserId)
+          .reduce((current, next) => current.bidTime.isAfter(next.bidTime) ? current : next);
+
+      String bidPrice = highestBid != null ? highestBid.bidPrice : '0';
+
       await _firestore.collection('chats').doc(chatId).collection('messages').add({
-        'text': '[구매 확정]',
+        'text': '[거래를 완료해주세요]',
         'uId': userId,
         'username': username,
         'createdAt': Timestamp.now(),
@@ -69,16 +89,20 @@ class ChatProvider extends ChangeNotifier {
         'confirmationMessage': {
           'postUid': post.postUid,
           'title': post.postTitle,
-          'status': '확정 대기 중',
+          'bidPrice': bidPrice,
+          'postContent': post.postContent.length > 50 
+              ? '${post.postContent.substring(0, 50)}...' 
+              : post.postContent,
+          'status': currentStatus,
           'buttons': ['확인', '취소']
         },
         'messageType': 'purchaseConfirmation',
-        'status': 'ready',
+        'status': currentStatus,
       });
       sendNotification(title: "알림", body: "${post.postTitle} 거래 확정 메시지가 도착했습니다.", pushToken: post.bidList.last.bidUser.pushToken ?? ""); //todo 화면이동
       notifyListeners();
     } catch (e) {
-      print("확정 메시지 보내기에서 에러가 떴음: $e");
+      print("확정 메시지 보내기에서 에러가 떴음: $e, chatId: $chatId, postUid: ${post.postUid}");
     }
   }
 
@@ -103,12 +127,12 @@ class ChatProvider extends ChangeNotifier {
               title: Text('입금을 확인하셨습니까?'),
               actions: [
                 TextButton(
-                  onPressed: () => Navigator.of(context).pop(false),
-                  child: Text('아니오'),
-                ),
-                TextButton(
                   onPressed: () => Navigator.of(context).pop(true),
                   child: Text('예'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: Text('아니오'),
                 ),
               ],
             );
@@ -130,12 +154,12 @@ class ChatProvider extends ChangeNotifier {
               title: Text('배송을 확인하셨습니까?'),
               actions: [
                 TextButton(
-                  onPressed: () => Navigator.of(context).pop(false),
-                  child: Text('아니오'),
-                ),
-                TextButton(
                   onPressed: () => Navigator.of(context).pop(true),
                   child: Text('예'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: Text('아니오'),
                 ),
               ],
             );
@@ -162,12 +186,12 @@ class ChatProvider extends ChangeNotifier {
           title: Text('거래를 취소하시겠습니까?'),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: Text('아니오'),
-            ),
-            TextButton(
               onPressed: () => Navigator.of(context).pop(true),
               child: Text('예'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text('아니오'),
             ),
           ],
         );
