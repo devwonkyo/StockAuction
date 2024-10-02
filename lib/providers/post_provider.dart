@@ -29,6 +29,20 @@ class PostProvider with ChangeNotifier {
   int? get postAuctionEndTime => _postAuctionEndTime;
   List<String> get likedPostTitles => _likedPostTitles;
 
+  List<BidModel> getSortedBids() {
+    if (postModel == null) return [];
+    return List.from(postModel!.bidList)
+      ..sort((a, b) => b.bidTime.compareTo(a.bidTime));
+  }
+
+  List<BidModel> getSortedBidsExcludingAuthor() {
+    if (postModel == null) return [];
+    return postModel!.bidList
+        .where((bid) => bid.bidUser.uid != postModel!.writeUser.uid)
+        .toList()
+      ..sort((a, b) => b.bidTime.compareTo(a.bidTime));
+  }
+
   PostProvider() {
     loadLikedPostTitles();
   }
