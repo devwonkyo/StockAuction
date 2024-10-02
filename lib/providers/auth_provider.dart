@@ -326,7 +326,7 @@ class AuthProvider extends ChangeNotifier {
   //판매 물품 추가시 selList에 목록 추가
   Future<Result> addPostIntoSellList(String userUid, String postUid) async {
     _isLoading = true;
-    notifyListeners;
+    notifyListeners();
     try {
       await FirebaseFirestore.instance.collection('users').doc(userUid).update({
         'sellList': FieldValue.arrayUnion([postUid])
@@ -336,7 +336,7 @@ class AuthProvider extends ChangeNotifier {
       return Result.failure("판매리스트에 등록 실패했습니다. 실패 코드 : $e");
     }finally{
       _isLoading = false;
-      notifyListeners;
+      notifyListeners();
     }
   }
 
@@ -344,6 +344,7 @@ class AuthProvider extends ChangeNotifier {
   //판매 물품 삭제시 selList 에서 목록 삭제
   Future<Result> deletePostInSellList(String userUid, String postUid) async{
     _isLoading = true;
+    notifyListeners();
     try {
       print("userUid : $userUid, postUid : $postUid");
       await FirebaseFirestore.instance.collection('users').doc(userUid).update({
@@ -354,6 +355,7 @@ class AuthProvider extends ChangeNotifier {
       return Result.failure("판매리스트에서 삭제 실패했습니다. 실패 코드 : $e");
     }finally{
       _isLoading = false;
+      notifyListeners();
     }
   }
 

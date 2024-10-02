@@ -600,12 +600,14 @@ class PostProvider with ChangeNotifier {
             .where('auctionStatus', isEqualTo: AuctionStatus.successBidding.index)
             .where('stockStatus', isEqualTo: StockStatus.successSell.index)
             .get();
+        print('패치 ${querySnapshot.size} documents for sublist: $sublist');
 
         final fetchedPosts = querySnapshot.docs
             .map((snapshot) => PostModel.fromMap(snapshot.data() as Map<String, dynamic>))
             .toList();
 
-        boughtPosts.addAll(fetchedPosts);
+        boughtPosts.addAll(fetchedPosts.where((newPost) =>
+          !boughtPosts.any((existingPost) => existingPost.postUid == newPost.postUid)));
       }
     } catch (e) {
       print("구매한 포스트 불러오기 실패: $e");
