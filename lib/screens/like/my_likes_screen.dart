@@ -1,3 +1,4 @@
+import 'package:auction/config/color.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:auction/providers/post_provider.dart';
@@ -65,7 +66,7 @@ class MyLikesScreen extends StatelessWidget {
                       ),
                       title: Text(post.postTitle),
                       subtitle: Text('현재 입찰가: $latestBid'),
-                      trailing: Icon(Icons.favorite, color: Colors.red),
+                      trailing: Icon(Icons.bookmark, color: AppsColor.pastelGreen),
                       onTap: () {
                         context.push('/post/detail', extra: post.postUid);
                       },

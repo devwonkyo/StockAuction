@@ -55,22 +55,33 @@ class AuthProvider extends ChangeNotifier {
     // Firestore에서 현재 사용자 정보 가져오기
     User? firebaseUser = _auth.currentUser;
     if (firebaseUser != null) {
-      DocumentSnapshot userDoc = await _firestore.collection('users').doc(firebaseUser.uid).get();
-      if (userDoc.exists) {
-        _currentUserModel = UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
-        
-        // 가져온 데이터를 로컬 스토리지에 저장
-        await saveUserToLocalStorage(_currentUserModel!);
-        
-        notifyListeners();
+      try {
+        await _loadUserFromFirestore(firebaseUser.uid);
+      } catch (e) {
+        print("Error loading user from Firestore: $e");
       }
     } else {
-      // 로컬에서 사용자 정보 불러오기
+      // Firestore에서 사용자가 없을 경우 로컬 스토리지에서 불러오기
       await _loadUserFromLocalStorage();
     }
 
     notifyListeners();
     print("Auth state initialized");
+  }
+
+  Future<void> _loadUserFromFirestore(String userId) async {
+    try {
+      DocumentSnapshot userDoc = await _firestore.collection('users').doc(userId).get();
+      if (userDoc.exists) {
+        _currentUserModel = UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
+        await saveUserToLocalStorage(_currentUserModel!);  // Firestore 데이터를 로컬에 저장
+        print("User loaded from Firestore and saved to local storage");
+      } else {
+        print("User document not found in Firestore");
+      }
+    } catch (e) {
+      print("Error loading user from Firestore: $e");
+    }
   }
 
   Future<UserModel?> getCurrentUser() async {
@@ -326,7 +337,7 @@ class AuthProvider extends ChangeNotifier {
   //판매 물품 추가시 selList에 목록 추가
   Future<Result> addPostIntoSellList(String userUid, String postUid) async {
     _isLoading = true;
-    notifyListeners;
+    notifyListeners();
     try {
       await FirebaseFirestore.instance.collection('users').doc(userUid).update({
         'sellList': FieldValue.arrayUnion([postUid])
@@ -336,7 +347,7 @@ class AuthProvider extends ChangeNotifier {
       return Result.failure("판매리스트에 등록 실패했습니다. 실패 코드 : $e");
     }finally{
       _isLoading = false;
-      notifyListeners;
+      notifyListeners();
     }
   }
 
@@ -344,6 +355,7 @@ class AuthProvider extends ChangeNotifier {
   //판매 물품 삭제시 selList 에서 목록 삭제
   Future<Result> deletePostInSellList(String userUid, String postUid) async{
     _isLoading = true;
+    notifyListeners();
     try {
       print("userUid : $userUid, postUid : $postUid");
       await FirebaseFirestore.instance.collection('users').doc(userUid).update({
@@ -354,6 +366,7 @@ class AuthProvider extends ChangeNotifier {
       return Result.failure("판매리스트에서 삭제 실패했습니다. 실패 코드 : $e");
     }finally{
       _isLoading = false;
+      notifyListeners();
     }
   }
 

@@ -1,8 +1,10 @@
+import 'package:auction/config/color.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:auction/providers/auth_provider.dart';
 import 'package:auction/providers/post_provider.dart';
-import 'package:auction/models/post_model.dart';
+import 'package:auction/providers/theme_provider.dart';
+import 'package:go_router/go_router.dart';
 
 class MySoldScreen extends StatefulWidget {
   const MySoldScreen({Key? key}) : super(key: key);
@@ -42,6 +44,7 @@ class _MySoldScreenState extends State<MySoldScreen> {
   @override
   Widget build(BuildContext context) {
     final postProvider = Provider.of<PostProvider>(context);
+    final themeProvider = Provider.of<ThemeProvider>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -60,7 +63,9 @@ class _MySoldScreenState extends State<MySoldScreen> {
                     fetchPostsBasedOnStatus();
                   },
                   style: TextButton.styleFrom(
-                    backgroundColor: _isSelling ? Colors.grey : Colors.white,
+                    backgroundColor: themeProvider.isDarkTheme ?
+                    _isSelling ? Colors.grey : AppsColor.darkGray :
+                    _isSelling ? Colors.grey : Colors.white,
                   ),
                   child: const Text('판매중'),
                 ),
@@ -74,7 +79,9 @@ class _MySoldScreenState extends State<MySoldScreen> {
                     fetchPostsBasedOnStatus();
                   },
                   style: TextButton.styleFrom(
-                    backgroundColor: !_isSelling ? Colors.grey : Colors.white,
+                    backgroundColor: themeProvider.isDarkTheme ?
+                    _isSelling ? AppsColor.darkGray : Colors.grey :
+                    _isSelling ? Colors.white : Colors.grey,
                   ),
                   child: const Text('판매완료'),
                 ),
@@ -90,7 +97,15 @@ class _MySoldScreenState extends State<MySoldScreen> {
                       final post = _isSelling ? postProvider.sellingPosts[index] : postProvider.soldPosts[index];
                       return ListTile(
                         leading: post.postImageList.isNotEmpty
-                            ? Image.network(post.postImageList[0], width: 50, height: 50, fit: BoxFit.cover)
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(10.0),
+                                child: Image.network(
+                                  post.postImageList[0],
+                                  width: 50,
+                                  height: 50,
+                                  fit: BoxFit.cover,
+                                ),
+                              )
                             : const Icon(Icons.image),
                         title: Text(post.postTitle.length > 15 
                             ? '${post.postTitle.substring(0, 15)}...' 
@@ -98,6 +113,9 @@ class _MySoldScreenState extends State<MySoldScreen> {
                         subtitle: Text(post.postContent.length > 30
                             ? '${post.postContent.substring(0, 30)}...'
                             : post.postContent),
+                        onTap: () {
+                          context.push('/post/detail/${post.postUid}');
+                        },
                       );
                     },
                   ),

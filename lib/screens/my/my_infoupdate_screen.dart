@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // Firestore import
-import 'package:firebase_auth/firebase_auth.dart'; // Firebase Auth import
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:auction/providers/my_provider.dart';
 
 class MyInfoUpdateScreen extends StatefulWidget {
@@ -44,13 +44,27 @@ class _MyInfoUpdateScreenState extends State<MyInfoUpdateScreen> {
           _nameController.text = userDoc['nickname'] ?? '닉네임이 없습니다';
           _phoneController.text = userDoc['phoneNumber'] ?? '전화번호가 없습니다';
           _emailController.text = userDoc['email'] ?? '이메일이 없습니다';
-          _birthController.text = userDoc['birthDate'] ?? '생년월일이 없습니다';
+          _birthController.text = userDoc['birthDate'] ?? '';
         });
       } else {
         print('사용자 문서가 존재하지 않습니다.');
       }
     } else {
       print('로그인된 사용자가 없습니다.');
+    }
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null) {
+      setState(() {
+        _birthController.text = DateFormat('yyyy-MM-dd').format(picked);
+      });
     }
   }
 
@@ -77,8 +91,10 @@ class _MyInfoUpdateScreenState extends State<MyInfoUpdateScreen> {
               const Divider(),
               _buildTextField('이름', _nameController),
               _buildTextField('전화번호', _phoneController),
-              _buildTextField('이메일', _emailController),
-              _buildTextField('생년월일', _birthController),
+              _buildTextField('이메일', _emailController, readOnly: true),
+              _buildTextField('생년월일', _birthController, onTap: () {
+                _selectDate(context);
+              }),
               const SizedBox(height: 20),
               _buildInfoTile('본인인증', '$_currentDate 본인인증이 완료되었습니다',
                   readOnly: true),
@@ -117,11 +133,14 @@ class _MyInfoUpdateScreenState extends State<MyInfoUpdateScreen> {
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController controller) {
+   Widget _buildTextField(String label, TextEditingController controller,
+      {bool readOnly = false, VoidCallback? onTap}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10.0),
       child: TextFormField(
         controller: controller,
+        readOnly: readOnly, // onTap과 함께 사용할 때 필드를 readOnly로 설정
+        onTap: readOnly ? onTap : null, // readOnly일 때만 onTap 실행
         decoration: InputDecoration(
           labelText: label,
           hintText: '입력하세요',

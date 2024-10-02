@@ -76,6 +76,13 @@ final GoRouter router = GoRouter(
         postUid: state.extra as String),
     ),
     GoRoute(
+      path: '/post/detail/:postUid',
+      builder: (BuildContext context, GoRouterState state) {
+        final postUid = state.pathParameters['postUid']!;
+        return PostDetailScreen(postUid: postUid);
+      },
+    ),
+    GoRoute(
       path: '/post/list',
       builder: (context, state) => PostListScreen(),
     ),
