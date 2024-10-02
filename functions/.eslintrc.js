@@ -17,6 +17,7 @@ module.exports = {
     "indent": "off",
     "semi": "off",
     "max-len": "off",
+    "require-jsdoc": "off",
   },
   overrides: [
     {
