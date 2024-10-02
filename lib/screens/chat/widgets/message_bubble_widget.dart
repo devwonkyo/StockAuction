@@ -62,17 +62,21 @@ class MessageBubble extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (imageUrl != null)
-                  Container(
-                    width: 100,
-                    height: 100,
-                    child: CachedNetworkImage(
-                      imageUrl: imageUrl!,
-                      placeholder: (context, url) => CircularProgressIndicator(),
-                      errorWidget: (context, url, error) => Icon(Icons.error),
-                      fit: BoxFit.cover,
-                    ),
+                Container(
+                  width: 100,
+                  height: 100,
+                  child: imageUrl != null
+                ? CachedNetworkImage(
+                    imageUrl: imageUrl!,
+                    placeholder: (context, url) => CircularProgressIndicator(),
+                    errorWidget: (context, url, error) => Icon(Icons.error),
+                    fit: BoxFit.cover,
+                  )
+                : Image.asset(
+                    'lib/assets/images/defaultUserProfile.png',
+                    fit: BoxFit.cover,
                   ),
+                ),
                 SizedBox(width: 8),
                 Expanded(
                   child: Column(

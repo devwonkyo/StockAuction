@@ -17,7 +17,9 @@ class _MySoldScreenState extends State<MySoldScreen> {
   @override
   void initState() {
     super.initState();
-    fetchPostsBasedOnStatus();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      fetchPostsBasedOnStatus();
+    });
   }
 
   // 판매중 판매완료 Post 갱신하기
@@ -83,9 +85,9 @@ class _MySoldScreenState extends State<MySoldScreen> {
             child: postProvider.isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : ListView.builder(
-                    itemCount: postProvider.postList.length,
+                    itemCount: _isSelling ? postProvider.sellingPosts.length : postProvider.soldPosts.length,
                     itemBuilder: (context, index) {
-                      final post = postProvider.postList[index];
+                      final post = _isSelling ? postProvider.sellingPosts[index] : postProvider.soldPosts[index];
                       return ListTile(
                         leading: post.postImageList.isNotEmpty
                             ? Image.network(post.postImageList[0], width: 50, height: 50, fit: BoxFit.cover)
