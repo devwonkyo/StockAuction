@@ -329,8 +329,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
             if (currentUser != null)
               IconButton(
                 icon: Icon(
-                  isLiked ? Icons.favorite : Icons.favorite_border,
-                  color: isLiked ? Colors.red : null,
+                  isLiked ? Icons.bookmark : Icons.bookmark_border,
+                  color: isLiked ? AppsColor.pastelGreen : null,
                 ),
                 onPressed: () => postProvider.toggleFavorite(widget.postUid, currentUser),
               ),

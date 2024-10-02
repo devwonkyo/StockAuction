@@ -46,7 +46,6 @@ class _PostListScreenState extends State<PostListScreen> {
           return Center(child: CircularProgressIndicator());
         }
         return Scaffold(
-          appBar: null,
           body: Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
             child: RefreshIndicator(
