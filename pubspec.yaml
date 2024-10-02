@@ -62,6 +62,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons: ^0.14.1
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -70,6 +71,13 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^4.0.0
 
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "lib/assets/icon/stockAuction_appIcon.png"
+  adaptive_icon_background: "#c0b6ae"
+  adaptive_icon_foreground: "lib/assets/icon/stockAuction_appIcon.png"
+  
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
@@ -88,6 +96,12 @@ flutter:
     - lib/assets/image/pic3.png
     - lib/assets/image/defaultUserProfile.png
     - lib/assets/image/loginimage.png
+    - lib/assets/image/default_profile/default_blue.png
+    - lib/assets/image/default_profile/default_green.png
+    - lib/assets/image/default_profile/default_mint.png
+    - lib/assets/image/default_profile/default_red.png
+    - lib/assets/image/default_profile/default_yellow.png
+    - lib/assets/icon/stockAuction_appIcon.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
