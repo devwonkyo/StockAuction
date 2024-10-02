@@ -68,7 +68,13 @@ class _MainScreenState extends State<MainScreen> {
       ),
       body: IndexedStack(
         index: _selectedIndex,
-        children: _pages,
+        children: [
+          Padding(
+            padding: EdgeInsets.all(8.0), // 첫 번째 페이지에만 padding 적용
+            child: _pages[0],
+          ),
+          ..._pages.sublist(1), // 첫 번째 페이지 제외한 나머지 페이지들
+        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
@@ -82,10 +88,8 @@ class _MainScreenState extends State<MainScreen> {
         onTap: _onItemTapped,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: '홈'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.gavel), label: '경매'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.chat_bubble_rounded), label: '채팅'),
+          BottomNavigationBarItem(icon: Icon(Icons.gavel), label: '경매'),
+          BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_rounded), label: '채팅'),
           BottomNavigationBarItem(icon: Icon(Icons.favorite), label: '찜 목록'),
         ],
       ),

@@ -102,7 +102,6 @@ class _MyAppState extends State<MyApp> {
     } else {
       print("No user is currently logged in");
     }
-
   }
 
   @override
