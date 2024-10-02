@@ -1,3 +1,4 @@
+import 'package:auction/config/color.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:auction/providers/theme_provider.dart';
@@ -303,7 +304,7 @@ class MessageBubble extends StatelessWidget {
         Container(
           constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.6),
           decoration: BoxDecoration(
-            color: isMe ? Colors.grey[300] : Colors.blue[300],
+            color: isMe ? Colors.grey[300] : AppsColor.pastelGreen,
             borderRadius: BorderRadius.circular(12),
           ),
           padding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),

@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:auction/providers/theme_provider.dart';
 import 'package:auction/providers/post_provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -28,6 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _startImageTimer();
       _loadPosts();
+      Provider.of<PostProvider>(context, listen: false).fetchSuccessBiddingPosts();
     });
   }
 
@@ -67,84 +69,113 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      body: Column(
-        children: <Widget>[
-          Expanded(
-            flex: 2,
-            child: PageView.builder(
-              controller: _pageController,
-              itemCount: _images.length,
-              itemBuilder: (context, index) {
-                return Image.asset(
-                  _images[index],
-                  fit: BoxFit.cover,
-                );
-              },
-            ),
-          ),
-          Container(
-            margin: EdgeInsets.all(10),
-            padding: EdgeInsets.all(5),
-            width: double.infinity,
-            child: Text(
-              '방금 시작된 경매',
-              textAlign: TextAlign.left,
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: theme.textTheme.headlineLarge!.color,
+      body: SingleChildScrollView(
+        child:
+          Column(
+            children: <Widget>[
+              SizedBox(
+                height: 350,
+                child: PageView.builder(
+                  controller: _pageController,
+                  itemCount: _images.length,
+                  itemBuilder: (context, index) {
+                    return Image.asset(
+                      _images[index],
+                      fit: BoxFit.fill,
+                    );
+                  },
+                ),
               ),
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Consumer<PostProvider>(
-              builder: (context, postProvider, child) {
-                if (postProvider.isLoading) {
-                  return Center(child: CircularProgressIndicator());
-                }
-
-                if (postProvider.hasError) {
-                  return Center(child: Text('포스트를 불러오는 데 오류가 발생했습니다.'));
-                }
-
-                // 전체 postList에서 최근 10개만 사용
-                final recentPosts = postProvider.postList.take(10).toList();
-
-                return SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: recentPosts.map((post) {
-                      return Container(
-                        width: 160, // 각 아이템의 너비 설정
-                        child: auctionItem(theme, post),
-                      );
-                    }).toList(),
+              Container(
+                margin: EdgeInsets.fromLTRB(5, 10, 0, 10),
+                width: double.infinity,
+                child: Text(
+                  '방금 시작된 경매',
+                  textAlign: TextAlign.left,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: theme.textTheme.headlineLarge!.color,
                   ),
-                );
-              },
-            ),
+                ),
+              ),
+              SizedBox(
+                height: 200,
+                child: Consumer<PostProvider>(
+                  builder: (context, postProvider, child) {
+                    if (postProvider.isLoading) {
+                      return Center(child: CircularProgressIndicator());
+                    }
+
+                    if (postProvider.hasError) {
+                      return Center(child: Text('포스트를 불러오는 데 오류가 발생했습니다.'));
+                    }
+
+                    // 전체 postList에서 최근 10개만 사용
+                    final recentPosts = postProvider.postList.take(10).toList();
+
+                    return SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: recentPosts.map((post) {
+                          return Container(
+                            width: 160,
+                            child: auctionItem(theme, post),
+                          );
+                        }).toList(),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.fromLTRB(5, 10, 0, 10),
+                width: double.infinity,
+                child: Text(
+                  '낙찰된 경매',
+                  textAlign: TextAlign.left,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: theme.textTheme.headlineLarge!.color,
+                  ),
+                ),
+              ),
+              SizedBox(
+                height: 200,
+                child: Consumer<PostProvider>(
+                  builder: (context, postProvider, child) {
+                    if (postProvider.isLoading) {
+                      return Center(child: CircularProgressIndicator());
+                    }
+
+                    if (postProvider.hasError) {
+                      return Center(child: Text('포스트를 불러오는 데 오류가 발생했습니다.'));
+                    }
+
+                    final successBiddingPosts = postProvider.successBiddingPosts.take(10).toList();
+
+                    return SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: successBiddingPosts.map((post) {
+                          return Container(
+                            width: 160,
+                            child: auctionItem(theme, post),
+                          );
+                        }).toList(),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
-        ],
       ),
     );
   }
 
   Widget auctionItem(ThemeData theme, PostModel post) {
-    // 기기의 세로 길이를 MediaQuery로 얻음
-    final screenHeight = MediaQuery.of(context).size.height;
-
-    // 화면 높이에 따라 maxLines 값을 조정
-    int calculateMaxLines(double height) {
-      if (height > 800) {
-        return 3; // 큰 화면일 경우 더 많은 줄 수 허용
-      } else if (height > 600) {
-        return 2; // 중간 크기 화면
-      } else {
-        return 1; // 작은 화면일 경우 줄 수를 줄임
-      }
-    }
-
     return GestureDetector(
       onTap: () {
         GoRouter.of(context).push('/post/detail', extra: post.postUid);
@@ -156,13 +187,18 @@ class _HomeScreenState extends State<HomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: Image.network(
-                post.postImageList.isNotEmpty
-                    ? post.postImageList[0]
-                    : 'default_image_url',
-                fit: BoxFit.cover,
-                width: 120,
-                height: 100,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10.0),
+                child: CachedNetworkImage(
+                  imageUrl: post.postImageList.isNotEmpty
+                      ? post.postImageList[0]
+                      : 'default_image_url',
+                  width: 160,
+                  height: 160,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => CircularProgressIndicator(),
+                  errorWidget: (context, url, error) => Icon(Icons.error),
+                ),
               ),
             ),
             SizedBox(height: 5),
@@ -172,6 +208,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 fontSize: 18,
                 color: theme.textTheme.bodyLarge!.color,
               ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+              softWrap: false,
             ),
             SizedBox(height: 3),
             // 가격 정보는 항상 보여야 함
@@ -182,17 +221,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 fontWeight: FontWeight.bold, // 글씨 두껍게
                 color: theme.textTheme.bodyMedium!.color,
               ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+              softWrap: false,
             ),
           ],
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    _pageController.dispose();
-    super.dispose();
   }
 }

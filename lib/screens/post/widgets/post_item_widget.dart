@@ -92,8 +92,8 @@ class PostItemWidget extends StatelessWidget {
                           ? () => postProvider.toggleFavorite(postModel.postUid, currentUser)
                           : null,
                       child: Icon(
-                        isLiked ? Icons.favorite : Icons.favorite_border,
-                        color: isLiked ? Colors.red : null,
+                        isLiked ? Icons.bookmark : Icons.bookmark_border,
+                        color: isLiked ? AppsColor.pastelGreen : null,
                         size: 20,
                       ),
                     ),

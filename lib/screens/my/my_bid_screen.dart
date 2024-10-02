@@ -9,7 +9,7 @@ import 'package:auction/models/post_model.dart';
 class MyBidsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(  // Scaffold 추가
+    return Scaffold(
       appBar: AppBar(
         title: Text('나의 입찰 목록'),
       ),
