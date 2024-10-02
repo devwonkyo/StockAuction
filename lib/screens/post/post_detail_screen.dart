@@ -442,10 +442,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                postProvider.postModel!.auctionStatus !=
-                        AuctionStatus.bidding
-                    ? const Text('낙찰가', style: TextStyle(fontSize: 16))
-                    : const Text('현재 입찰가', style: TextStyle(fontSize: 16)),
+                _buildAuctionStatusText(postProvider.postModel!.auctionStatus),
                 TimerTextWidget(postProvider: postProvider),
               ],
             ),
@@ -791,6 +788,17 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     _priceFocusNode.removeListener(_onFocusChange);
     _priceFocusNode.dispose();
     super.dispose();
+  }
+
+  _buildAuctionStatusText(AuctionStatus auctionStatus) {
+    switch (auctionStatus) {
+      case AuctionStatus.bidding:
+        return const Text('현재 입찰가', style: TextStyle(fontSize: 16));
+      case AuctionStatus.successBidding:
+        return const Text('낙찰가', style: TextStyle(fontSize: 16));
+      case AuctionStatus.failBidding:
+        return const Text('유찰된 상품', style: TextStyle(fontSize: 16));
+    }
   }
 
 }
