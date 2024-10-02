@@ -8,7 +8,6 @@ import 'package:auction/screens/auth/login_screen.dart';
 import 'package:auction/screens/auth/signup_screen.dart';
 import 'package:auction/screens/auth/password_reser_screen.dart';
 // import chat
-import 'package:auction/screens/chat/chat_list_screen.dart';
 import 'package:auction/screens/chat/chat_screen.dart';
 // import post
 import 'package:auction/screens/post/post_list_screen.dart';
@@ -23,6 +22,8 @@ import 'package:auction/screens/my/my_bought_screen.dart';
 import 'package:auction/screens/my/my_infoupdate_screen.dart';
 // import other
 import 'package:auction/screens/other/other_profile_screen.dart';
+import 'package:auction/screens/other/other_selling_screen.dart';
+import 'package:auction/screens/other/other_sold_screen.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -30,6 +31,7 @@ final GoRouter router = GoRouter(
   initialLocation: '/login',
   navigatorKey: rootNavigatorKey,
   routes: [
+    // Auth 관련 Route
     GoRoute(
       path: '/login',
       builder: (context, state) => LoginScreen(),
@@ -42,6 +44,7 @@ final GoRouter router = GoRouter(
       path: '/password-reset',
       builder: (context, state) => PasswordResetScreen(),
     ),
+    // Main 관련 Route
     GoRoute(
       path: '/main',
       builder: (context, state) => MainScreen(),
@@ -58,6 +61,7 @@ final GoRouter router = GoRouter(
       path: '/main/like',
       builder: (context, state) => MainScreen(pageIndex: 3),
     ),
+    // Post 관련 Route
     GoRoute(
       path: '/post/add',
       builder: (context, state) => PostAddScreen(),
@@ -80,20 +84,18 @@ final GoRouter router = GoRouter(
       builder: (context, state) => BidListScreen(postUid: ""),
     ),
     GoRoute(
+      path: '/PostListScreen',
+      builder: (context, state) => PostListScreen(),
+    ),
+    // Chat 관련 Route
+    GoRoute(
       path: '/chat/:chatId',
       builder: (BuildContext context, GoRouterState state) {
         final chatId = state.pathParameters['chatId']!;
         return ChatScreen(chatId: chatId);
       },
     ),
-    GoRoute(
-      path: '/PostListScreen',
-      builder: (context, state) => PostListScreen(),
-    ),
-    GoRoute(
-      path: '/chat',
-      builder: (context, state) => ChatListScreen(),
-    ),
+    // My 관련 Route
     GoRoute(
       path: '/my',
       builder: (context, state) => MyScreen(),
@@ -115,15 +117,30 @@ final GoRouter router = GoRouter(
       builder: (context, state) => MyBoughtScreen(),
     ),
     GoRoute(
+      path: '/my-bids',
+      builder: (context, state) => MyBidsScreen(),
+    ),
+    // Other 관련 Route
+    GoRoute(
       path: '/other/profile/:uId',
       builder: (BuildContext context, GoRouterState state) {
         final uId = state.pathParameters['uId']!;
-        return OtherProfileScreen(uId: uId); // userId 전달
+        return OtherProfileScreen(uId: uId);
       },
     ),
     GoRoute(
-      path: '/my-bids',
-      builder: (context, state) => MyBidsScreen(),
+      path: '/other/selling/:uId',
+      builder: (BuildContext context, GoRouterState state) {
+        final uId = state.pathParameters['uId']!;
+        return OtherSellingScreen(uId: uId);
+      },
+    ),
+    GoRoute(
+      path: '/other/sold/:uId',
+      builder: (BuildContext context, GoRouterState state) {
+        final uId = state.pathParameters['uId']!;
+        return OtherSoldScreen(uId: uId);
+      },
     ),
   ],
 );
