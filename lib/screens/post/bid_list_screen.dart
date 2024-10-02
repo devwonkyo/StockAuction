@@ -29,17 +29,17 @@ class BidListScreen extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final List<BidModel> sortedBids = List.from(post.bidList)
-            ..sort((a, b) => b.bidTime.compareTo(a.bidTime));
+          final List<BidModel> sortedBids = postProvider.getSortedBidsExcludingAuthor();
 
           return Column(
-            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               _buildPostInfo(post),
               const Divider(thickness: 1, color: AppsColor.lightGray),
               _buildBidListHeader(),
               Expanded(
-                child: _buildBidList(context, sortedBids),
+                child: sortedBids.isEmpty
+                    ? const Center(child: Text("입찰 기록이 없습니다."))
+                    : _buildBidList(context, sortedBids),
               ),
             ],
           );
@@ -129,7 +129,7 @@ class BidListScreen extends StatelessWidget {
           bidUserId: bid.bidUser.uid,
           bidPrice: bid.bidPrice,
           bidTime: bid.bidTime,
-          onUserTap: (userId) => _navigateToUserProfile(context, userId),
+          onUserTap: () => _navigateToUserProfile(context, bid.bidUser.uid),
         );
       },
       separatorBuilder: (context, index) {

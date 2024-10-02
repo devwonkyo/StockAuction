@@ -6,7 +6,7 @@ class BidItemWidget extends StatelessWidget {
   final String bidUserId;
   final String bidPrice;
   final DateTime bidTime;
-  final Function(String) onUserTap;
+  final VoidCallback onUserTap;
 
   const BidItemWidget({
     Key? key,
@@ -27,7 +27,7 @@ class BidItemWidget extends StatelessWidget {
           Expanded(
             flex: 3,
             child: GestureDetector(
-              onTap: () => onUserTap(bidUserId),
+              onTap: onUserTap,  // 수정된 부분
               child: Text(
                 bidUserName,
                 style: const TextStyle(
