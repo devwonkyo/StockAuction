@@ -78,7 +78,7 @@ exports.checkEndTimeAndSendFCM = functions.pubsub.schedule("every 1 minutes").on
         await sendFCM(postData.writeUser.pushToken, "경매 종료", `${postData.postTitle} 상품의 경매가 종료되었습니다. 낙찰자가 결정되었습니다.`, `/post/detail?${postData.postUid}`);
 
         // 시간지나서 낙찰자에게 fcm보내기
-        const lastBid = `bidList`[bidList.length - 1];
+        const lastBid = bidList[bidList.length - 1];
         await sendFCM(lastBid.bidUser.pushToken, "낙찰 알림", `${postData.postTitle} 상품이 낙찰되었습니다. 확인해보세요!`, `/post/detail?${postData.postUid}`);
       }
     }
@@ -90,6 +90,56 @@ exports.checkEndTimeAndSendFCM = functions.pubsub.schedule("every 1 minutes").on
     return null;
   } catch (error) {
     console.error("Error in checkEndTimeAndSendFCM:", error);
+    return null;
+  }
+});
+
+exports.checkAlmostEndTimeAndSendFCM = functions.pubsub.schedule("every 10 minutes").onRun(async (context) => {
+  const db = admin.firestore();
+  const now = admin.firestore.Timestamp.now();
+  const tenMinuteLater = admin.firestore.Timestamp.fromMillis(now.toMillis() + 60 * 1000 * 10);
+
+  try {
+    const snapshot = await db.collection("posts")
+      .where("auctionStatus", "==", 0)
+      .where("endTime", "<=", tenMinuteLater)
+      .where("endTime", ">", now)
+      .get();
+
+    console.log(`Number of documents in snapshot: ${snapshot.docs.length}`);
+
+    for (const doc of snapshot.docs) {
+      const postData = doc.data();
+      const favoriteList = postData.favoriteList || [];
+
+      if (favoriteList.length >= 1) {
+        const fcmPromises = favoriteList.map(async (favorite) => {
+            console.log(`favoritelist of one push token: ${favorite.pushToken}`);
+            try {
+              await sendFCM(
+                favorite.pushToken,
+                "⏰ 찜한 상품 경매 마감 임박!",
+                `"${postData.postTitle}" 상품의 경매 마감 시간이 얼마 남지 않았어요! 서두르세요!`,
+                `/post/detail?${postData.postUid}`,
+              );
+              console.log(`FCM sent to user: ${favorite.uid}`);
+            } catch (error) {
+              console.error(`Failed to send FCM to user: ${favorite.uid}`, error);
+              }
+        });
+
+        // 각 문서에 대한 FCM 전송 작업이 완료될 때까지 기다림
+        await Promise.all(fcmPromises);
+        console.log(`All FCM messages for post ${doc.id} have been sent`);
+      } else {
+        console.log("favoritelist is emptu");
+      }
+    }
+
+    console.log("Processing completed for all relevant posts");
+    return null;
+  } catch (error) {
+    console.error("Error in checkAlmostEndTimeAndSendFCM:", error);
     return null;
   }
 });
