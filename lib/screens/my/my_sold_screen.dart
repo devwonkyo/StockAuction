@@ -97,7 +97,15 @@ class _MySoldScreenState extends State<MySoldScreen> {
                       final post = _isSelling ? postProvider.sellingPosts[index] : postProvider.soldPosts[index];
                       return ListTile(
                         leading: post.postImageList.isNotEmpty
-                            ? Image.network(post.postImageList[0], width: 50, height: 50, fit: BoxFit.cover)
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(10.0),
+                                child: Image.network(
+                                  post.postImageList[0],
+                                  width: 50,
+                                  height: 50,
+                                  fit: BoxFit.cover,
+                                ),
+                              )
                             : const Icon(Icons.image),
                         title: Text(post.postTitle.length > 15 
                             ? '${post.postTitle.substring(0, 15)}...' 
