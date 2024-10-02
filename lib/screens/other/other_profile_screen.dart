@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:auction/providers/auth_provider.dart';
 import 'package:auction/providers/user_provider.dart';
+import 'package:auction/providers/post_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:auction/screens/other/widgets/post_list_widget.dart';
 
 class OtherProfileScreen extends StatefulWidget {
   final String uId;
@@ -20,6 +22,11 @@ class _OtherProfileScreenState extends State<OtherProfileScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<UserProvider>(context, listen: false).fetchUser(widget.uId);
+      Provider.of<PostProvider>(context, listen: false).fetchUserSellingPosts(widget.uId);
+      Provider.of<UserProvider>(context, listen: false).fetchUser(widget.uId).then((_) {
+        final sellList = Provider.of<UserProvider>(context, listen: false).user?.sellList ?? [];
+        Provider.of<PostProvider>(context, listen: false).fetchUserSoldPosts(sellList);
+      });
     });
   }
 
@@ -27,6 +34,7 @@ class _OtherProfileScreenState extends State<OtherProfileScreen> {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
     final userProvider = Provider.of<UserProvider>(context);
+    final postProvider = Provider.of<PostProvider>(context);
     final isCurrentUser = authProvider.currentUser?.uid == widget.uId;
 
     return Scaffold(
@@ -74,6 +82,25 @@ class _OtherProfileScreenState extends State<OtherProfileScreen> {
                         GoRouter.of(context).push('/chat/$chatId');
                       },
                     ),
+                  Divider(
+                    indent: 16,
+                    endIndent: 16,
+                    thickness: 0.5,
+                  ),
+
+                  Text("판매중인 상품", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 8),
+                  PostListWidget(posts: postProvider.sellingPosts, route: '/other/selling/${widget.uId}'),
+
+                  Divider(
+                    indent: 16,
+                    endIndent: 16,
+                    thickness: 0.5,
+                  ),
+
+                  Text("판매완료 상품", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 8),
+                  PostListWidget(posts: postProvider.soldPosts, route: '/other/sold/${widget.uId}'),
                 ],
               ),
       ),
