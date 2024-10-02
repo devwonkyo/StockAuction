@@ -106,7 +106,6 @@ class _MySoldScreenState extends State<MySoldScreen> {
                             ? '${post.postContent.substring(0, 30)}...'
                             : post.postContent),
                         onTap: () {
-                          // 상세 페이지로 이동
                           context.push('/post/detail/${post.postUid}');
                         },
                       );
