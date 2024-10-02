@@ -187,15 +187,18 @@ class _HomeScreenState extends State<HomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: CachedNetworkImage(
-                imageUrl: post.postImageList.isNotEmpty
-                    ? post.postImageList[0]
-                    : 'default_image_url',
-                width: 160,
-                height: 160,
-                fit: BoxFit.cover,
-                placeholder: (context, url) => CircularProgressIndicator(),
-                errorWidget: (context, url, error) => Icon(Icons.error),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10.0),
+                child: CachedNetworkImage(
+                  imageUrl: post.postImageList.isNotEmpty
+                      ? post.postImageList[0]
+                      : 'default_image_url',
+                  width: 160,
+                  height: 160,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => CircularProgressIndicator(),
+                  errorWidget: (context, url, error) => Icon(Icons.error),
+                ),
               ),
             ),
             SizedBox(height: 5),
@@ -226,12 +229,5 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    _pageController.dispose();
-    super.dispose();
   }
 }
