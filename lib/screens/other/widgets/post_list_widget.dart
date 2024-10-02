@@ -21,7 +21,11 @@ class PostListWidget extends StatelessWidget {
                 final post = posts[index];
                 return GestureDetector(
                   onTap: () {
-                    GoRouter.of(context).push(route);
+                    if(route == '/post/detail'){
+                      GoRouter.of(context).push('$route/${post.postUid}');
+                    } else {
+                      GoRouter.of(context).push(route);
+                    }
                   },
                   child: Container(
                     width: 100,

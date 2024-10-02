@@ -44,7 +44,7 @@ class _MyInfoUpdateScreenState extends State<MyInfoUpdateScreen> {
           _nameController.text = userDoc['nickname'] ?? '닉네임이 없습니다';
           _phoneController.text = userDoc['phoneNumber'] ?? '전화번호가 없습니다';
           _emailController.text = userDoc['email'] ?? '이메일이 없습니다';
-          _birthController.text = userDoc['birthDate'] ?? '생년월일이 없습니다';
+          _birthController.text = userDoc['birthDate'] ?? '';
         });
       } else {
         print('사용자 문서가 존재하지 않습니다.');

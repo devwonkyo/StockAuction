@@ -1,7 +1,9 @@
+import 'package:auction/config/color.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:auction/providers/auth_provider.dart';
 import 'package:auction/providers/post_provider.dart';
+import 'package:auction/providers/theme_provider.dart';
 import 'package:auction/models/post_model.dart';
 
 class MySoldScreen extends StatefulWidget {
@@ -42,6 +44,7 @@ class _MySoldScreenState extends State<MySoldScreen> {
   @override
   Widget build(BuildContext context) {
     final postProvider = Provider.of<PostProvider>(context);
+    final themeProvider = Provider.of<ThemeProvider>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -60,7 +63,9 @@ class _MySoldScreenState extends State<MySoldScreen> {
                     fetchPostsBasedOnStatus();
                   },
                   style: TextButton.styleFrom(
-                    backgroundColor: _isSelling ? Colors.grey : Colors.white,
+                    backgroundColor: themeProvider.isDarkTheme ?
+                    _isSelling ? Colors.grey : AppsColor.darkGray :
+                    _isSelling ? Colors.grey : Colors.white,
                   ),
                   child: const Text('판매중'),
                 ),
@@ -74,7 +79,9 @@ class _MySoldScreenState extends State<MySoldScreen> {
                     fetchPostsBasedOnStatus();
                   },
                   style: TextButton.styleFrom(
-                    backgroundColor: !_isSelling ? Colors.grey : Colors.white,
+                    backgroundColor: themeProvider.isDarkTheme ?
+                    _isSelling ? AppsColor.darkGray : Colors.grey :
+                    _isSelling ? Colors.white : Colors.grey,
                   ),
                   child: const Text('판매완료'),
                 ),
