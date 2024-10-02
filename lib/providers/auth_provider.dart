@@ -24,6 +24,7 @@ class AuthProvider extends ChangeNotifier {
   bool _isEmailVerified = false;
   bool _isLoading = false;
   UserModel? _currentUserModel;
+  String? _userProfileImage;
 
   AuthProvider() {
     print("AuthProvider initialized");
@@ -133,6 +134,11 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setUserProfileImage(String imageUrl) {
+    _userProfileImage = imageUrl;
+    notifyListeners();
+  }
+
   Future<void> setStayLoggedIn(bool value) async {
     print("Setting stay logged in: $value");
     _stayLoggedIn = value;
@@ -235,7 +241,7 @@ class AuthProvider extends ChangeNotifier {
         nickname: _nickname,
         phoneNumber: _phoneNumber,
         pushToken: pushToken,
-        userProfileImage: null,
+        userProfileImage: _userProfileImage,
         birthDate: null,
       );
 
