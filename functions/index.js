@@ -78,7 +78,7 @@ exports.checkEndTimeAndSendFCM = functions.pubsub.schedule("every 1 minutes").on
         await sendFCM(postData.writeUser.pushToken, "경매 종료", `${postData.postTitle} 상품의 경매가 종료되었습니다. 낙찰자가 결정되었습니다.`, `/post/detail?${postData.postUid}`);
 
         // 시간지나서 낙찰자에게 fcm보내기
-        const lastBid = bidList[bidList.length - 1];
+        const lastBid = `bidList`[bidList.length - 1];
         await sendFCM(lastBid.bidUser.pushToken, "낙찰 알림", `${postData.postTitle} 상품이 낙찰되었습니다. 확인해보세요!`, `/post/detail?${postData.postUid}`);
       }
     }
