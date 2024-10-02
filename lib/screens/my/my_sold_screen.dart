@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:auction/providers/auth_provider.dart';
 import 'package:auction/providers/post_provider.dart';
 import 'package:auction/providers/theme_provider.dart';
-import 'package:auction/models/post_model.dart';
+import 'package:go_router/go_router.dart';
 
 class MySoldScreen extends StatefulWidget {
   const MySoldScreen({Key? key}) : super(key: key);
@@ -105,6 +105,10 @@ class _MySoldScreenState extends State<MySoldScreen> {
                         subtitle: Text(post.postContent.length > 30
                             ? '${post.postContent.substring(0, 30)}...'
                             : post.postContent),
+                        onTap: () {
+                          // 상세 페이지로 이동
+                          context.push('/post/detail/${post.postUid}');
+                        },
                       );
                     },
                   ),
