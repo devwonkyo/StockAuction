@@ -23,7 +23,7 @@ class _MyBoughtScreenState extends State<MyBoughtScreen> {
     if (buyList.isNotEmpty && !_hasFetchedPosts && !postProvider.isLoading) {
       _hasFetchedPosts = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        postProvider.fetchPostsByUids(buyList);
+        postProvider.fetchBoughtPosts(buyList);
       });
     }
   
@@ -34,9 +34,9 @@ class _MyBoughtScreenState extends State<MyBoughtScreen> {
       body: postProvider.isLoading
           ? const Center(child: CircularProgressIndicator())
           : ListView.builder(
-              itemCount: postProvider.postList.length,
+              itemCount: postProvider.boughtPosts.length,
               itemBuilder: (context, index) {
-                final post = postProvider.postList[index];
+                final post = postProvider.boughtPosts[index];
                 return ListTile(
                   leading: post.postImageList.isNotEmpty
                       ? Image.network(post.postImageList[0], width: 50, height: 50, fit: BoxFit.cover)

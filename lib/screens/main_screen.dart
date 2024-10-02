@@ -1,3 +1,4 @@
+import 'package:auction/config/color.dart';
 import 'package:auction/screens/my/my_screen.dart';
 import 'package:auction/screens/post/post_list_screen.dart';
 import 'package:flutter/material.dart';
@@ -79,7 +80,7 @@ class _MainScreenState extends State<MainScreen> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         selectedItemColor:
-            themeProvider.isDarkTheme ? Colors.amber : Colors.red,
+            themeProvider.isDarkTheme ? Colors.white : AppsColor.pastelGreen,
         unselectedItemColor: Colors.grey,
         showSelectedLabels: true,
         showUnselectedLabels: true,
@@ -90,7 +91,7 @@ class _MainScreenState extends State<MainScreen> {
           BottomNavigationBarItem(icon: Icon(Icons.home), label: '홈'),
           BottomNavigationBarItem(icon: Icon(Icons.gavel), label: '경매'),
           BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_rounded), label: '채팅'),
-          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: '찜 목록'),
+          BottomNavigationBarItem(icon: Icon(Icons.bookmark), label: '찜 목록'),
         ],
       ),
     );

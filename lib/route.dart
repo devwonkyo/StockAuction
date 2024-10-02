@@ -28,7 +28,7 @@ import 'package:auction/screens/other/other_sold_screen.dart';
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 
 final GoRouter router = GoRouter(
-  initialLocation: '/login',
+  initialLocation: '/main',
   navigatorKey: rootNavigatorKey,
   routes: [
     // Auth 관련 Route
@@ -74,6 +74,13 @@ final GoRouter router = GoRouter(
       path: '/post/detail',
       builder: (context, state) => PostDetailScreen(
         postUid: state.extra as String),
+    ),
+    GoRoute(
+      path: '/post/detail/:postUid',
+      builder: (BuildContext context, GoRouterState state) {
+        final postUid = state.pathParameters['postUid']!;
+        return PostDetailScreen(postUid: postUid);
+      },
     ),
     GoRoute(
       path: '/post/list',

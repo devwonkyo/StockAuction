@@ -12,7 +12,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 class PostProvider with ChangeNotifier {
   bool isLoading = false;
   List<PostModel> sellingPosts = [];
+  List<PostModel> biddingPosts = [];
   List<PostModel> soldPosts = [];
+  List<PostModel> successBiddingPosts = [];
+  List<PostModel> boughtPosts = [];
   bool hasError = false; // 오류 상태 추가
   List<PostModel> postList = [];
   PostModel? postModel;
@@ -582,6 +585,36 @@ class PostProvider with ChangeNotifier {
     }
   }
 
+  Future<void> fetchBoughtPosts(List<String> postUids) async {
+    isLoading = true;
+    notifyListeners();
+    boughtPosts = [];
+
+    try {
+      for (int i = 0; i < postUids.length; i += 10) {
+        final sublist = postUids.sublist(i, i + 10 > postUids.length ? postUids.length : i + 10);
+
+        final querySnapshot = await FirebaseFirestore.instance
+            .collection('posts')
+            .where('postUid', whereIn: sublist)
+            .where('auctionStatus', isEqualTo: AuctionStatus.successBidding.index)
+            .where('stockStatus', isEqualTo: StockStatus.successSell.index)
+            .get();
+
+        final fetchedPosts = querySnapshot.docs
+            .map((snapshot) => PostModel.fromMap(snapshot.data() as Map<String, dynamic>))
+            .toList();
+
+        boughtPosts.addAll(fetchedPosts);
+      }
+    } catch (e) {
+      print("구매한 포스트 불러오기 실패: $e");
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
   // selling posts 불러오기 successBidding, readySell 상태여야 함
   Future<void> fetchUserSellingPosts(String userId) async {
     isLoading = true;
@@ -595,6 +628,29 @@ class PostProvider with ChangeNotifier {
           .get();
 
       sellingPosts = querySnapshot.docs
+          .map((snapshot) => PostModel.fromMap(snapshot.data() as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      print("판매중인 포스트 불러오기 실패: $e");
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // 경매중인 posts 불러오기 bidding, readySell 상태여야 함
+  Future<void> fetchUserBiddingPosts(String userId) async {
+    isLoading = true;
+    notifyListeners();
+    try {
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('posts')
+          .where('writeUser.uid', isEqualTo: userId)
+          .where('auctionStatus', isEqualTo: AuctionStatus.bidding.index)
+          .where('stockStatus', isEqualTo: StockStatus.bidding.index)
+          .get();
+
+      biddingPosts = querySnapshot.docs
           .map((snapshot) => PostModel.fromMap(snapshot.data() as Map<String, dynamic>))
           .toList();
     } catch (e) {
@@ -630,6 +686,27 @@ class PostProvider with ChangeNotifier {
       }
     } catch (e) {
       print("판매된 포스트 불러오기 실패: $e");
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> fetchSuccessBiddingPosts() async {
+    isLoading = true;
+    notifyListeners();
+    
+    try {
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('posts')
+          .where('auctionStatus', isEqualTo: AuctionStatus.successBidding.index)
+          .get();
+
+      successBiddingPosts = querySnapshot.docs
+          .map((snapshot) => PostModel.fromMap(snapshot.data() as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      print("낙찰된 포스트 불러오기 실패: $e");
     } finally {
       isLoading = false;
       notifyListeners();
