@@ -89,8 +89,7 @@ class _MainScreenState extends State<MainScreen> {
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: '홈'),
           BottomNavigationBarItem(icon: Icon(Icons.gavel), label: '경매'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.chat_bubble_rounded), label: '채팅'),
+          BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_rounded), label: '채팅'),
           BottomNavigationBarItem(icon: Icon(Icons.favorite), label: '찜 목록'),
         ],
       ),
