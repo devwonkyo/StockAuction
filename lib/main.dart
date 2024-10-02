@@ -102,7 +102,6 @@ class _MyAppState extends State<MyApp> {
     } else {
       print("No user is currently logged in");
     }
-
   }
 
   @override
@@ -112,7 +111,8 @@ class _MyAppState extends State<MyApp> {
         return MaterialApp.router(
           theme: themeProvider.currentTheme,
           darkTheme: darkThemeData(),
-          themeMode: themeProvider.isDarkTheme ? ThemeMode.dark : ThemeMode.light,
+          themeMode:
+              themeProvider.isDarkTheme ? ThemeMode.dark : ThemeMode.light,
           routerConfig: router,
         );
       },
