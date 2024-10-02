@@ -11,22 +11,29 @@ class MyBoughtScreen extends StatefulWidget {
 }
 
 class _MyBoughtScreenState extends State<MyBoughtScreen> {
-  bool _hasFetchedPosts = false;
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      fetchBoughtPosts();
+    });
+  }
+
+  // 구매한 Post 목록을 불러오기
+  void fetchBoughtPosts() {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final postProvider = Provider.of<PostProvider>(context, listen: false);
+
+    final buyList = authProvider.currentUserModel?.buyList ?? [];
+    if (buyList.isNotEmpty) {
+      postProvider.fetchBoughtPosts(buyList);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context);
     final postProvider = Provider.of<PostProvider>(context);
 
-    final buyList = authProvider.currentUserModel?.buyList ?? [];
-
-    if (buyList.isNotEmpty && !_hasFetchedPosts && !postProvider.isLoading) {
-      _hasFetchedPosts = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        postProvider.fetchBoughtPosts(buyList);
-      });
-    }
-  
     return Scaffold(
       appBar: AppBar(
         title: const Text('나의 구매 내역'),

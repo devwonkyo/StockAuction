@@ -6,6 +6,8 @@ import 'package:auction/models/message_model.dart';
 import 'package:auction/models/post_model.dart';
 import 'package:auction/models/bid_model.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
+import 'package:auction/providers/auth_provider.dart';
 import 'dart:io';
 
 class ChatProvider extends ChangeNotifier {
@@ -186,7 +188,7 @@ class ChatProvider extends ChangeNotifier {
             'status': 'dealed',
             'confirmationMessage.status': '거래 완료',
           });
-          await _updateUserListsOnDealCompletion(message);
+          await _updateUserListsOnDealCompletion(message, context);
         }
         break;
     }
@@ -227,7 +229,7 @@ class ChatProvider extends ChangeNotifier {
   }
 
   // 각자 sellList, buyList에 추가하는 메소드
-  Future<void> _updateUserListsOnDealCompletion(Message message) async {
+  Future<void> _updateUserListsOnDealCompletion(Message message, BuildContext context) async {
     final sellerId = message.uId;
     final buyerId = currentUserId == sellerId ? message.otherUserId : currentUserId;
     final postUid = message.confirmationMessage?['postUid'];
@@ -244,6 +246,8 @@ class ChatProvider extends ChangeNotifier {
     await _firestore.collection('posts').doc(postUid).update({
       'stockStatus': StockStatus.successSell.index
     });
+
+    await Provider.of<AuthProvider>(context, listen: false).getCurrentUser();
   }
 
   // 구매확정 버튼 관련 함수 분류 종료
