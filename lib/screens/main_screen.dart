@@ -50,10 +50,10 @@ class _MainScreenState extends State<MainScreen> {
           'Stock Auction',
           style: TextStyle(
             color: themeProvider.isDarkTheme ? Colors.white : Colors.black,
-          ), // 다크모드에 맞춰 텍스트 색상 전환
+          ),
         ),
         backgroundColor:
-            themeProvider.isDarkTheme ? Colors.black : Colors.white,
+        themeProvider.isDarkTheme ? Colors.black : Colors.white,
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.person,
@@ -69,23 +69,17 @@ class _MainScreenState extends State<MainScreen> {
       ),
       body: IndexedStack(
         index: _selectedIndex,
-        children: [
-          Padding(
-            padding: EdgeInsets.all(8.0), // 첫 번째 페이지에만 padding 적용
-            child: _pages[0],
-          ),
-          ..._pages.sublist(1), // 첫 번째 페이지 제외한 나머지 페이지들
-        ],
+        children: _pages,
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         selectedItemColor:
-            themeProvider.isDarkTheme ? Colors.white : AppsColor.pastelGreen,
+        themeProvider.isDarkTheme ? Colors.white : AppsColor.pastelGreen,
         unselectedItemColor: Colors.grey,
         showSelectedLabels: true,
         showUnselectedLabels: true,
         backgroundColor:
-            themeProvider.isDarkTheme ? Colors.black : Colors.white,
+        themeProvider.isDarkTheme ? Colors.black : Colors.white,
         onTap: _onItemTapped,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: '홈'),
