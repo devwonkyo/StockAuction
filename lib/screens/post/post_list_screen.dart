@@ -1,8 +1,6 @@
 import 'package:auction/config/color.dart';
 import 'package:auction/models/post_model.dart';
-import 'package:auction/models/result_model.dart';
 import 'package:auction/providers/post_provider.dart';
-import 'package:auction/route.dart';
 import 'package:auction/screens/post/widgets/post_item_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -14,70 +12,113 @@ class PostListScreen extends StatefulWidget {
 }
 
 class _PostListScreenState extends State<PostListScreen> {
+  late TextEditingController _searchController;
+  List<PostModel> _filteredPosts = [];
+  bool _isSearching = false;
+
   @override
   void initState() {
     super.initState();
+    _searchController = TextEditingController();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadPosts();
     });
   }
 
-  Future<void> _loadPosts() async {
-    final postProvider = Provider.of<PostProvider>(context, listen: false);
-    postProvider.isLoading = true;
-    postProvider.notifyListeners();
-
-    await postProvider.getAllPostList();
-
-    postProvider.isLoading = false;
-    postProvider.notifyListeners();
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
-  Future<void> _fetchPosts() async {
+  Future<void> _loadPosts() async {
     final postProvider = Provider.of<PostProvider>(context, listen: false);
     await postProvider.getAllPostList();
+    _filterPosts();
+  }
+
+  void _filterPosts() {
+    final postProvider = Provider.of<PostProvider>(context, listen: false);
+    setState(() {
+      if (_searchController.text.isEmpty) {
+        _filteredPosts = postProvider.postList;
+      } else {
+        _filteredPosts = postProvider.postList
+            .where((post) =>
+        post.postTitle.toLowerCase().contains(_searchController.text.toLowerCase()) ||
+            post.postContent.toLowerCase().contains(_searchController.text.toLowerCase()))
+            .toList();
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Consumer<PostProvider>(
-      builder: (context, postProvider, child) {
-        if (postProvider.isLoading) {
-          return Center(child: CircularProgressIndicator());
-        }
-        return Scaffold(
-          body: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-            child: RefreshIndicator(
-                onRefresh: () => postProvider.getAllPostList(),
-                child: GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2, // Number of columns
-                    mainAxisSpacing: 10, // Vertical spacing
-                    crossAxisSpacing: 5, // Horizontal spacing
-                    childAspectRatio: 1/2, // Adjust aspect ratio to fit your needs
-                  ),
-                  itemCount: postProvider.postList.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return PostItemWidget(postModel: postProvider.postList[index]);
+        builder: (context, postProvider, child) {
+          if (postProvider.isLoading) {
+            return Center(child: CircularProgressIndicator());
+          }
+          return Scaffold(
+            appBar: AppBar(
+              title: _isSearching
+                  ? TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: '검색어를 입력하세요',
+                  border: InputBorder.none,
+                ),
+                onChanged: (value) {
+                  _filterPosts();
+                },
+              )
+                  : Text(''),
+              actions: [
+                IconButton(
+                  icon: Icon(_isSearching ? Icons.close : Icons.search),
+                  onPressed: () {
+                    setState(() {
+                      _isSearching = !_isSearching;
+                      if (!_isSearching) {
+                        _searchController.clear();
+                        _filterPosts();
+                      }
+                    });
                   },
                 ),
+              ],
             ),
-          ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () {
-              //글쓰기 화면 이동
-              context.push("/post/add");
-            },
-            backgroundColor: AppsColor.pastelGreen,
-            child: const Icon(
-              Icons.add,
-              color: Colors.white,
+            body: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+              child: RefreshIndicator(
+                onRefresh: _loadPosts,
+                child: GridView.builder(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 10,
+                    crossAxisSpacing: 5,
+                    childAspectRatio: 1/2,
+                  ),
+                  itemCount: _filteredPosts.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return PostItemWidget(postModel: _filteredPosts[index]);
+                  },
+                ),
+              ),
             ),
-          ),
-          floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-        );
-      }
+            floatingActionButton: FloatingActionButton(
+              onPressed: () {
+                context.push("/post/add");
+              },
+              backgroundColor: AppsColor.pastelGreen,
+              child: const Icon(
+                Icons.add,
+                color: Colors.white,
+              ),
+            ),
+            floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+          );
+        }
     );
   }
 }
