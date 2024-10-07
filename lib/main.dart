@@ -1,8 +1,10 @@
 import 'package:auction/config/theme.dart';
+import 'package:auction/models/user_model.dart';
+import 'package:auction/utils/notification_handler.dart';
+import 'package:auction/firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:auction/route.dart';
-// provider 패키지 및 파일
 import 'package:provider/provider.dart';
 import 'package:auction/providers/post_provider.dart';
 import 'package:auction/providers/theme_provider.dart';
@@ -10,79 +12,108 @@ import 'package:auction/providers/chat_provider.dart';
 import 'package:auction/providers/auth_provider.dart';
 import 'package:auction/providers/my_provider.dart';
 import 'package:auction/providers/user_provider.dart';
-// firebase 패키지
 import 'package:firebase_core/firebase_core.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
-// FCM 백그라운드 메시지 핸들러
+@pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  print("백그라운드 메시지 처리.. ${message.notification!.body!}");
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  print("Handling a background message: ${message.messageId}");
 }
 
-// 알림 초기화 함수
-void initializeNotification() async {
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
 
-  final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+const AndroidNotificationChannel channel = AndroidNotificationChannel(
+  'high_importance_channel',
+  'High Importance Notifications',
+  description: 'This channel is used for important notifications.',
+  importance: Importance.high,
+);
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  String? fcmToken = await FirebaseMessaging.instance.getToken();
+  print('fcmToken : $fcmToken');
+
+  // Firebase Messaging 설정
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   await flutterLocalNotificationsPlugin
       .resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin>()
-      ?.createNotificationChannel(const AndroidNotificationChannel(
-        'high_importance_channel',
-        'high_importance_notification',
-        importance: Importance.max,
-      ));
-
-  await flutterLocalNotificationsPlugin.initialize(const InitializationSettings(
-    android: AndroidInitializationSettings("@mipmap/ic_launcher"),
-  ));
-
+      ?.createNotificationChannel(channel);
   await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
     alert: true,
     badge: true,
     sound: true,
   );
-}
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(); // Firebase 초기화
-  initializeNotification(); // FCM 초기화 추가
+  final notificationHandler = NotificationHandler(router: router);
+  await notificationHandler.initialize();
 
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-            create: (context) => ThemeProvider()), //테마 변경 Provider
-        ChangeNotifierProvider(
-            create: (context) => PostProvider()), //포스트 Provider
-        ChangeNotifierProvider(
-            create: (context) => ChatProvider()), // 채팅 Provider
+        ChangeNotifierProvider(create: (context) => ThemeProvider()),
+        ChangeNotifierProvider(create: (context) => PostProvider()),
+        ChangeNotifierProvider(create: (context) => ChatProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (context) => MyProvider()),
         ChangeNotifierProvider(create: (_) => UserProvider()),
+        Provider<NotificationHandler>.value(value: notificationHandler),
       ],
       child: MyApp(),
     ),
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    _initializeApp();
+  }
+
+  Future<void> _initializeApp() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final notificationHandler =
+        Provider.of<NotificationHandler>(context, listen: false);
+
+    UserModel? currentUser = authProvider.currentUserModel;
+
+    if (currentUser != null) {
+      print("User is logged in: ${currentUser.nickname}");
+      await userProvider.fetchUser(currentUser.uid);
+      final token = await notificationHandler.getToken();
+      if (token != null) {
+        print('FCM Token: $token');
+        await authProvider.updatePushToken(token);
+        await userProvider.updatePushToken(currentUser.uid, token);
+      }
+    } else {
+      print("No user is currently logged in");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<ThemeProvider>(
       builder: (context, themeProvider, child) {
         return MaterialApp.router(
-          theme: themeProvider.currentTheme, // 라이트 모드 테마
-          darkTheme: darkThemeData(), // 다크 모드 테마
-          themeMode: themeProvider.isDarkTheme
-              ? ThemeMode.dark
-              : ThemeMode.light, // 테마 모드 설정
-          routerDelegate: router.routerDelegate,
-          routeInformationParser: router.routeInformationParser,
-          routeInformationProvider: router.routeInformationProvider,
+          debugShowCheckedModeBanner: false,
+          theme: themeProvider.currentTheme,
+          darkTheme: darkThemeData(),
+          themeMode: themeProvider.isDarkTheme ? ThemeMode.dark : ThemeMode.light,
+          routerConfig: router,
         );
       },
     );

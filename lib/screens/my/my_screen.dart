@@ -116,7 +116,7 @@ class _MyPageState extends State<MyScreen> {
                 radius: 50,
                 backgroundImage: _imageFile == null
                     ? (_profileImageUrl.isEmpty
-                        ? const AssetImage('lib/assets/image/pic1.png')
+                        ? const AssetImage('lib/assets/image/defaultUserProfile.png')
                         : NetworkImage(_profileImageUrl))
                     : FileImage(File(_imageFile!.path)) as ImageProvider,
                 child: _imageFile == null && _profileImageUrl.isEmpty
@@ -135,14 +135,14 @@ class _MyPageState extends State<MyScreen> {
               leading: const Icon(Icons.folder),
               title: const Text('회원 정보 수정'),
               onTap: () {
-                context.go('/infoupdate');
+                context.push('/infoupdate');
               },
             ),
             ListTile(
               leading: const Icon(Icons.folder),
               title: const Text('계정 설정'),
               onTap: () {
-                context.go('/account');
+                context.push('/account');
               },
             ),
             const Divider(),
@@ -150,14 +150,14 @@ class _MyPageState extends State<MyScreen> {
               leading: const Icon(Icons.folder),
               title: const Text('나의 판매'),
               onTap: () {
-                context.go('/sold');
+                context.push('/sold');
               },
             ),
             ListTile(
               leading: const Icon(Icons.folder),
               title: const Text('나의 구매'),
               onTap: () {
-                context.go('/bought');
+                context.push('/bought');
               },
             ),
             ListTile(

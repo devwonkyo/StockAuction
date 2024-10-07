@@ -1,3 +1,4 @@
+import 'package:auction/widgets/profile_image_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -30,6 +31,14 @@ class SignupScreen extends StatelessWidget {
           key: _formKey,
           child: Column(
             children: [
+              ProfileImageSelector(
+                initialImage:
+                    'https://firebasestorage.googleapis.com/v0/b/auctionproject-cea5a.appspot.com/o/userProfileImages%2FdefaultImage%2Fdefault_blue.png?alt=media',
+                onImageSelected: (String imageUrl) {
+                  authProvider.setUserProfileImage(imageUrl);
+                },
+              ),
+              SizedBox(height: 20),
               TextFormField(
                 decoration: InputDecoration(
                   labelText: '이메일 주소를 입력해주세요',
@@ -60,7 +69,9 @@ class SignupScreen extends StatelessWidget {
                   ),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      authProvider.isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                      authProvider.isPasswordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
                     ),
                     onPressed: authProvider.togglePasswordVisibility,
                   ),
@@ -88,11 +99,14 @@ class SignupScreen extends StatelessWidget {
                   ),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      authProvider.isConfirmPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                      authProvider.isConfirmPasswordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
                     ),
                     onPressed: authProvider.toggleConfirmPasswordVisibility,
                   ),
-                  errorText: !authProvider.passwordsMatch ? '비밀번호가 일치하지 않습니다' : null,
+                  errorText:
+                      !authProvider.passwordsMatch ? '비밀번호가 일치하지 않습니다' : null,
                   errorStyle: TextStyle(color: Colors.red),
                 ),
                 obscureText: !authProvider.isConfirmPasswordVisible,
@@ -114,17 +128,20 @@ class SignupScreen extends StatelessWidget {
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _signup,
-                child: Text('회원가입'),
-                style: ElevatedButton.styleFrom(
-                  textStyle: TextStyle(
-                      fontSize: 20.0,
-                      fontWeight: FontWeight.w600
+                child: Text(
+                  '회원가입',
+                  style: TextStyle(
+                    color: Color(0XFFFFFFFF),
                   ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  textStyle:
+                      TextStyle(fontSize: 20.0, fontWeight: FontWeight.w600),
                   padding: EdgeInsets.symmetric(horizontal: 150, vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15.0),
                   ),
-                  backgroundColor: Color(0XFFEBCDFC),
+                  backgroundColor: Color(0XFF5C4339),
                 ),
               ),
             ],
@@ -134,7 +151,8 @@ class SignupScreen extends StatelessWidget {
     );
   }
 
-  void _showEmailVerificationDialog(BuildContext context, AuthProvider authProvider) {
+  void _showEmailVerificationDialog(
+      BuildContext context, AuthProvider authProvider) {
     showDialog(
       context: context,
       barrierDismissible: false,

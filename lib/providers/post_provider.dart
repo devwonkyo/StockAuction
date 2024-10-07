@@ -11,6 +11,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class PostProvider with ChangeNotifier {
   bool isLoading = false;
+  List<PostModel> sellingPosts = [];
+  List<PostModel> biddingPosts = [];
+  List<PostModel> soldPosts = [];
+  List<PostModel> successBiddingPosts = [];
+  List<PostModel> boughtPosts = [];
   bool hasError = false; // 오류 상태 추가
   List<PostModel> postList = [];
   PostModel? postModel;
@@ -23,6 +28,20 @@ class PostProvider with ChangeNotifier {
   String? get priceDifferenceAndPercentage => _priceDifferenceAndPercentage;
   int? get postAuctionEndTime => _postAuctionEndTime;
   List<String> get likedPostTitles => _likedPostTitles;
+
+  List<BidModel> getSortedBids() {
+    if (postModel == null) return [];
+    return List.from(postModel!.bidList)
+      ..sort((a, b) => b.bidTime.compareTo(a.bidTime));
+  }
+
+  List<BidModel> getSortedBidsExcludingAuthor() {
+    if (postModel == null) return [];
+    return postModel!.bidList
+        .where((bid) => bid.bidUser.uid != postModel!.writeUser.uid)
+        .toList()
+      ..sort((a, b) => b.bidTime.compareTo(a.bidTime));
+  }
 
   PostProvider() {
     loadLikedPostTitles();
@@ -62,6 +81,10 @@ class PostProvider with ChangeNotifier {
     List<String> downloadPostImageList = [];
 
     for (String imagePath in postImageList) {
+      if(imagePath.startsWith("http")){
+        downloadPostImageList.add(imagePath);
+        continue;
+      }
       String fileName = DateTime.now().toIso8601String();
       Reference ref = storage.ref().child('post/$fileName');
 
@@ -129,6 +152,69 @@ class PostProvider with ChangeNotifier {
     } catch (e) {
       hasError = true; // 오류 발생 시 오류 상태 설정
       return Result.failure("게시물 등록에 실패했습니다. 오류메시지 : $e");
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<Result> modifyPostItem(PostModel modifidPost) async {
+    isLoading = true;
+    notifyListeners();
+
+    try {
+    final downloadImageList = await _uploadImages(modifidPost.postImageList);
+
+    Map<String, dynamic> updatedFields = {
+      'postTitle': modifidPost.postTitle,
+      'postContent': modifidPost.postContent,
+      'endTime': Timestamp.fromDate(modifidPost.endTime),
+      'postImageList': downloadImageList
+    };
+      await FirebaseFirestore.instance
+          .collection('posts')
+          .doc(modifidPost.postUid)
+          .update(updatedFields);
+
+      return Result.success("게시물을 수정했습니다.");
+    } catch (e) {
+      return Result.failure("게시물 수정에 실패했습니다. 오류메시지 : $e");
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<Result> deletePostItem(String postUid) async {
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      await FirebaseFirestore.instance.collection('posts').doc(postUid).delete();
+      return Result.success("게시물을 삭제했습니다.");
+    } catch (e) {
+      return Result.failure("게시물 삭제에 실패했습니다. 오류메시지 : $e");
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<Result> biddingPostItem(String postUid, String biddingUserUid, AuctionStatus auctionStatus, StockStatus stockStatus) async {
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      Map<String, dynamic> data = {
+        'auctionStatus': auctionStatus.index,
+        'stockStatus': stockStatus.index,
+        'successBiddingUser': biddingUserUid
+      };
+
+      await FirebaseFirestore.instance.collection('posts').doc(postUid).update(data);
+      return Result.success("낙찰 완료되었습니다.");
+    } catch (e) {
+      return Result.failure("낙찰에 실패했습니다. 오류메시지 : $e");
     } finally {
       isLoading = false;
       notifyListeners();
@@ -479,5 +565,170 @@ class PostProvider with ChangeNotifier {
       return Result.failure("댓글 삭제에 실패했습니다. 오류: $e");
     }
   }
+  /////////////////////////////////////////////////////////////////////////////////
+  /// sold_screen, bought_screen 관련 메서드
 
+  // PostUid 리스트 받으면 안에 있는 애들 정보 갖고 오기
+  Future<void> fetchPostsByUids(List<String> postUids) async {
+    isLoading = true;
+    notifyListeners();
+
+    postList = [];
+    try {
+      for (int i = 0; i < postUids.length; i += 10) {
+        final sublist = postUids.sublist(i, i + 10 > postUids.length ? postUids.length : i + 10);
+
+        final querySnapshot = await FirebaseFirestore.instance
+            .collection('posts')
+            .where('postUid', whereIn: sublist)
+            .where('auctionStatus', isEqualTo: AuctionStatus.successBidding.index)
+            .where('stockStatus', isEqualTo: StockStatus.successSell.index)
+            .get();
+
+        final fetchedPosts = querySnapshot.docs
+            .map((snapshot) => PostModel.fromMap(snapshot.data() as Map<String, dynamic>))
+            .toList();
+
+        postList.addAll(fetchedPosts);
+      }
+    } catch (e) {
+      print("PostUid 리스트 불러오기 실패: $e");
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> fetchBoughtPosts(List<String> postUids) async {
+    isLoading = true;
+    notifyListeners();
+    boughtPosts = [];
+
+    try {
+      for (int i = 0; i < postUids.length; i += 10) {
+        final sublist = postUids.sublist(i, i + 10 > postUids.length ? postUids.length : i + 10);
+
+        final querySnapshot = await FirebaseFirestore.instance
+            .collection('posts')
+            .where('postUid', whereIn: sublist)
+            .where('auctionStatus', isEqualTo: AuctionStatus.successBidding.index)
+            .where('stockStatus', isEqualTo: StockStatus.successSell.index)
+            .get();
+        print('패치 ${querySnapshot.size} documents for sublist: $sublist');
+
+        final fetchedPosts = querySnapshot.docs
+            .map((snapshot) => PostModel.fromMap(snapshot.data() as Map<String, dynamic>))
+            .toList();
+
+        boughtPosts.addAll(fetchedPosts.where((newPost) =>
+          !boughtPosts.any((existingPost) => existingPost.postUid == newPost.postUid)));
+      }
+    } catch (e) {
+      print("구매한 포스트 불러오기 실패: $e");
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // selling posts 불러오기 successBidding, readySell 상태여야 함
+  Future<void> fetchUserSellingPosts(String userId) async {
+    isLoading = true;
+    notifyListeners();
+    try {
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('posts')
+          .where('writeUser.uid', isEqualTo: userId)
+          .where('auctionStatus', isEqualTo: AuctionStatus.successBidding.index)
+          .where('stockStatus', isEqualTo: StockStatus.readySell.index)
+          .get();
+
+      sellingPosts = querySnapshot.docs
+          .map((snapshot) => PostModel.fromMap(snapshot.data() as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      print("판매중인 포스트 불러오기 실패: $e");
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // 경매중인 posts 불러오기 bidding, readySell 상태여야 함
+  Future<void> fetchUserBiddingPosts(String userId) async {
+    isLoading = true;
+    notifyListeners();
+    try {
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('posts')
+          .where('writeUser.uid', isEqualTo: userId)
+          .where('auctionStatus', isEqualTo: AuctionStatus.bidding.index)
+          .where('stockStatus', isEqualTo: StockStatus.bidding.index)
+          .get();
+
+      biddingPosts = querySnapshot.docs
+          .map((snapshot) => PostModel.fromMap(snapshot.data() as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      print("판매중인 포스트 불러오기 실패: $e");
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // sold posts 불러오기 successBidding, successSell 상태여야 함
+  Future<void> fetchUserSoldPosts(List<String> postUids) async {
+    isLoading = true;
+    notifyListeners();
+    soldPosts = [];
+
+    try {
+      for (int i = 0; i < postUids.length; i += 10) {
+        final sublist = postUids.sublist(i, i + 10 > postUids.length ? postUids.length : i + 10);
+
+        final querySnapshot = await FirebaseFirestore.instance
+            .collection('posts')
+            .where('postUid', whereIn: sublist)
+            .where('auctionStatus', isEqualTo: AuctionStatus.successBidding.index)
+            .where('stockStatus', isEqualTo: StockStatus.successSell.index)
+            .get();
+
+        final fetchedPosts = querySnapshot.docs
+            .map((snapshot) => PostModel.fromMap(snapshot.data() as Map<String, dynamic>))
+            .toList();
+
+        soldPosts.addAll(fetchedPosts);
+      }
+    } catch (e) {
+      print("판매된 포스트 불러오기 실패: $e");
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> fetchSuccessBiddingPosts() async {
+    isLoading = true;
+    notifyListeners();
+    
+    try {
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('posts')
+          .where('auctionStatus', isEqualTo: AuctionStatus.successBidding.index)
+          .get();
+
+      successBiddingPosts = querySnapshot.docs
+          .map((snapshot) => PostModel.fromMap(snapshot.data() as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      print("낙찰된 포스트 불러오기 실패: $e");
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+  
+  /// sold_screen, bought_screen 관련 메서드 종료
+  ////////////////////////////////////////////////////////////////////////////////////
 }
