@@ -1,9 +1,13 @@
+import 'package:auction/config/color.dart';
 import 'package:provider/provider.dart';
 import 'package:auction/providers/chat_provider.dart';
 import 'package:auction/providers/auth_provider.dart';
+import 'package:auction/providers/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:auction/screens/chat/widgets/bottom_sheet_widget.dart';
 import 'package:auction/screens/chat/widgets/message_bubble_widget.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:go_router/go_router.dart';
 
 class ChatScreen extends StatefulWidget {
   final String chatId;
@@ -19,6 +23,7 @@ class _ChatScreenState extends State<ChatScreen> {
   final BottomSheetWidget bottomSheetWidget = BottomSheetWidget();
   String? otherUserNickname;
   String? otherUserId;
+  String? otherUserProfileImage;
 
   @override
   void initState() {
@@ -28,26 +33,53 @@ class _ChatScreenState extends State<ChatScreen> {
     final ids = widget.chatId.split('_');
     otherUserId = ids[0] == authProvider.currentUser?.uid ? ids[1] : ids[0];
 
-    // 상대방의 닉네임을 가져오기
+    // 상대방의 닉네임과 프로필 이미지 가져오기
     authProvider.getUserNickname(otherUserId!).then((thisUserName) {
       setState(() {
         otherUserNickname = thisUserName ?? 'Unknown User';
       });
     });
 
+    authProvider.getUserProfileImage(otherUserId!).then((profileImage) {
+      setState(() {
+        otherUserProfileImage = profileImage;
+      });
+    });
+
     Provider.of<ChatProvider>(context, listen: false).listenToMessages(widget.chatId);
+
+    messageController.addListener(() {
+      setState(() {});
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final chatProvider = Provider.of<ChatProvider>(context);
     final authProvider = Provider.of<AuthProvider>(context);
+    final themeProvider = Provider.of<ThemeProvider>(context);
 
     chatProvider.setCurrentChatInfo(widget.chatId, authProvider.currentUser?.uid ?? '', authProvider.currentUserModel?.nickname ?? 'Unknown User');
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('$otherUserNickname님과의 채팅'),
+        title: Row(
+          children: [
+            GestureDetector(
+              onTap: () {
+                GoRouter.of(context).push('/other/profile/$otherUserId');
+              },
+              child: CircleAvatar(
+                backgroundImage: otherUserProfileImage != null
+                    ? CachedNetworkImageProvider(otherUserProfileImage!)
+                    : AssetImage("lib/assets/image/defaultUserProfile.png") as ImageProvider,
+                radius: 15,
+              ),
+            ),
+            SizedBox(width: 10),
+            Text('$otherUserNickname님과의 채팅'),
+          ],
+        ),
       ),
       body: Column(
         children: <Widget>[
@@ -63,6 +95,17 @@ class _ChatScreenState extends State<ChatScreen> {
                   message.uId == authProvider.currentUser?.uid,
                   message.profileImageUrl,
                   imageUrl: message.imageUrl,
+                  status: message.status,
+                  messageType: message.messageType,
+                  postTitle: message.confirmationMessage?['title'],
+                  bidPrice: message.confirmationMessage?['bidPrice'],
+                  postContent: message.confirmationMessage?['postContent'],
+                  onPositivePressed: () {
+                    chatProvider.handlePositiveButton(context, message, widget.chatId);
+                  },
+                  onNegativePressed: () async {
+                    chatProvider.handleNegativeButton(message, widget.chatId, context);
+                  },
                 );
               },
             ),
@@ -95,6 +138,24 @@ class _ChatScreenState extends State<ChatScreen> {
                 // 메시지 보내기 버튼
                 IconButton(
                   icon: Icon(Icons.send),
+                  color: themeProvider.isDarkTheme ? 
+                    messageController.text.isNotEmpty ? Colors.black : Colors.white : 
+                    messageController.text.isNotEmpty ? Colors.white : Colors.black,
+                  style: ElevatedButton.styleFrom(
+                  backgroundColor: messageController.text.isNotEmpty ? AppsColor.pastelGreen : const Color.fromARGB(0, 255, 255, 255),
+                  textStyle: TextStyle(
+                    color: Colors.black,
+                  ),
+                  side: BorderSide(
+                    color: themeProvider.isDarkTheme ? 
+                    messageController.text.isNotEmpty ? Colors.black : Colors.white : 
+                    messageController.text.isNotEmpty ? Colors.white : Colors.black,
+                    width: 1.2,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
                   onPressed: () {
                     if (messageController.text.isNotEmpty) {
                       Provider.of<ChatProvider>(context, listen: false).sendMessage(

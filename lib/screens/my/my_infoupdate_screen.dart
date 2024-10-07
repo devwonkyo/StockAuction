@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // Firestore import
-import 'package:firebase_auth/firebase_auth.dart'; // Firebase Auth import
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:auction/providers/my_provider.dart';
 
 class MyInfoUpdateScreen extends StatefulWidget {
@@ -13,7 +13,6 @@ class MyInfoUpdateScreen extends StatefulWidget {
 
 class _MyInfoUpdateScreenState extends State<MyInfoUpdateScreen> {
   final _formKey = GlobalKey<FormState>();
-  String _gender = '남성';
   String _currentDate = '';
   late TextEditingController _nameController;
   late TextEditingController _phoneController;
@@ -45,8 +44,7 @@ class _MyInfoUpdateScreenState extends State<MyInfoUpdateScreen> {
           _nameController.text = userDoc['nickname'] ?? '닉네임이 없습니다';
           _phoneController.text = userDoc['phoneNumber'] ?? '전화번호가 없습니다';
           _emailController.text = userDoc['email'] ?? '이메일이 없습니다';
-          _birthController.text = userDoc['birthDate'] ?? '생년월일이 없습니다';
-          _gender = userDoc['gender'] ?? '남성';
+          _birthController.text = userDoc['birthDate'] ?? '';
         });
       } else {
         print('사용자 문서가 존재하지 않습니다.');
@@ -56,22 +54,26 @@ class _MyInfoUpdateScreenState extends State<MyInfoUpdateScreen> {
     }
   }
 
+  Future<void> _selectDate(BuildContext context) async {
+    DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null) {
+      setState(() {
+        _birthController.text = DateFormat('yyyy-MM-dd').format(picked);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('회원정보수정'),
         centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            if (GoRouter.of(context).canPop()) {
-              context.pop();
-            } else {
-              context.go('/my');
-            }
-          },
-        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -89,37 +91,10 @@ class _MyInfoUpdateScreenState extends State<MyInfoUpdateScreen> {
               const Divider(),
               _buildTextField('이름', _nameController),
               _buildTextField('전화번호', _phoneController),
-              _buildTextField('이메일', _emailController),
-              _buildTextField('생년월일', _birthController),
-              const SizedBox(height: 20),
-              const Text(
-                '성별',
-                style: TextStyle(fontSize: 16),
-              ),
-              Row(
-                children: [
-                  Radio<String>(
-                    value: '남성',
-                    groupValue: _gender,
-                    onChanged: (value) {
-                      setState(() {
-                        _gender = value!;
-                      });
-                    },
-                  ),
-                  const Text('남성'),
-                  Radio<String>(
-                    value: '여성',
-                    groupValue: _gender,
-                    onChanged: (value) {
-                      setState(() {
-                        _gender = value!;
-                      });
-                    },
-                  ),
-                  const Text('여성'),
-                ],
-              ),
+              _buildTextField('이메일', _emailController, readOnly: true),
+              _buildTextField('생년월일', _birthController, onTap: () {
+                _selectDate(context);
+              }),
               const SizedBox(height: 20),
               _buildInfoTile('본인인증', '$_currentDate 본인인증이 완료되었습니다',
                   readOnly: true),
@@ -132,7 +107,6 @@ class _MyInfoUpdateScreenState extends State<MyInfoUpdateScreen> {
                       'phoneNumber': _phoneController.text,
                       'email': _emailController.text,
                       'birthDate': _birthController.text,
-                      'gender': _gender,
                     };
                     context.read<MyProvider>().updateUserInfo(updatedInfo);
                     FirebaseFirestore.instance
@@ -159,11 +133,14 @@ class _MyInfoUpdateScreenState extends State<MyInfoUpdateScreen> {
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController controller) {
+   Widget _buildTextField(String label, TextEditingController controller,
+      {bool readOnly = false, VoidCallback? onTap}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10.0),
       child: TextFormField(
         controller: controller,
+        readOnly: readOnly, // onTap과 함께 사용할 때 필드를 readOnly로 설정
+        onTap: readOnly ? onTap : null, // readOnly일 때만 onTap 실행
         decoration: InputDecoration(
           labelText: label,
           hintText: '입력하세요',

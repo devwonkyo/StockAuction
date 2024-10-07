@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:auction/models/post_model.dart';
 
 class UserModel {
   final String uid;
@@ -10,8 +9,8 @@ class UserModel {
   final String? userProfileImage;
   final DateTime? birthDate;
   final List<String> likeList;
-  final List<PostModel> sellList;
-  final List<PostModel> buyList;
+  final List<String> sellList;
+  final List<String> buyList;
 
   UserModel({
     required this.uid,
@@ -22,8 +21,8 @@ class UserModel {
     this.userProfileImage,
     this.birthDate,
     List<String>? likeList,
-    List<PostModel>? sellList,
-    List<PostModel>? buyList,
+    List<String>? sellList,
+    List<String>? buyList,
   }) : likeList = likeList ?? [],
         sellList = sellList ?? [],
         buyList = buyList ?? [];
@@ -38,8 +37,8 @@ class UserModel {
       'userProfileImage': userProfileImage,
       'birthDate': birthDate,
       'likeList': likeList,
-      'sellList': sellList.map((post) => post.toMap()).toList(),
-      'buyList': buyList.map((post) => post.toMap()).toList(),
+      'sellList': sellList,
+      'buyList': buyList,
     };
   }
 
@@ -53,14 +52,34 @@ class UserModel {
       userProfileImage: map['userProfileImage'],
       birthDate: map['birthDate'] != null ? (map['birthDate'] as Timestamp).toDate() : null,
       likeList: List<String>.from(map['likeList'] ?? []),
-      sellList: (map['sellList'] as List<dynamic>?)
-              ?.map((postMap) => PostModel.fromMap(postMap))
-              .toList() ??
-          [],
-      buyList: (map['buyList'] as List<dynamic>?)
-              ?.map((postMap) => PostModel.fromMap(postMap))
-              .toList() ??
-          [],
+      sellList: List<String>.from(map['sellList'] ?? []),
+      buyList: List<String>.from(map['buyList'] ?? []),
+    );
+  }
+
+  UserModel copyWith({
+    String? uid,
+    String? email,
+    String? nickname,
+    String? phoneNumber,
+    String? pushToken,
+    String? userProfileImage,
+    DateTime? birthDate,
+    List<String>? likeList,
+    List<String>? sellList,
+    List<String>? buyList,
+  }) {
+    return UserModel(
+      uid: uid ?? this.uid,
+      email: email ?? this.email,
+      nickname: nickname ?? this.nickname,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+      pushToken: pushToken ?? this.pushToken,
+      userProfileImage: userProfileImage ?? this.userProfileImage,
+      birthDate: birthDate ?? this.birthDate,
+      likeList: likeList ?? List.from(this.likeList),
+      sellList: sellList ?? List.from(this.sellList),
+      buyList: buyList ?? List.from(this.buyList),
     );
   }
 }

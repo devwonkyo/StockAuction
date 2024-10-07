@@ -5,6 +5,7 @@ import 'package:auction/providers/chat_provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:auction/utils/permissions_util.dart';
 import 'package:auction/utils/custom_alert_dialog.dart';
+import 'package:auction/models/post_model.dart';
 
 class BottomSheetWidget {
   final ImagePicker _picker = ImagePicker();
@@ -17,6 +18,7 @@ class BottomSheetWidget {
     required String currentUserProfileImage,
     required String username,
   }) {
+    final chatProvider = Provider.of<ChatProvider>(parentContext, listen: false);
 
     showModalBottomSheet(
       context: parentContext,
@@ -25,10 +27,66 @@ class BottomSheetWidget {
           children: [
             ListTile(
               leading: Icon(Icons.gavel),
-              title: Text('구매 확정 버튼'),
-              onTap: () {
+              title: Text('거래 확정 버튼 보내기'),
+              onTap: () async {
                 Navigator.pop(context);
-              },
+                List<PostModel> posts = await chatProvider.fetchConfirmablePosts(userId, otherUserId);
+
+                if (posts.isEmpty) {
+                  showDialog(
+                    context: parentContext,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: Text('알림'),
+                        content: Text('해당 조건에 맞는 구매 확정 가능한 상품이 없습니다.'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: Text('확인'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                  return;
+                }
+                showModalBottomSheet(
+                  context: parentContext,
+                  builder: (BuildContext context) {
+                    return ListView.builder(
+                      itemCount: posts.length,
+                      itemBuilder: (context, index) {
+                        PostModel post = posts[index];
+                        int maxTitleLength = 15;
+                        int maxContentLength = 65;
+
+                        // 제목과 내용에 최대 글자 수 적용
+                        String displayTitle = post.postTitle.length > maxTitleLength
+                            ? post.postTitle.substring(0, maxTitleLength) + '...'
+                            : post.postTitle;
+                        
+                        String displayContent = post.postContent.length > maxContentLength
+                            ? post.postContent.substring(0, maxContentLength) + '...'
+                            : post.postContent;
+                        return ListTile(
+                          leading: post.postImageList.isNotEmpty
+                              ? Image.network(post.postImageList[0], width: 50, height: 50, fit: BoxFit.cover)
+                              : Icon(Icons.image_not_supported),
+                          title: Text(displayTitle,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold
+                          )),
+                          subtitle: Text(displayContent),
+                          onTap: () {
+                            Navigator.pop(context);
+                            chatProvider.sendConfirmationMessage(post, chatId, userId, otherUserId, username);
+                          },
+                        );
+                      },
+                    );
+                  },
+                );
+              }
             ),
             ListTile(
               leading: Icon(Icons.image),
@@ -97,10 +155,8 @@ class BottomSheetWidget {
               onPressed: () {
                 Navigator.pop(context);
 
-                // 현재 사용자의 정보 가져오기
                 final chatProvider = Provider.of<ChatProvider>(context, listen: false);
 
-                // 이미지를 전송하는 함수 호출
                 chatProvider.sendImageMessage(
                   chatId,
                   userId,

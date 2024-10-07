@@ -1,4 +1,5 @@
 import 'package:auction/utils/SharedPrefsUtil.dart';
+import 'package:auction/utils/notification_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -32,6 +33,8 @@ class LoginScreen extends StatelessWidget {
       _formKey.currentState!.save();
       try {
         await authProvider.login();
+
+        // 로그인 성공 시 바로 메인 페이지로 이동
         context.go('/main');
       } catch (e) {
         _showErrorDialog(context, '아이디 또는 비밀번호를 확인해주세요');
