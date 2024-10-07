@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:auction/providers/auth_provider.dart';
+import 'package:auction/providers/post_provider.dart';
 import 'package:go_router/go_router.dart';
 
 class MyBoughtScreen extends StatefulWidget {
@@ -9,116 +12,63 @@ class MyBoughtScreen extends StatefulWidget {
 }
 
 class _MyBoughtScreenState extends State<MyBoughtScreen> {
-  // 구매 기간 검색을 위한 변수
-  DateTime? _startDate;
-  DateTime? _endDate;
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      fetchBoughtPosts();
+    });
+  }
 
-  // 임시로 사용할 구매 리스트 데이터
-  final List<Map<String, dynamic>> boughtItems = [
-    {'title': '상품 1', 'price': 30000, 'image': 'lib/assets/image/item1.png'},
-    {'title': '상품 2', 'price': 45000, 'image': 'lib/assets/image/item2.png'},
-  ];
+  // 구매한 Post 목록을 불러오기
+  void fetchBoughtPosts() {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final postProvider = Provider.of<PostProvider>(context, listen: false);
+
+    final buyList = authProvider.currentUserModel?.buyList ?? [];
+    if (buyList.isNotEmpty) {
+      postProvider.fetchBoughtPosts(buyList);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final postProvider = Provider.of<PostProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            if (GoRouter.of(context).canPop()) {
-              context.pop();
-            } else {
-              context.go('/my');
-            }
-          },
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              // 설정 페이지로 이동
-            },
-          ),
-        ],
+        title: const Text('나의 구매 내역'),
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Text(
-              '나의 구매내역',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-          ),
-          // 구매 기간 검색을 위한 버튼
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              TextButton(
-                onPressed: () async {
-                  DateTime? picked = await showDatePicker(
-                    context: context,
-                    initialDate: _startDate ?? DateTime.now(),
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2101),
-                  );
-                  if (picked != null && picked != _startDate) {
-                    setState(() {
-                      _startDate = picked;
-                    });
-                  }
-                },
-                child: Text(
-                  _startDate == null
-                      ? '시작일 선택'
-                      : '시작일: ${_startDate!.toLocal()}'.split(' ')[0],
-                ),
-              ),
-              TextButton(
-                onPressed: () async {
-                  DateTime? picked = await showDatePicker(
-                    context: context,
-                    initialDate: _endDate ?? DateTime.now(),
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2101),
-                  );
-                  if (picked != null && picked != _endDate) {
-                    setState(() {
-                      _endDate = picked;
-                    });
-                  }
-                },
-                child: Text(
-                  _endDate == null
-                      ? '종료일 선택'
-                      : '종료일: ${_endDate!.toLocal()}'.split(' ')[0],
-                ),
-              ),
-            ],
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: boughtItems.length,
+      body: postProvider.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              itemCount: postProvider.boughtPosts.length,
               itemBuilder: (context, index) {
-                final item = boughtItems[index];
+                final post = postProvider.boughtPosts[index];
                 return ListTile(
-                  leading: Image.asset(
-                    item['image'],
-                    width: 50,
-                    height: 50,
-                    fit: BoxFit.cover,
-                  ),
-                  title: Text(item['title']),
-                  subtitle: Text('${item['price']}원'),
+                  leading: post.postImageList.isNotEmpty
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(10.0),
+                          child: Image.network(
+                            post.postImageList[0],
+                            width: 50,
+                            height: 50,
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                      : const Icon(Icons.image),
+                  title: Text(post.postTitle.length > 15 
+                      ? '${post.postTitle.substring(0, 15)}...' 
+                      : post.postTitle),
+                  subtitle: Text(post.postContent.length > 30
+                      ? '${post.postContent.substring(0, 30)}...'
+                      : post.postContent),
+                  onTap: () {
+                    context.push('/post/detail/${post.postUid}');
+                  },
                 );
               },
             ),
-          ),
-        ],
-      ),
     );
   }
 }

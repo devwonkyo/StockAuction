@@ -1,3 +1,4 @@
+import 'package:auction/config/color.dart';
 import 'package:auction/screens/my/my_screen.dart';
 import 'package:auction/screens/post/post_list_screen.dart';
 import 'package:flutter/material.dart';
@@ -49,10 +50,10 @@ class _MainScreenState extends State<MainScreen> {
           'Stock Auction',
           style: TextStyle(
             color: themeProvider.isDarkTheme ? Colors.white : Colors.black,
-          ), // 다크모드에 맞춰 텍스트 색상 전환
+          ),
         ),
         backgroundColor:
-            themeProvider.isDarkTheme ? Colors.black : Colors.white,
+        themeProvider.isDarkTheme ? Colors.black : Colors.white,
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.person,
@@ -73,20 +74,18 @@ class _MainScreenState extends State<MainScreen> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         selectedItemColor:
-            themeProvider.isDarkTheme ? Colors.amber : Colors.red,
+        themeProvider.isDarkTheme ? Colors.white : AppsColor.pastelGreen,
         unselectedItemColor: Colors.grey,
         showSelectedLabels: true,
-        showUnselectedLabels: false,
+        showUnselectedLabels: true,
         backgroundColor:
-            themeProvider.isDarkTheme ? Colors.black : Colors.white,
+        themeProvider.isDarkTheme ? Colors.black : Colors.white,
         onTap: _onItemTapped,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.menu_book_sharp), label: 'Selllist'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.people_rounded), label: 'Chatlist'),
-          BottomNavigationBarItem(icon: Icon(Icons.star), label: 'likelist'),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: '홈'),
+          BottomNavigationBarItem(icon: Icon(Icons.gavel), label: '경매'),
+          BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_rounded), label: '채팅'),
+          BottomNavigationBarItem(icon: Icon(Icons.bookmark), label: '찜 목록'),
         ],
       ),
     );

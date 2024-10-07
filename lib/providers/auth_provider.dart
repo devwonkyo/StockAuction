@@ -1,3 +1,5 @@
+import 'package:auction/models/result_model.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -20,7 +22,9 @@ class AuthProvider extends ChangeNotifier {
   bool _stayLoggedIn = false;
   bool _resetEmailSent = false;
   bool _isEmailVerified = false;
+  bool _isLoading = false;
   UserModel? _currentUserModel;
+  String? _userProfileImage;
 
   AuthProvider() {
     print("AuthProvider initialized");
@@ -39,6 +43,7 @@ class AuthProvider extends ChangeNotifier {
   bool get stayLoggedIn => _stayLoggedIn;
   bool get resetEmailSent => _resetEmailSent;
   bool get isEmailVerified => _isEmailVerified;
+  bool get isLoading => _isLoading;
   User? get currentUser => _auth.currentUser;
   UserModel? get currentUserModel => _currentUserModel;
 
@@ -46,9 +51,37 @@ class AuthProvider extends ChangeNotifier {
   Future<void> _initializeAuthState() async {
     print("Initializing auth state");
     await _loadStayLoggedIn();
-    await _loadUserFromLocalStorage();
+
+    // Firestore에서 현재 사용자 정보 가져오기
+    User? firebaseUser = _auth.currentUser;
+    if (firebaseUser != null) {
+      try {
+        await _loadUserFromFirestore(firebaseUser.uid);
+      } catch (e) {
+        print("Error loading user from Firestore: $e");
+      }
+    } else {
+      // Firestore에서 사용자가 없을 경우 로컬 스토리지에서 불러오기
+      await _loadUserFromLocalStorage();
+    }
+
     notifyListeners();
     print("Auth state initialized");
+  }
+
+  Future<void> _loadUserFromFirestore(String userId) async {
+    try {
+      DocumentSnapshot userDoc = await _firestore.collection('users').doc(userId).get();
+      if (userDoc.exists) {
+        _currentUserModel = UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
+        await saveUserToLocalStorage(_currentUserModel!);  // Firestore 데이터를 로컬에 저장
+        print("User loaded from Firestore and saved to local storage");
+      } else {
+        print("User document not found in Firestore");
+      }
+    } catch (e) {
+      print("Error loading user from Firestore: $e");
+    }
   }
 
   Future<UserModel?> getCurrentUser() async {
@@ -57,6 +90,12 @@ class AuthProvider extends ChangeNotifier {
       DocumentSnapshot userDoc = await _firestore.collection('users').doc(firebaseUser.uid).get();
       if (userDoc.exists) {
         _currentUserModel = UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
+
+        // 로컬에 저장
+        await saveUserToLocalStorage(_currentUserModel!);
+        notifyListeners();
+        
+        print("Updated UserModel from Firestore: ${_currentUserModel!.buyList}");
         return _currentUserModel;
       }
     }
@@ -103,6 +142,11 @@ class AuthProvider extends ChangeNotifier {
 
   void checkPasswordsMatch() {
     _passwordsMatch = _password == _confirmPassword;
+    notifyListeners();
+  }
+
+  void setUserProfileImage(String imageUrl) {
+    _userProfileImage = imageUrl;
     notifyListeners();
   }
 
@@ -199,20 +243,23 @@ class AuthProvider extends ChangeNotifier {
     print("Creating user in Firestore");
     User? user = _auth.currentUser;
     if (user != null && user.emailVerified) {
+      // Get the FCM token
+      String? pushToken = await FirebaseMessaging.instance.getToken();
+
       UserModel newUser = UserModel(
         uid: user.uid,
         email: _email,
         nickname: _nickname,
         phoneNumber: _phoneNumber,
-        pushToken: null,
-        userProfileImage: null,
+        pushToken: pushToken,
+        userProfileImage: _userProfileImage,
         birthDate: null,
       );
 
       await _firestore.collection('users').doc(user.uid).set(newUser.toMap());
       await saveUserToLocalStorage(newUser);
-      await setStayLoggedIn(true);  // 회원가입 후 stayLoggedIn을 true로 설정
-      print("User created in Firestore, saved locally, and stay logged in set to true");
+      await setStayLoggedIn(true);
+      print("User created in Firestore with push token, saved locally, and stay logged in set to true");
     } else {
       print("Failed to create user: email not verified");
       throw Exception('이메일이 인증되지 않았습니다.');
@@ -226,7 +273,6 @@ class AuthProvider extends ChangeNotifier {
     await prefs.setString('user_data', userJson);
     _currentUserModel = user;
     notifyListeners();
-    print("User saved to local storage");
   }
 
   Future<void> login() async {
@@ -240,10 +286,19 @@ class AuthProvider extends ChangeNotifier {
       DocumentSnapshot userDoc = await _firestore.collection('users').doc(userCredential.user!.uid).get();
       if (userDoc.exists) {
         UserModel user = UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
+
+        // FCM 토큰 가져오기 및 업데이트
+        String? fcmToken = await FirebaseMessaging.instance.getToken();
+        if (fcmToken != null) {
+          print('로그인 시 FCM 토큰: $fcmToken');
+          user = user.copyWith(pushToken: fcmToken);
+          await _firestore.collection('users').doc(user.uid).update({'pushToken': fcmToken});
+        }
+
         await saveUserToLocalStorage(user);
         await setStayLoggedIn(true);
-        _currentUserModel = user;  // 현재 사용자 모델 업데이트
-        print("Login successful, user saved locally and stay logged in set to true");
+        _currentUserModel = user;
+        print("Login successful, user saved locally, FCM token updated, and stay logged in set to true");
       } else {
         print("User document not found in Firestore");
       }
@@ -254,6 +309,7 @@ class AuthProvider extends ChangeNotifier {
       throw e;
     }
   }
+
 
   Future<void> logout() async {
     print("Logging out");
@@ -278,6 +334,42 @@ class AuthProvider extends ChangeNotifier {
     print("Password reset email sent");
   }
 
+  //판매 물품 추가시 selList에 목록 추가
+  Future<Result> addPostIntoSellList(String userUid, String postUid) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      await FirebaseFirestore.instance.collection('users').doc(userUid).update({
+        'sellList': FieldValue.arrayUnion([postUid])
+      });
+      return Result.success("판매리스트에 등록되었습니다.");
+    } catch (e) {
+      return Result.failure("판매리스트에 등록 실패했습니다. 실패 코드 : $e");
+    }finally{
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+
+  //판매 물품 삭제시 selList 에서 목록 삭제
+  Future<Result> deletePostInSellList(String userUid, String postUid) async{
+    _isLoading = true;
+    notifyListeners();
+    try {
+      print("userUid : $userUid, postUid : $postUid");
+      await FirebaseFirestore.instance.collection('users').doc(userUid).update({
+        'sellList': FieldValue.arrayRemove([postUid])
+      });
+      return Result.success("판매리스트에서 삭제되었습니다.");
+    } catch (e) {
+      return Result.failure("판매리스트에서 삭제 실패했습니다. 실패 코드 : $e");
+    }finally{
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   /////////////////////////////////////////////
   // 채팅방 관련 함수
   // 상대방 닉네임 갖고오는 함수
@@ -289,6 +381,21 @@ class AuthProvider extends ChangeNotifier {
     return 'Unknown User';
   }
 
+  Future<String?> getUserProfileImage(String uId) async {
+    try {
+      final userDoc = await FirebaseFirestore.instance.collection('users').doc(uId).get();
+      if (userDoc.exists) {
+        return userDoc['userProfileImage'];
+      }
+    } catch (e) {
+      print("Error fetching user profile image: $e");
+    }
+    return null;
+  }
+  
+  // 채팅방 관련 함수 종료
+  /////////////////////////////////////////////
+  
   UserModel _convertToUserModel(User firebaseUser) {
     return UserModel(
       uid: firebaseUser.uid,
@@ -300,4 +407,23 @@ class AuthProvider extends ChangeNotifier {
       birthDate: null,
     );
   }
+
+  Future<void> updatePushToken(String token) async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      try {
+        await _firestore.collection('users').doc(user.uid).update({
+          'pushToken': token,
+        });
+        if (_currentUserModel != null) {
+          _currentUserModel = _currentUserModel!.copyWith(pushToken: token);
+          await saveUserToLocalStorage(_currentUserModel!);
+        }
+        print("Push token updated successfully: $token");
+      } catch (e) {
+        print("Error updating push token: $e");
+      }
+    }
+  }
+
 }

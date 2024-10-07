@@ -2,16 +2,19 @@ import 'package:auction/models/comment_model.dart';
 import 'package:auction/providers/auth_provider.dart';
 import 'package:auction/providers/post_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 class CommentWidget extends StatelessWidget {
   final CommentModel commentModel;
   final String postUid;
+  final bool isAuthor;
 
   const CommentWidget({
     Key? key,
     required this.commentModel,
-    required this.postUid
+    required this.postUid,
+    required this.isAuthor,
   }) : super(key: key);
 
   @override
@@ -24,11 +27,16 @@ class CommentWidget extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(
-            backgroundImage: commentModel.userProfileImage.isNotEmpty
-                ? NetworkImage(commentModel.userProfileImage)
-                : const AssetImage('lib/assets/image/defaultUserProfile.png') as ImageProvider,
-            radius: 20,
+          GestureDetector(
+            onTap: () {
+              GoRouter.of(context).push('/other/profile/${commentModel.uid}');
+            },
+            child: CircleAvatar(
+              backgroundImage: commentModel.userProfileImage.isNotEmpty
+                  ? NetworkImage(commentModel.userProfileImage)
+                  : const AssetImage('lib/assets/image/defaultUserProfile.png') as ImageProvider,
+              radius: 20,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -36,16 +44,39 @@ class CommentWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            commentModel.userName,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          Row(
+                            children: [
+                              Text(
+                                commentModel.userName,
+                                style: const TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              if (isAuthor)
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 8.0),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: Colors.blue.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: const Text(
+                                      '작성자',
+                                      style: TextStyle(
+                                        color: Colors.blue,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
+                          const SizedBox(height: 2),
                           Text(
                             _getTimeAgo(commentModel.commentTime),
                             style: TextStyle(color: Colors.grey[600], fontSize: 12),
